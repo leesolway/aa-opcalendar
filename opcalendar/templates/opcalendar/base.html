@@ -1,0 +1,43 @@
+{% extends 'allianceauth/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block extra_css %}
+    {% include 'bundles/jquery-datetimepicker-css.html' %}
+    <link rel="stylesheet" type="text/css" href="{% static 'opcalendar/style.css' %}">
+{% endblock extra_css %}
+{% block page_title %}{% trans title %}{% endblock %}
+
+{% block content %}    
+    <h2 class="text-center">{{ title }}</h2>
+    <div class="col-lg-14 container">            
+        {% block details %}{% endblock %}
+    </div>
+{% endblock %}
+{% block extra_script %}
+
+    $('#id_start_time').datetimepicker({
+    setlocale: '{{ LANGUAGE_CODE }}',
+    {% if NIGHT_MODE %}
+        theme: 'dark',
+    {% else %}
+        theme: 'default',
+    {% endif %}
+    mask: true,
+    format: 'Y-m-d H:i',
+    minDate: 0
+    });
+
+    $('#id_end_time').datetimepicker({
+    setlocale: '{{ LANGUAGE_CODE }}',
+    {% if NIGHT_MODE %}
+        theme: 'dark',
+    {% else %}
+        theme: 'default',
+    {% endif %}
+    mask: true,
+    format: 'Y-m-d H:i',
+    minDate: 0
+    });
+
+{% endblock extra_script %}

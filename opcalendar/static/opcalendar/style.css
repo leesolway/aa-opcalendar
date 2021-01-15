@@ -1,0 +1,173 @@
+.calendar {
+    width: 98%;
+    margin: auto;
+    font-size: 13px;
+    table-layout: fixed;
+  }
+
+.nostyling{
+  text-decoration: none !important;
+}
+
+.event{
+  background-image: none;
+  border-radius: 0;
+  background: #eeeeee;
+  border: none;
+  color: black;
+  font-size: .75em;
+  padding: 0 .75em;
+  line-height: 2em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 1px; 
+  position: relative;
+}
+
+.public-event:before {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0px 15px 15px 0;
+    border-color: transparent #9C27B0 transparent transparent;
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.import-event:before {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0px 15px 15px 0;
+    border-color: transparent #607D8B transparent transparent;
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.member-event:before {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0px 15px 15px 0;
+    border-color: transparent #50a5f1 transparent transparent;
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.event.purple{
+  border-left: 6px solid #9C27B0;
+}
+
+.event.green{
+  border-left: 6px solid #8BC34A;
+}
+
+.event.orange{
+  border-left: 6px solid #ff9800;
+}
+
+.event.yellow{
+  border-left: 6px solid #FFEB3B;
+}
+
+.event.blue{
+   border-left: 6px solid #50a5f1;
+}
+
+.event.red{
+  border-left: 6px solid #b71c1c;
+}
+
+.event.grey{
+  border-left: 6px solid #607D8B;
+}
+
+.event.past-event{
+    opacity: 0.4;
+}
+  
+td.today {
+    color: #50a5f1;
+    font-weight: bold;
+}
+.calendar tr, .calendar td {
+  border: 1px solid #32394e;
+}
+
+.calendar th {
+  padding: 10px;
+  text-align: center;
+  font-size: 18px;
+  width: 15%;
+}
+
+.calendar td {
+  height: 110px;
+  vertical-align:top;
+  width: 15%;
+  padding: 0px 5px 0px 5px;
+}
+
+.month {
+  font-size: 25px;
+  background: #32394e;
+}
+
+.date {
+  font-size: 16px;
+  padding: 5px;
+}
+
+ul {
+  height: 100%;
+  padding: 0px 5px 0px 20px;
+}
+
+a {
+  color: #17a2b8;
+}.left {
+  float: left;
+}
+
+.right {
+  float: right;
+}
+
+.btn {
+  outline: none;
+  color: black;
+  background-color: transparent;
+  box-shadow: 0 0 0 0;
+}
+
+.clearfix {
+  margin: 15px;
+}.form {
+  margin: auto;
+}
+
+.form input, .form select, .form textarea {
+  border-radius: 5px;
+  border: 1px solid #17a2b8;
+  outline: none;
+  background: none;
+  padding: 5px;
+  width: 100%;
+  }
+
+.legend span {
+    padding: 3px 16px 3px 6px;
+    cursor: pointer;
+    opacity: 0.7
+}
+
+.legend span.active{
+  opacity: 1;
+}

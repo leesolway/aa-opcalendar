@@ -1,0 +1,6 @@
+include LICENSE
+include README.md
+recursive-include opcalendar *.py
+recursive-include opcalendar/static *
+recursive-include opcalendar/templates *
+

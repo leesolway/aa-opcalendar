@@ -1,0 +1,192 @@
+{% extends 'opcalendar/base.html' %}
+{% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block title %}
+Event Details
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="clearfix">
+            <a class="btn btn-primary left" href="{% url 'opcalendar:calendar' %}"> Calendar </a>
+            {% if perms.opcalendar.create_event %}
+                <a class="btn btn-primary left mr-2" href="{% url 'opcalendar:event_edit' event.pk %}"> Edit Event </a>
+                <a class="btn btn-danger" href="{% url 'opcalendar:remove_event' event.id %}">Remove</a>
+            {% endif %}
+        </div>
+        
+        <div class="clearfix">
+            <div class="col-lg-12 text-center row">
+            <div class="label label-info text-left">
+                <b>{% trans "Current Eve Time:" %} </b>
+            </div>
+            <strong class="label label-info text-left" id="current-time"></strong>
+            <br  />
+        </div>
+            <h2>{{ event.title }}</h2>
+            <p>Created by: <span style="color: gray;">{{ event.eve_character }}</span> Starts in: <span id="countdown{{ event.id }}" style="color: gray;">{{ event.eve_character }}</span></p>
+            <hr>
+            <h4>Event details</h4>
+            <table>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Type:</b></td>
+                    <td><span class="event {{ event.operation_type.color }}">{{ event.operation_type }}</span></td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Availability:</b></td>
+                    <td><span class="event {{ event.get_html_visibility_color }}">{{ event.visibility }}</span></td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Start time:</b></td>
+                    <td>{{ event.start_time|date:"D Y-m-d H:i" }} (EVE) / <span id="localtime{{ event.id }}"></span> (Local)</td>
+                </tr>
+
+                <tr>
+                    <td style="padding-right: 10px;"><b>Est. end time:</b></td>
+                    <td>{{ event.end_time|date:"D Y-m-d H:i" }}</td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Duration:</b></td>
+                    <td>{{ event.duration }}</td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Formup location:</b></td>
+                    <td>{{ event.formup_system }}</td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Doctrine:</b></td>
+                    <td>{{ event.doctrine }}</td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Fleet Commander:</b></td>
+                    <td>{{ event.fc }}</td>
+                </tr>
+            </table>
+            <p style="padding-top:40px">{{ event.description|striptags|urlize}}</p>   
+            <hr>
+            <h4>Host details</h4>
+            <table>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Community:</b></td>
+                    <td><span>{{ event.host.community|urlize }}</span></td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Ingame channel:</b></td>
+                    <td><span>{{ event.host.ingame_channel|urlize }}</span></td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Ingame mailing list:</b></td>
+                    <td><span>{{ event.host.ingame_mailing_list|urlize }}</span></td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Fleet comms:</b></td>
+                    <td><span>{{ event.host.fleet_comms|urlize }}</span></td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Fleet doctrines:</b></td>
+                    <td><span>{{ event.host.fleet_doctrines|urlize }}</span></td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Website:</b></td>
+                    <td><span>{{ event.host.website|urlize }}</span></td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Discord:</b></td>
+                    <td><span>{{ event.host.discord|urlize }}</span></td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Twitch:</b></td>
+                    <td><span>{{ event.host.twitch|urlize }}</span></td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Twitter:</b></td>
+                    <td><span>{{ event.host.twitter|urlize }}</span></td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Youtube:</b></td>
+                    <td><span>{{ event.host.youtube|urlize }}</span></td>
+                </tr>
+                <tr>
+                    <td style="padding-right: 10px;"><b>Facebook:</b></td>
+                    <td><span>{{ event.host.facebook|urlize }}</span></td>
+                </tr>             
+            </table>
+            <p style="padding-top:40px">{{ event.host.details }}</p> 
+        </div>
+    </div>
+{% include 'bundles/moment-js.html' with locale=True %}
+    <script src="{% static 'js/timers.js' %}"></script>
+    <script type="application/javascript">
+        // Data
+        var timers = [
+            {
+                'id': {{ event.id }},
+                'start': moment("{{ event.start_time | date:"c" }}"),
+                'expired': false
+            },
+        ];
+    </script>
+    <script type="application/javascript">
+
+        timedUpdate();
+        setAllLocalTimes();
+
+        // Start timed updates
+        setInterval(timedUpdate, 1000);
+
+        function timedUpdate() {
+            updateClock();
+            updateAllTimers();
+        }
+
+        function updateAllTimers () {
+            var l = timers.length;
+            for (var i=0; i < l; ++i) {
+                if (timers[i].expired) continue;
+                updateTimer(timers[i]);
+            }
+        }
+
+        /**
+         * Update a timer
+         * @param timer Timer information
+         * @param timer.start Date of the timer
+         * @param timer.id Id number of the timer
+         * @param timer.expired
+         */
+        function updateTimer(timer) {
+            if (timer.start.isAfter(Date.now())) {
+                var duration = moment.duration(timer.start - moment(), 'milliseconds');
+                document.getElementById("countdown" + timer.id).innerHTML = getDurationString(duration);
+            } else {
+                timer.expired = true;
+                document.getElementById("countdown" + timer.id).innerHTML = "";
+            }
+        }
+
+        /**
+         * Set all local time fields
+         */
+        function setAllLocalTimes() {
+            var l = timers.length;
+            for (var i=0; i < l; ++i) {
+                setLocalTime(timers[i]);
+            }
+        }
+
+        /**
+         * Set the local time info for the timer
+         * @param timer Timer information
+         * @param timer.start Date of the timer
+         * @param timer.id Id number of the timer
+         */
+        function setLocalTime(timer) {
+            document.getElementById("localtime" + timer.id).innerHTML = timer.start.format("ddd MM-DD HH:mm");
+        }
+
+        function updateClock() {
+            document.getElementById("current-time").innerHTML = getCurrentEveTimeString();
+        }
+    </script>
+{% endblock %}

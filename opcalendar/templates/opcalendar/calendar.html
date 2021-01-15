@@ -1,0 +1,60 @@
+{% extends 'opcalendar/base.html' %}
+{% load bootstrap %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% load evelinks %}
+{% block page_title %}{% trans "Create Operation" %}{% endblock page_title %}
+
+{% block content %}
+
+<div class="clearfix">
+	<a class="btn btn-info right mr-2" href="{% url 'opcalendar:calendar' %}?{{ next_month }} "> Next Month >> </a>
+    <a class="btn btn-info right mr-2" href="{% url 'opcalendar:calendar' %}?{{ prev_month }}"> << Previous Month </a>
+    {% if perms.opcalendar.create_event %}
+    	<a class="btn btn-info right mr-2" href="{% url 'opcalendar:event_new' %}"> + New Event </a>
+    {% endif %}
+    <h5>Legend & Filters:</h5>
+    <div class="legend">
+    	<div>
+    		<span class="event import-event">Third Party Event</span>
+    		<span class="event public-event">Public Event</span>
+    		<span class="event member-event">Members Only Event</span>
+    	</div>
+    	<div>
+    		{% for event in category %}
+    			<span class="event {{ event.color }}">{{ event.name }}</span>
+    		{% endfor %}
+    	</div>
+    </div>
+</div>
+<div>
+    {{ calendar }}
+</div>
+{% endblock content %}
+
+{% block extra_javascript %}
+    {% include 'bundles/jquery-datetimepicker-js.html' %}
+    <script>
+		$('.legend div:first-child').prepend('<span class="event show-all">Show all</span>')
+
+		$('.legend').on('click', 'span', function(){
+		    const classes = $(this).attr('class')
+		    const selectors = '.' + classes.split(' ').join('.')
+		    applyCalendarFilters(selectors)
+		})
+
+		function applyCalendarFilters(selectors){
+		    $('.calendar .event').hide()
+		    $('.legend span').removeClass('active')
+
+		    if(selectors.includes('show-all')){
+		        $('.calendar .event').show()
+		        $('.legend .show-all').addClass('active')
+		    }
+		    else{
+		        $('.calendar ' + selectors).show()
+		        $('.legend ' + selectors).addClass('active')
+		    }
+		}
+    </script>
+{% endblock %}
