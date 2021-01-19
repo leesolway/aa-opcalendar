@@ -324,8 +324,18 @@ class Owner(models.Model):
                 ]
             )[0]
 
-            for event in events:
+            """Delte all events from the owner to remove deleted events"""
+            IngameEvents.objects.filter(
+                owner=self
+            ).delete()
+            
+            for event in events:   
                 
+                """Delte all events with the same ID to update events from other feeds"""
+                IngameEvents.objects.filter(
+                    event_id=event["event_id"]
+                ).delete()
+
                 character_id = self.character.character.character_id
                
                 details = esi.client.Calendar.get_characters_character_id_calendar_event_id(
