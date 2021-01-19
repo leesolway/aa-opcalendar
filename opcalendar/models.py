@@ -27,6 +27,7 @@ class General(models.Model):
             ("basic_access", "Can access this app"),
             ("view_public", "Can see public events"),
             ("view_member", "Can see member events"),
+            ("view_ingame", "Can see events from ingame calendar"),
             ("create_event", "Can create and edit events"),
             ("manage_event", "Can delete and manage signups"),
             ("add_ingame_calendar_owner", "Can add ingame calendar feeds for their corporation"),
