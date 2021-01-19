@@ -1,5 +1,5 @@
 from django.contrib import admin
-from opcalendar.models import Event, EventCategory, EventSignal, WebHook, EventHost, EventImport
+from opcalendar.models import Event, EventCategory, EventSignal, WebHook, EventHost, EventImport, Owner, IngameEvents
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -32,6 +32,11 @@ class EventHostAdmin(admin.ModelAdmin):
     model = EventImport
 
 admin.site.register(EventImport, EventHostAdmin)
+
+
+admin.site.register(Owner)
+
+admin.site.register(IngameEvents)
 
 admin.site.register(Event)
 

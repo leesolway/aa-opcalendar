@@ -315,7 +315,11 @@ class Owner(models.Model):
         default=True,
         help_text=("whether this owner is currently included in the sync process"),
     )
-    
+
+    class Meta:
+        verbose_name = 'Ingame Clanedar Owner'
+        verbose_name_plural = 'Ingame Calendar Owners'  
+
     def update_events_esi(self):
         if self.is_active:
             events = self._fetch_events()
@@ -462,6 +466,13 @@ class IngameEvents(models.Model):
     duration = models.CharField(
         max_length=128
     )
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = 'Ingame Event'
+        verbose_name_plural = 'Ingame Events' 
 
     def get_absolute_url(self):
         return reverse('opcalendar:ingame-event-detail', args=(self.event_id,))
