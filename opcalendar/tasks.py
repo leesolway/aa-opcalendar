@@ -130,7 +130,7 @@ def import_fleets():
     }
 )
 def update_events_for_owner(self, owner_pk):
-    """fetches all blueprints for owner from ESI"""
+    """fetches all calendars for owner from ESI"""
     print(owner_pk)
     return _get_owner(owner_pk).update_events_esi()
 

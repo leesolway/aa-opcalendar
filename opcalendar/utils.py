@@ -19,7 +19,7 @@ class Calendar(HTMLCalendar):
 	# filter events by day
 	def formatday(self, day, events, ingame_events):
 		events_per_day = events.filter(start_time__day=day).order_by('start_time')
-		ingame_events_per_day = ingame_events.filter(event_date__day=day).order_by('event_date')
+		ingame_events_per_day = ingame_events.filter(event_start_date__day=day).order_by('event_start_date')
 		d = ''
 		
 		# Only events for current month
@@ -42,10 +42,10 @@ class Calendar(HTMLCalendar):
 			for event in ingame_events_per_day:
 				if self.user.has_perm('opcalendar.view_ingame'):
 					#Get past events
-					if datetime.now(timezone.utc) > event.event_date:
-						d += f'<a class="nostyling" href="{event.title}"><div class="event grey past-event import-event">{event.title}</div></a>'
-					if datetime.now(timezone.utc) <= event.event_date:
-						d += f'<a class="nostyling" href="{event.title}"><div class="event grey import-event">{event.title}</div></a>'
+					if datetime.now(timezone.utc) > event.event_start_date:
+						d += f'<a class="nostyling" href="{event.get_html_url}"><div class="event {event.get_html_operation_color} past-event import-event">{event.get_html_title}</div></a>'
+					if datetime.now(timezone.utc) <= event.event_start_date:
+						d += f'<a class="nostyling" href="{event.get_html_url}"><div class="event {event.get_html_operation_color} import-event">{event.get_html_title}</div></a>'
 
 			if date.today() == date(self.year, self.month, day):
 				return f"<td class='today'><div class='date'>{day}</div> {d}</td>"
@@ -63,7 +63,7 @@ class Calendar(HTMLCalendar):
 	# filter events by year and month
 	def formatmonth(self, withyear=True):
 		events = Event.objects.filter(start_time__year=self.year, start_time__month=self.month)
-		ingame_events = IngameEvents.objects.filter(event_date__year=self.year, event_date__month=self.month)
+		ingame_events = IngameEvents.objects.filter(event_start_date__year=self.year, event_start_date__month=self.month)
 		
 		cal = f'<table border="0" cellpadding="0" cellspacing="0" class="calendar">\n'
 		cal += f'{self.formatmonthname(self.year, self.month, withyear=withyear)}\n'

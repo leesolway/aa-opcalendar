@@ -5,18 +5,16 @@ An operation calendar app for Alliance Auth to display fleet operations and othe
 ![release](https://img.shields.io/pypi/v/aa-opcalendar??label=release) ![python](https://img.shields.io/pypi/pyversions/aa-opcalendar?) ![license](https://img.shields.io/badge/license-MIT-green)
 
 ## Includes:
- * Calendar view of events
+ * Calendar type view of events and fleets
  * Custom event categories
- * Supports multiple event hosts
- * Public and member events
+ * Custom hosts
+ * Public and member restricted events
  * Detailed view for events
  * Webhook for discord notifications
  * Importing NPSI fleets from public sources
+ * Importing fleets from corporation ingame calendar
 
 ![screenshot](https://i.imgur.com/bLepJGH.jpg)
-
-## Upcoming:
-  * List view of events
  
 ## Installation
  1. Install the Repo `pip install aa-opcalendar`
@@ -31,6 +29,8 @@ Perm | Auth Site
 opcalendar basic_access | Can view the calendar page.
 opcalendar view_public | Can view events with public visibility.
 opcalendar view_member | Can view events with member only visibility.
+opcalendar view_ingame | Can view events that have been imported from the ingame calendars
+add_ingame_calendar_owner | Can add feeds for ingame calendar events
 opcalendar create_event | Can create events.
 
 ## Usage
@@ -69,6 +69,21 @@ CELERYBEAT_SCHEDULE['import_fleets'] = {
     'schedule': crontab(minute=0, hour='*'),
 }
 
+```
+
+### Importing fleets from ingame calendar
+You can import events that have been created in the ingame calendar. As the fields on the ingame calendar are limited the events will not be as detailed as when created directly from the calendar.
+
+1. Give the add_ingame_calendar_owner role for the user
+2. Navigate to the opcalendar page and press the `Add Ingame Calendar Feed` button
+3. Log in with the character that holds the calendar
+4. Add the following into your local.py setting file or set up a periodic task for the `opcalendar.tasks.update_all_ingame_events`
+
+```
+CELERYBEAT_SCHEDULE['update_all_ingame_events'] = {
+    'task': 'opcalendar.tasks.update_all_ingame_events',
+    'schedule': crontab(minute=0, hour='*'),
+}
 ```
 
 ## Contributing

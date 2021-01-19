@@ -89,6 +89,10 @@
   border-left: 6px solid #607D8B;
 }
 
+.event.black{
+  border-left: 6px solid #000000;
+}
+
 .event.past-event{
     opacity: 0.4;
 }

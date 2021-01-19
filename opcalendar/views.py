@@ -61,7 +61,7 @@ def add_ingame_calendar(request, token):
 
             owner.save()
 
-        tasks.update_events_for_owner(owner_pk=owner.pk)
+        tasks.update_events_for_owner.delay(owner_pk=owner.pk)
     
     return redirect("opcalendar:calendar")
 
@@ -158,6 +158,24 @@ class EventEdit(generic.UpdateView):
     model = Event
     fields = ['operation_type', 'title', 'doctrine', 'formup_system', 'description', 'start_time','end_time','fc', 'visibility']
     template_name = 'opcalendar/event-edit.html'
+
+@login_required(login_url='signup')
+@permission_required("opcalendar.basic_access")
+def ingame_event_details(request, event_id):
+    event = IngameEvents.objects.get(event_id=event_id)
+    context = {
+        'event': event
+    }
+    if request.user.has_perm('opcalendar.view_ingame'):
+        return render(request, 'opcalendar/ingame-event-details.html', context)
+    else:
+        return redirect('opcalendar:calendar')
+
+class EventEdit(generic.UpdateView):
+    permission_required = "opcalendar.create_event"
+    model = Event
+    fields = ['operation_type', 'title', 'doctrine', 'formup_system', 'description', 'start_time','end_time','fc', 'visibility']
+    template_name = 'opcalendar/event-edit.html'    
 
 @login_required(login_url='signup')
 @permission_required("opcalendar.manage_event")

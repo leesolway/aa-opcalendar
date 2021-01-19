@@ -7,6 +7,6 @@ def get_swagger_spec_path() -> str:
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "swagger.json")
 
 esi = EsiClientProvider(
-    spec_file=get_swagger_spec_path(), app_info_text=f"aa-blueprints v{__version__}"
+    spec_file=get_swagger_spec_path(), app_info_text=f"aa-opcalendar v{__version__}"
 )
  

@@ -268,7 +268,7 @@ class Event(models.Model):
         )
 
 class Owner(models.Model):
-    """A corporation that owns blueprints"""
+    """A corporation that holds the calendars"""
 
     ERROR_NONE = 0
     ERROR_TOKEN_INVALID = 1
@@ -299,7 +299,7 @@ class Owner(models.Model):
         null=True,
         blank=True,
         on_delete=models.CASCADE,
-        help_text="Corporation owning blueprints, if this is a 'corporate' owner",
+        help_text="Corporation owning the calendar",
         related_name="+",
     )
     character = models.ForeignKey(
@@ -308,7 +308,7 @@ class Owner(models.Model):
         default=None,
         null=True,
         blank=True,
-        help_text="character used for syncing blueprints",
+        help_text="Character used for syncing the calendar",
         related_name="+",
     )
     is_active = models.BooleanField(
@@ -345,6 +345,8 @@ class Owner(models.Model):
                     token=token.valid_access_token(),
                 ).results()
 
+                end_date = event["event_date"] + timedelta(minutes=details['duration'])
+
                 IngameEvents.objects.create(
                     event_id=event["event_id"],
                     owner = self,
@@ -353,7 +355,8 @@ class Owner(models.Model):
                     owner_name = details['owner_name'],
                     importance = details['importance'],
                     duration = details['duration'],
-                    event_date=event["event_date"],
+                    event_start_date=event["event_date"],
+                    event_end_date=end_date,
                     title=event["title"],
     
                 )
@@ -382,22 +385,22 @@ class Owner(models.Model):
 
         # abort if character does not have sufficient permissions
         elif self.corporation and not self.character.user.has_perm(
-            "opcalendar.add_corporate_blueprint_owner"
+            "opcalendar.add_ingame_calendar_owner"
         ):
             logger.error(
                 add_prefix(
-                    "This character does not have sufficient permission to sync corporations"
+                    "This character does not have sufficient permission to sync corporation calendars"
                 )
             )
             error = self.ERROR_INSUFFICIENT_PERMISSIONS
 
         # abort if character does not have sufficient permissions
         elif not self.character.user.has_perm(
-            "opcalendar.add_personal_blueprint_owner"
+            "opcalendar.add_ingame_calendar_owner"
         ):
             logger.error(
                 add_prefix(
-                    "This character does not have sufficient permission to sync personal blueprints"
+                    "This character does not have sufficient permission to sync personal calendars"
                 )
             )
             error = self.ERROR_INSUFFICIENT_PERMISSIONS
@@ -415,10 +418,10 @@ class Owner(models.Model):
                     .first()
                 )
             except TokenInvalidError:
-                logger.error(add_prefix("Invalid token for fetching blueprints"))
+                logger.error(add_prefix("Invalid token for fetching calendars"))
                 error = self.ERROR_TOKEN_INVALID
             except TokenExpiredError:
-                logger.error(add_prefix("Token expired for fetching blueprints"))
+                logger.error(add_prefix("Token expired for fetching calendars"))
                 error = self.ERROR_TOKEN_EXPIRED
             else:
                 if not token:
@@ -438,7 +441,11 @@ class IngameEvents(models.Model):
         on_delete=models.CASCADE,
         help_text="Event holder",
     )
-    event_date = models.DateTimeField()
+    event_start_date = models.DateTimeField()
+    event_end_date = models.DateTimeField(
+        blank=True,
+        null=True
+    )
     title = models.CharField(
         max_length=128
     )
@@ -455,6 +462,22 @@ class IngameEvents(models.Model):
     duration = models.CharField(
         max_length=128
     )
+
+    def get_absolute_url(self):
+        return reverse('opcalendar:ingame-event-detail', args=(self.event_id,))
+
+    @property
+    def get_html_url(self):
+        url = reverse('opcalendar:ingame-event-detail', args=(self.event_id,))
+        return f'{url}'
+
+    @property
+    def get_html_operation_color(self):
+        return "black"
+    
+    @property
+    def get_html_title(self):
+        return f'{self.event_start_date.strftime("%H:%M")} - {self.event_end_date.strftime("%H:%M")}<i> {self.owner_name}</i><br><b>{self.title}</b>'
     
 
 class EventMember(models.Model):
