@@ -14,7 +14,9 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
-
+from esi.decorators import token_required
+from django.db import transaction
+from . import tasks
 from .models import *
 from .utils import Calendar
 from .forms import EventForm, AddMemberForm
@@ -26,6 +28,42 @@ logger = logging.getLogger(__name__)
 @login_required(login_url='signup')
 def index(request):
     return HttpResponse('hello')
+
+@token_required(scopes=['esi-calendar.read_calendar_events.v1', 'esi-calendar.read_calendar_events.v1'])
+def add_ingame_calendar(request, token):
+    token_char = EveCharacter.objects.get(character_id=token.character_id)
+
+    success = True
+    try:
+        owned_char = CharacterOwnership.objects.get(
+            user=request.user, character=token_char
+        )
+    except CharacterOwnership.DoesNotExist:
+
+        success = False
+        owned_char = None
+
+    if success:
+
+        try:
+            corporation = EveCorporationInfo.objects.get(
+                corporation_id=token_char.corporation_id
+            )
+        except EveCorporationInfo.DoesNotExist:
+            corporation = EveCorporationInfo.objects.create_corporation(
+                token_char.corporation_id
+            )
+
+        with transaction.atomic():
+            owner, _ = Owner.objects.update_or_create(
+                corporation=corporation, defaults={"character": owned_char}
+            )
+
+            owner.save()
+
+        tasks.update_events_for_owner(owner_pk=owner.pk)
+    
+    return redirect("opcalendar:calendar")
 
 def get_date(req_day):
     if req_day:

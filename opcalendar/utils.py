@@ -4,7 +4,8 @@ from datetime import datetime, timedelta, date, timezone
 from calendar import HTMLCalendar
 from .models import Event
 from eventcalendar.helper import get_current_user
-
+from typing import Any
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 class Calendar(HTMLCalendar):
@@ -61,3 +62,53 @@ class Calendar(HTMLCalendar):
 		for week in self.monthdays2calendar(self.year, self.month):
 			cal += f'{self.formatweek(week, events)}\n'
 		return cal
+
+def clean_setting(
+    name: str,
+    default_value: object,
+    min_value: int = None,
+    max_value: int = None,
+    required_type: type = None,
+    choices: list = None,
+) -> Any:
+    """cleans the input for a custom setting
+
+    Will use `default_value` if settings does not exit or has the wrong type
+    or is outside define boundaries (for int only)
+
+    Need to define `required_type` if `default_value` is `None`
+
+    Will assume `min_value` of 0 for int (can be overriden)
+
+    `None` allowed as value
+
+    Returns cleaned value for setting
+    """
+    if default_value is None and not required_type:
+        raise ValueError("You must specify a required_type for None defaults")
+
+    if not required_type:
+        required_type = type(default_value)
+
+    if min_value is None and required_type == int:
+        min_value = 0
+
+    if not hasattr(settings, name):
+        cleaned_value = default_value
+    else:
+        dirty_value = getattr(settings, name)
+        if dirty_value is None or (
+            isinstance(dirty_value, required_type)
+            and (min_value is None or dirty_value >= min_value)
+            and (max_value is None or dirty_value <= max_value)
+            and (choices is None or dirty_value in choices)
+        ):
+            cleaned_value = dirty_value
+        else:
+            logger.warn(
+                "You setting for {} it not valid. Please correct it. "
+                "Using default for now: {}".format(name, default_value)
+            )
+            cleaned_value = default_value
+    return cleaned_value
+

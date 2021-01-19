@@ -6,12 +6,52 @@ import feedparser
 import logging
 import re
 from dateutil.parser import parse
-from .models import Event, EventImport
+from .models import Event, EventImport, Owner
 
+from .app_settings import OPCALENDAR_TASKS_TIME_LIMIT
+from bravado.exception import HTTPBadGateway, HTTPGatewayTimeout, HTTPServiceUnavailable
+from allianceauth.services.tasks import QueueOnce
 from ics import Calendar
 import requests
 
+import random
+
+
+from celery import shared_task
+
+from allianceauth.services.hooks import get_extension_logger
+from allianceauth.services.tasks import QueueOnce
+from esi.models import Token
+
+
+DEFAULT_TASK_PRIORITY = 6
+
+
+DEFAULT_TASK_PRIORITY = 6
+
 logger = logging.getLogger(__name__)
+
+# Create your tasks here
+TASK_DEFAULT_KWARGS = {
+    "time_limit": OPCALENDAR_TASKS_TIME_LIMIT,
+}
+
+TASK_ESI_KWARGS = {
+    **TASK_DEFAULT_KWARGS,
+    **{
+        "bind": True,
+        "autoretry_for": (
+            OSError,
+            HTTPBadGateway,
+            HTTPGatewayTimeout,
+            HTTPServiceUnavailable,
+        ),
+        "retry_kwargs": {"max_retries": 3},
+        "retry_backoff": 30,
+    },
+}
+
+
 
 # Import eve uni classes
 @shared_task
@@ -79,6 +119,39 @@ def import_fleets():
 					)
 					event.save()
 
+@shared_task(
+    **{
+        **TASK_ESI_KWARGS,
+        **{
+            "base": QueueOnce,
+            "once": {"keys": ["owner_pk"], "graceful": True},
+            "max_retries": None,
+        },
+    }
+)
+def update_events_for_owner(self, owner_pk):
+    """fetches all blueprints for owner from ESI"""
+    print(owner_pk)
+    return _get_owner(owner_pk).update_events_esi()
+
+@shared_task(**TASK_DEFAULT_KWARGS)
+def update_all_ingame_events():
+    for owner in Owner.objects.all():
+        update_events_for_owner.apply_async(
+            kwargs={"owner_pk": owner.pk},
+            priority=DEFAULT_TASK_PRIORITY,
+        )
+
+
+def _get_owner(owner_pk: int) -> Owner:
+    """returns the owner or raises exception"""
+    try:
+        owner = Owner.objects.get(pk=owner_pk)
+    except Owner.DoesNotExist:
+        raise Owner.DoesNotExist(
+            "Requested owner with pk {} does not exist".format(owner_pk)
+        )
+    return owner
 
 
 @shared_task

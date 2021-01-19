@@ -1,14 +1,19 @@
+
+from .providers import esi
 import requests
 import json
-
+from typing import Tuple
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
+from esi.models import Token
+from .decorators import fetch_token_for_owner
 
 from allianceauth.eveonline.models import EveCharacter
-
+from allianceauth.authentication.models import CharacterOwnership
+from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
 from django.utils.translation import ugettext_lazy as _
 # Create your models here.
 
@@ -24,6 +29,7 @@ class General(models.Model):
             ("view_member", "Can see member events"),
             ("create_event", "Can create and edit events"),
             ("manage_event", "Can delete and manage signups"),
+            ("add_ingame_calendar_owner", "Can add ingame calendar feeds for their corporation"),
         )     
 
 class WebHook(models.Model):
@@ -260,9 +266,192 @@ class Event(models.Model):
             self.user == user and user.has_perm("opcalendar.create_event")
         )
 
+class Owner(models.Model):
+    """A corporation that owns blueprints"""
+
+    ERROR_NONE = 0
+    ERROR_TOKEN_INVALID = 1
+    ERROR_TOKEN_EXPIRED = 2
+    ERROR_INSUFFICIENT_PERMISSIONS = 3
+    ERROR_NO_CHARACTER = 4
+    ERROR_ESI_UNAVAILABLE = 5
+    ERROR_OPERATION_MODE_MISMATCH = 6
+    ERROR_UNKNOWN = 99
+
+    ERRORS_LIST = [
+        (ERROR_NONE, "No error"),
+        (ERROR_TOKEN_INVALID, "Invalid token"),
+        (ERROR_TOKEN_EXPIRED, "Expired token"),
+        (ERROR_INSUFFICIENT_PERMISSIONS, "Insufficient permissions"),
+        (ERROR_NO_CHARACTER, "No character set for fetching data from ESI"),
+        (ERROR_ESI_UNAVAILABLE, "ESI API is currently unavailable"),
+        (
+            ERROR_OPERATION_MODE_MISMATCH,
+            "Operaton mode does not match with current setting",
+        ),
+        (ERROR_UNKNOWN, "Unknown error"),
+    ]
+    
+    corporation = models.OneToOneField(
+        EveCorporationInfo,
+        default=None,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="Corporation owning blueprints, if this is a 'corporate' owner",
+        related_name="+",
+    )
+    character = models.ForeignKey(
+        CharacterOwnership,
+        on_delete=models.SET_DEFAULT,
+        default=None,
+        null=True,
+        blank=True,
+        help_text="character used for syncing blueprints",
+        related_name="+",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text=("whether this owner is currently included in the sync process"),
+    )
+    
+    def update_events_esi(self):
+        if self.is_active:
+            events = self._fetch_events()
+            token = self.token(
+                [
+                    "esi-calendar.read_calendar_events.v1",
+                ]
+            )[0]
+
+            for event in events:
+                
+                character_id = self.character.character.character_id
+               
+                details = esi.client.Calendar.get_characters_character_id_calendar_event_id(
+                    character_id=character_id,
+                    event_id=event["event_id"],
+                    token=token.valid_access_token(),
+                ).results()
+
+                IngameEvents.objects.create(
+                    event_id=event["event_id"],
+                    owner = self,
+                    text = details['text'],
+                    owner_type = details['owner_type'],
+                    owner_name = details['owner_name'],
+                    importance = details['importance'],
+                    duration = details['duration'],
+                    event_date=event["event_date"],
+                    title=event["title"],
+    
+                )
+    @fetch_token_for_owner(["esi-calendar.read_calendar_events.v1"])
+    def _fetch_events(self, token) -> list:
+
+        character_id = self.character.character.character_id
+
+        events = esi.client.Calendar.get_characters_character_id_calendar(
+            character_id=character_id,
+            token=token.valid_access_token(),
+        ).results()
+        
+        return events
+
+    def token(self, scopes=None) -> Tuple[Token, int]:
+        """returns a valid Token for the owner"""
+        token = None
+        error = None
+        add_prefix = ""
+
+        # abort if character is not configured
+        if self.character is None:
+            logger.error(add_prefix("No character configured to sync"))
+            error = self.ERROR_NO_CHARACTER
+
+        # abort if character does not have sufficient permissions
+        elif self.corporation and not self.character.user.has_perm(
+            "opcalendar.add_corporate_blueprint_owner"
+        ):
+            logger.error(
+                add_prefix(
+                    "This character does not have sufficient permission to sync corporations"
+                )
+            )
+            error = self.ERROR_INSUFFICIENT_PERMISSIONS
+
+        # abort if character does not have sufficient permissions
+        elif not self.character.user.has_perm(
+            "opcalendar.add_personal_blueprint_owner"
+        ):
+            logger.error(
+                add_prefix(
+                    "This character does not have sufficient permission to sync personal blueprints"
+                )
+            )
+            error = self.ERROR_INSUFFICIENT_PERMISSIONS
+
+        else:
+            try:
+                # get token
+                token = (
+                    Token.objects.filter(
+                        user=self.character.user,
+                        character_id=self.character.character.character_id,
+                    )
+                    .require_scopes(scopes)
+                    .require_valid()
+                    .first()
+                )
+            except TokenInvalidError:
+                logger.error(add_prefix("Invalid token for fetching blueprints"))
+                error = self.ERROR_TOKEN_INVALID
+            except TokenExpiredError:
+                logger.error(add_prefix("Token expired for fetching blueprints"))
+                error = self.ERROR_TOKEN_EXPIRED
+            else:
+                if not token:
+                    logger.error(add_prefix("No token found with sufficient scopes"))
+                    error = self.ERROR_TOKEN_INVALID
+
+        return token, error
+
+
+class IngameEvents(models.Model):
+
+    event_id = models.PositiveBigIntegerField(
+        primary_key=True, help_text="The EVE ID of the event"
+    )
+    owner = models.ForeignKey(
+        Owner,
+        on_delete=models.CASCADE,
+        help_text="Event holder",
+    )
+    event_date = models.DateTimeField()
+    title = models.CharField(
+        max_length=128
+    )
+    text = models.TextField()
+    owner_type = models.CharField(
+        max_length=128
+    )
+    owner_name = models.CharField(
+        max_length=128
+    )
+    importance = models.CharField(
+        max_length=128
+    )
+    duration = models.CharField(
+        max_length=128
+    )
+    
+
 class EventMember(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "%s for %s" % (self.__class__.__name__, self.corp)
 
     class Meta:
         unique_together = ['event', 'user']
