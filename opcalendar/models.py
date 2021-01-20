@@ -1,21 +1,25 @@
-
-from .providers import esi
 import requests
 import json
 from typing import Tuple
+from datetime import timedelta
+
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.utils import timezone
-from datetime import timedelta
+from django.utils.translation import ugettext_lazy as _
+
 from esi.models import Token
-from .decorators import fetch_token_for_owner
 
 from allianceauth.eveonline.models import EveCharacter
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
-from django.utils.translation import ugettext_lazy as _
-# Create your models here.
+from allianceauth.services.hooks import get_extension_logger
+
+from .providers import esi
+from .decorators import fetch_token_for_owner
+
+logger = get_extension_logger(__name__)
 
 class General(models.Model):
     """Meta model for app permissions"""
@@ -364,6 +368,10 @@ class Owner(models.Model):
                     title=event["title"],
     
                 )
+                logger.debug("Events id %s fetched" % event["event_id"])
+
+            logger.debug("All events fetched for %s" % self.character.character.character_name)
+
     @fetch_token_for_owner(["esi-calendar.read_calendar_events.v1"])
     def _fetch_events(self, token) -> list:
 

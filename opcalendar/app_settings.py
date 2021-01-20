@@ -15,3 +15,7 @@ def get_site_url():  # regex sso url
 # Hard timeout for tasks in seconds to reduce task accumulation during outages
 OPCALENDAR_TASKS_TIME_LIMIT = clean_setting("OPCALENDAR_TASKS_TIME_LIMIT", 7200)
 
+# whether admins will get notifications about import events
+OPCALENDAR_ADMIN_NOTIFICATIONS_ENABLED = clean_setting(
+    "OPCALENDAR_ADMIN_NOTIFICATIONS_ENABLED", True
+)

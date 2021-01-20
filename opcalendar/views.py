@@ -1,35 +1,40 @@
 # cal/views.py
 import logging
+import calendar
+from datetime import datetime, date, timedelta
 
 from django.contrib import messages
-from datetime import datetime, date
+
+from django.views import generic
 from django.views.generic import ListView, UpdateView, DeleteView
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
-from django.views import generic
-from django.utils.safestring import mark_safe
-from datetime import timedelta
-import calendar
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
-from esi.decorators import token_required
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy
+from django.utils.translation import ugettext_lazy as _
 from django.db import transaction
+
+from esi.decorators import token_required
+
+from allianceauth.services.hooks import get_extension_logger
+
 from . import tasks
 from .models import *
-from .utils import Calendar
+from .utils import Calendar, messages_plus
 from .forms import EventForm, AddMemberForm
 
-from django.utils.translation import ugettext_lazy as _
-
-logger = logging.getLogger(__name__)
+logger = get_extension_logger(__name__)
 
 @login_required(login_url='signup')
 def index(request):
     return HttpResponse('hello')
 
-@token_required(scopes=['esi-calendar.read_calendar_events.v1', 'esi-calendar.read_calendar_events.v1'])
+@token_required(scopes=['esi-calendar.read_calendar_events.v1'])
 def add_ingame_calendar(request, token):
     token_char = EveCharacter.objects.get(character_id=token.character_id)
 
@@ -42,6 +47,19 @@ def add_ingame_calendar(request, token):
 
         success = False
         owned_char = None
+
+        messages_plus.error(
+            request,
+            format_html(
+                gettext_lazy(
+                    "You can only use your main or alt characters "
+                    "to add corporations. "
+                    "However, character %s is neither. "
+                )
+                % format_html("<strong>{}</strong>", token_char.character_name)
+            ),
+        )
+
 
     if success:
 
@@ -62,7 +80,22 @@ def add_ingame_calendar(request, token):
             owner.save()
 
         tasks.update_events_for_owner(owner_pk=owner.pk)
-        messages.success(request, 'Successful synchronized with ingame events')
+        
+        messages_plus.success(
+            request,
+            format_html(
+                gettext_lazy(
+                    "Succesfully added ingame calendar sync for %(character)s. Process will run on background. You will receive a report once the process is finished."
+                )
+                % {
+                    "corporation": format_html("<strong>{}</strong>", owner),
+                    "character": format_html(
+                        "<strong>{}</strong>", owner.character.character.character_name
+                    ),
+                }
+            ),
+        )
+
     return redirect("opcalendar:calendar")
 
 def get_date(req_day):
@@ -134,7 +167,9 @@ def create_event(request):
             visibility=visibility
         )
         messages.success(request, _('Event %(opname)s created for %(date)s.') % {"opname": title,"date": start_time.strftime("%Y-%m-%d %H:%M")})
+        
         return HttpResponseRedirect(reverse('opcalendar:calendar'))
+   
     return render(request, 'opcalendar/event-add.html', {'form': form})
 
 
@@ -142,10 +177,13 @@ def create_event(request):
 @login_required(login_url='signup')
 @permission_required("opcalendar.basic_access")
 def event_details(request, event_id):
+    
     event = Event.objects.get(id=event_id)
+    
     context = {
         'event': event
     }
+
     if request.user.has_perm('opcalendar.view_public') and event.visibility == "public" or event.visibility == "import":
         return render(request, 'opcalendar/event-details.html', context)
     elif request.user.has_perm('opcalendar.view_member') and event.visibility == "member":
@@ -163,19 +201,15 @@ class EventEdit(generic.UpdateView):
 @permission_required("opcalendar.basic_access")
 def ingame_event_details(request, event_id):
     event = IngameEvents.objects.get(event_id=event_id)
+    
     context = {
         'event': event
     }
+
     if request.user.has_perm('opcalendar.view_ingame'):
         return render(request, 'opcalendar/ingame-event-details.html', context)
     else:
-        return redirect('opcalendar:calendar')
-
-class EventEdit(generic.UpdateView):
-    permission_required = "opcalendar.create_event"
-    model = Event
-    fields = ['operation_type', 'title', 'doctrine', 'formup_system', 'description', 'start_time','end_time','fc', 'visibility']
-    template_name = 'opcalendar/event-edit.html'    
+        return redirect('opcalendar:calendar') 
 
 @login_required(login_url='signup')
 @permission_required("opcalendar.manage_event")
@@ -199,8 +233,6 @@ def add_eventmember(request, event_id):
         'form': forms
     }
     return render(request, 'opcalendar/add_member.html', context)
-
-
 
 @login_required
 @permission_required('opcalendar.create_event')
