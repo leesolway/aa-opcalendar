@@ -326,24 +326,21 @@ class Owner(models.Model):
 
     def update_events_esi(self):
         if self.is_active:
+            
+            #Get all current imported fleets in database
+            event_ids_to_remove = list(
+                IngameEvents.objects.filter(owner=self).values_list("event_id", flat=True)
+            )
+            logger.debug("Ingame events currently in database: %s" % event_ids_to_remove)
+            
             events = self._fetch_events()
             token = self.token(
                 [
                     "esi-calendar.read_calendar_events.v1",
                 ]
             )[0]
-
-            """Delte all events from the owner to remove deleted events"""
-            IngameEvents.objects.filter(
-                owner=self
-            ).delete()
             
             for event in events:   
-                
-                """Delte all events with the same ID to update events from other feeds"""
-                IngameEvents.objects.filter(
-                    event_id=event["event_id"]
-                ).delete()
 
                 character_id = self.character.character.character_id
                
@@ -355,20 +352,34 @@ class Owner(models.Model):
 
                 end_date = event["event_date"] + timedelta(minutes=details['duration'])
 
-                IngameEvents.objects.create(
-                    event_id=event["event_id"],
-                    owner = self,
-                    text = details['text'],
-                    owner_type = details['owner_type'],
-                    owner_name = details['owner_name'],
-                    importance = details['importance'],
-                    duration = details['duration'],
-                    event_start_date=event["event_date"],
-                    event_end_date=end_date,
-                    title=event["title"],
-    
-                )
-                logger.debug("Events id %s fetched" % event["event_id"])
+                original = IngameEvents.objects.filter(
+                    owner=self, event_id=event["event_id"]
+                ).first()
+
+                if original is not None:
+                    
+                    logger.debug("Event: %s already in database" % event["title"])
+                    event_ids_to_remove.remove(original.event_id)
+
+                else:
+                    ingame_event = IngameEvents(
+                        event_id=event["event_id"],
+                        owner = self,
+                        text = details['text'],
+                        owner_type = details['owner_type'],
+                        owner_name = details['owner_name'],
+                        importance = details['importance'],
+                        duration = details['duration'],
+                        event_start_date=event["event_date"],
+                        event_end_date=end_date,
+                        title=event["title"],
+        
+                    )
+                    ingame_event.save()
+                    logger.debug("New event created: %s" % event["title"])
+
+            logger.debug("Removing all events that we did not get over API")
+            IngameEvents.objects.filter(pk__in=event_ids_to_remove).delete()
 
             logger.debug("All events fetched for %s" % self.character.character.character_name)
 
