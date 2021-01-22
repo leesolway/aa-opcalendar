@@ -18,6 +18,10 @@ logger = get_extension_logger(__name__)
 
 from django.utils.translation import ugettext_lazy as _
 
+from .app_settings import (
+    OPCALENDAR_NOTIFY_IMPORTS,
+)
+
 RED = 16711710
 BLUE = 42751
 GREEN = 6684416
@@ -88,7 +92,7 @@ def fleet_saved(sender, instance, created, **kwargs):
 
 @receiver(pre_delete, sender=Event)
 def fleet_deleted(sender, instance, **kwargs):
-    if not "import" in instance.visibility:
+    if not "import" in instance.visibility or OPCALENDAR_NOTIFY_IMPORTS == True:
         try:
             logger.debug("New signal fleet deleted for %s" % instance.title)
             url = get_site_url() + "/optimer/"
