@@ -24,14 +24,19 @@ An operation calendar app for Alliance Auth to display fleet operations and othe
 
 ## Permissions
 
-Perm | Auth Site 
- --- | --- 
-opcalendar basic_access | Can view the calendar page.
-opcalendar view_public | Can view events with public visibility.
-opcalendar view_member | Can view events with member only visibility.
-opcalendar view_ingame | Can view events that have been imported from the ingame calendars
-add_ingame_calendar_owner | Can add feeds for ingame calendar events
-opcalendar create_event | Can create events.
+Perm | Auth Site | Example Target Group
+ --- | --- | ---
+opcalendar basic_access | Can view the calendar page. | Guest and Members
+opcalendar view_public | Can view events with public visibility. | Guest and Members
+opcalendar view_member | Can view events with member only visibility. | Members
+opcalendar view_ingame | Can view events that have been imported from the ingame calendars | Members
+add_ingame_calendar_owner | Can add feeds for ingame calendar events | CEOs and Directors
+opcalendar create_event | Can create events. | Fleet Commanders
+
+## Settings
+
+Name | Description | Default
+OPCALENDAR_NOTIFY_IMPORTS | Wheter to automatically send out discord notifications for fleets imported and deleted via API sources such as ingame calendar or the pre determined sources | True
 
 ## Usage
 In order to use the calendar and create event you will need to create event hosts and event categories.
@@ -61,7 +66,7 @@ To start importing fleets:
 
 **WARNING: Running the import function will delete all fleets labaled with the import label to get rid of possibly deleted operations.**
 
-To schedule the import runs either add the following line in your local.py file or set up a perioduc task for the `opcalendar.tasks.import_fleets` task on your admin menu
+To schedule the import runs either add the following line in your local.py file or set up a perioduc task for the `opcalendar.tasks.import_fleets` task on your admin menu to fetch fleets every hour.
 
 ```
 CELERYBEAT_SCHEDULE['import_fleets'] = {
@@ -74,15 +79,15 @@ CELERYBEAT_SCHEDULE['import_fleets'] = {
 ### Importing fleets from ingame calendar
 You can import events that have been created in the ingame calendar. As the fields on the ingame calendar are limited the events will not be as detailed as when created directly from the calendar.
 
-1. Give the add_ingame_calendar_owner role for the user
+1. Give the add_ingame_calendar_owner role for the wanter groups
 2. Navigate to the opcalendar page and press the `Add Ingame Calendar Feed` button
 3. Log in with the character that holds the calendar
-4. Add the following into your local.py setting file or set up a periodic task for the `opcalendar.tasks.update_all_ingame_events`
+4. Add the following line into your local.py setting file or set up a periodic task for the `opcalendar.tasks.update_all_ingame_events` to pull fleets from ingame every 5 minutes.
 
 ```
 CELERYBEAT_SCHEDULE['update_all_ingame_events'] = {
     'task': 'opcalendar.tasks.update_all_ingame_events',
-    'schedule': crontab(minute=0, hour='*'),
+    'schedule': crontab(minute='*/5'),
 }
 ```
 

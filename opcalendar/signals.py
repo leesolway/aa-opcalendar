@@ -49,43 +49,52 @@ def fleet_saved(sender, instance, created, **kwargs):
             # Translate titles if we have ingame events
             if sender == IngameEvents:
                 
-                entity = esi.client.Search.get_search(
+                message = "New Fleet From API Feed"
+
+                # Get the entity name from owner name
+                entity_id = esi.client.Search.get_search(
                     categories=[instance.owner_type],
                     search=instance.owner_name, 
-                    strict=True).results()
+                    strict=True).results()[instance.owner_type][0]
 
-                logger.debug("Entity data is %s" % entity)
+                logger.debug("Entity data is %s" % entity_id)
                 
                 main_char = instance.owner.character.character.character_name
                 
-                formup_system = "N/A"
+                formup_system = instance.owner_name
                 
                 title = instance.title
                 
-                doctrine = "N/A"
+                doctrine = ""
                 
                 eve_time = instance.event_start_date
                 
                 fc = instance.owner_name
                 
+                # Setup portrait URL based on owner type
                 if instance.owner_type == "alliance":
-                    portrait = "https://images.evetech.net/alliances/{}/logo".format(entity[instance.owner_type][0])
+                    portrait = "https://images.evetech.net/alliances/{}/logo".format(entity_id)
+                    ticker = "[{}]".format(esi.client.Alliance.get_alliances_alliance_id(
+                        alliance_id = entity_id
+                        ).results()["ticker"])
 
                 if instance.owner_type == "corporation":
-                    portrait = "https://images.evetech.net/corporations/{}/logo".format(entity[instance.owner_type][0])
-                    
-                if instance.owner_type == "character": 
-                   portrait = "https://images.evetech.net/characters/{}/portrait".format(entity[instance.owner_type][0]) 
-                    
+                    portrait = "https://images.evetech.net/corporations/{}/logo".format(entity_id)
+                    ticker = "[{}]".format(esi.client.Corporation.get_corporations_corporation_id(
+                        corporation_id = entity_id
+                        ).results()["ticker"])
 
+                if instance.owner_type == "character": 
+                    portrait = "https://images.evetech.net/characters/{}/portrait".format(entity_id) 
+                    ticker = ""
 
                 logger.debug("Portrait url is %s" % portrait)
 
-                character_name = instance.owner_name
-
-                ticker = ""
+                character_name = instance.owner_name   
 
             else:
+
+                message = "New Fleet Event Posted"
 
                 main_char = instance.eve_character
                 
@@ -103,14 +112,12 @@ def fleet_saved(sender, instance, created, **kwargs):
 
                 character_name = main_char.character_name
 
-                ticker = main_char.corporation_ticker
+                ticker = "{}".format(main_char.corporation_ticker)
             
             col = GREEN
             
-            message = "New Fleet Timer Posted"
-            
             if not created:
-                message = "Fleet Timer Updated"
+                message = "Fleet Event Updated"
                 col = BLUE
 
             embed = {'title': message, 
@@ -140,7 +147,7 @@ def fleet_saved(sender, instance, created, **kwargs):
                     ],
                     "footer": {
                         "icon_url": portrait,
-                        "text": "{}  [{}]".format(character_name, ticker)
+                        "text": "{}  {}".format(character_name, ticker)
                     }
                 }
 
@@ -159,20 +166,85 @@ def fleet_saved(sender, instance, created, **kwargs):
             pass  # shits fucked... Don't worry about it...
 
 @receiver(pre_delete, sender=Event)
+@receiver(pre_delete, sender=IngameEvents)
 def fleet_deleted(sender, instance, **kwargs):
-    if not "import" in instance.visibility or OPCALENDAR_NOTIFY_IMPORTS == True:
+     
+    # Translate titles if we have ingame events
+    if sender == IngameEvents:
+        instance.visibility = ""
+
+    if not "import" in instance.visibility or OPCALENDAR_NOTIFY_IMPORTS:
         try:
             logger.debug("New signal fleet deleted for %s" % instance.title)
             url = get_site_url() + "/optimer/"
-            main_char = instance.eve_character
-            formup_system = instance.formup_system
-            title = instance.title
-            doctrine = instance.doctrine
+            
+            # Translate titles if we have ingame events
+            if sender == IngameEvents:
+                
+                message = "Feed Removed From API Feed"
 
-            eve_time = instance.start_time
+                # Get the entity name from owner name
+                entity_id = esi.client.Search.get_search(
+                    categories=[instance.owner_type],
+                    search=instance.owner_name, 
+                    strict=True).results()[instance.owner_type][0]
 
-            fc = instance.fc
-            message = "Fleet Removed"
+                logger.debug("Entity data is %s" % entity_id)
+                
+                main_char = instance.owner.character.character.character_name
+                
+                formup_system = instance.owner_name
+                
+                title = instance.title
+                
+                doctrine = ""
+                
+                eve_time = instance.event_start_date
+                
+                fc = instance.owner_name
+                
+                # Setup portrait URL based on owner type
+                if instance.owner_type == "alliance":
+                    portrait = "https://images.evetech.net/alliances/{}/logo".format(entity_id)
+                    ticker = "[{}]".format(esi.client.Alliance.get_alliances_alliance_id(
+                        alliance_id = entity_id
+                        ).results()["ticker"])
+
+                if instance.owner_type == "corporation":
+                    portrait = "https://images.evetech.net/corporations/{}/logo".format(entity_id)
+                    ticker = "[{}]".format(esi.client.Corporation.get_corporations_corporation_id(
+                        corporation_id = entity_id
+                        ).results()["ticker"])
+
+                if instance.owner_type == "character": 
+                    portrait = "https://images.evetech.net/characters/{}/portrait".format(entity_id) 
+                    ticker = ""
+
+                logger.debug("Portrait url is %s" % portrait)
+
+                character_name = instance.owner_name            
+
+            else:
+
+                message = "Fleet Event Removed"
+
+                main_char = instance.eve_character
+                
+                formup_system = instance.formup_system
+                
+                title = instance.title
+                
+                doctrine = instance.doctrine
+                
+                eve_time = instance.start_time
+                
+                fc = instance.fc
+
+                portrait = main_char.portrait_url_64
+
+                character_name = main_char.character_name
+
+                ticker = "{}".format(main_char.corporation_ticker)
 
             embed = {'title': message, 
                     'description': ("**{}** from **{}** has been cancelled".format(title,formup_system)),
@@ -191,8 +263,8 @@ def fleet_deleted(sender, instance, **kwargs):
 
                     ],
                     "footer": {
-                        "icon_url": main_char.portrait_url_64,
-                        "text": "{}  [{}]".format(main_char.character_name, main_char.corporation_ticker)
+                        "icon_url": portrait,
+                        "text": "{}  {}".format(character_name, ticker)
                     }
                 }
 
