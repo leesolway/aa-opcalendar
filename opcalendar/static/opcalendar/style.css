@@ -1,15 +1,15 @@
-.calendar {
+.allianceauth-opcalendar .calendar {
     width: 98%;
     margin: auto;
     font-size: 13px;
     table-layout: fixed;
   }
 
-.nostyling{
+.allianceauth-opcalendar .nostyling{
   text-decoration: none !important;
 }
 
-.event{
+.allianceauth-opcalendar .event{
   background-image: none;
   border-radius: 0;
   background: #eeeeee;
@@ -25,7 +25,7 @@
   position: relative;
 }
 
-.public-event:before {
+.allianceauth-opcalendar .public-event:before {
     width: 0;
     height: 0;
     border-style: solid;
@@ -37,7 +37,7 @@
     top: 0;
 }
 
-.import-event:before {
+.allianceauth-opcalendar .import-event:before {
     width: 0;
     height: 0;
     border-style: solid;
@@ -49,7 +49,7 @@
     top: 0;
 }
 
-.member-event:before {
+.allianceauth-opcalendar .member-event:before {
     width: 0;
     height: 0;
     border-style: solid;
@@ -61,103 +61,102 @@
     top: 0;
 }
 
-.event.purple{
+.allianceauth-opcalendar .event.purple{
   border-left: 6px solid #9C27B0;
 }
 
-.event.green{
+.allianceauth-opcalendar .event.green{
   border-left: 6px solid #8BC34A;
 }
 
-.event.orange{
+.allianceauth-opcalendar .event.orange{
   border-left: 6px solid #ff9800;
 }
 
-.event.yellow{
+.allianceauth-opcalendar .event.yellow{
   border-left: 6px solid #FFEB3B;
 }
 
-.event.blue{
+.allianceauth-opcalendar .event.blue{
    border-left: 6px solid #50a5f1;
 }
 
-.event.red{
+.allianceauth-opcalendar .event.red{
   border-left: 6px solid #b71c1c;
 }
 
-.event.grey{
+.allianceauth-opcalendar .event.grey{
   border-left: 6px solid #607D8B;
 }
 
-.event.black{
+.allianceauth-opcalendar .event.black{
   border-left: 6px solid #000000;
 }
 
-.event.past-event{
+.allianceauth-opcalendar .event.past-event{
     opacity: 0.4;
 }
   
-td.today {
+.allianceauth-opcalendar td.today {
     color: #50a5f1;
     font-weight: bold;
 }
-.calendar tr, .calendar td {
+.allianceauth-opcalendar .calendar tr, .calendar td {
   border: 1px solid #32394e;
 }
 
-.calendar th {
+.allianceauth-opcalendar .calendar th {
   padding: 10px;
   text-align: center;
   font-size: 18px;
   width: 15%;
 }
 
-.calendar td {
+.allianceauth-opcalendar .calendar td {
   height: 110px;
   vertical-align:top;
   width: 15%;
   padding: 0px 5px 0px 5px;
 }
 
-.month {
+.allianceauth-opcalendar .month {
   font-size: 25px;
   background: #32394e;
 }
 
-.date {
+.allianceauth-opcalendar .date {
   font-size: 16px;
   padding: 5px;
 }
 
-ul {
+.allianceauth-opcalendar ul {
   height: 100%;
   padding: 0px 5px 0px 20px;
 }
 
-a {
+.allianceauth-opcalendar a {
   color: #17a2b8;
-}.left {
+}
+.allianceauth-opcalendar .left {
   float: left;
 }
 
-.right {
+.allianceauth-opcalendar .right {
   float: right;
 }
 
-.btn {
+.allianceauth-opcalendar .btn {
   outline: none;
   color: black;
   background-color: transparent;
   box-shadow: 0 0 0 0;
 }
 
-.clearfix {
-  margin: 15px;
-}.form {
+.allianceauth-opcalendar .form {
   margin: auto;
 }
 
-.form input, .form select, .form textarea {
+.allianceauth-opcalendar .form input, .form select, .form textarea {
   border-radius: 5px;
   border: 1px solid #17a2b8;
   outline: none;
@@ -166,12 +165,15 @@ a {
   width: 100%;
   }
 
-.legend span {
+.allianceauth-opcalendar .legend {
+  margin: 15px;
+}
+.allianceauth-opcalendar .legend span {
     padding: 3px 16px 3px 6px;
     cursor: pointer;
     opacity: 0.7
 }
 
-.legend span.active{
+.allianceauth-opcalendar .legend span.active{
   opacity: 1;
 }

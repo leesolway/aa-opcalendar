@@ -6,34 +6,37 @@
 {% block page_title %}{% trans "Create Operation" %}{% endblock page_title %}
 
 {% block content %}
-
-<div class="clearfix">
-	<a class="btn btn-info right mr-2" href="{% url 'opcalendar:calendar' %}?{{ next_month }} "> Next Month >> </a>
-    <a class="btn btn-info right mr-2" href="{% url 'opcalendar:calendar' %}?{{ prev_month }}"> << Previous Month </a>
-        {% if perms.opcalendar.create_event %}
-    	<a class="btn btn-info right mr-2" href="{% url 'opcalendar:event_new' %}"> + New Event </a>
-    {% endif %}
-    {% if perms.opcalendar.add_ingame_calendar_owner %}
-        <a class="btn btn-success right mr-2" href="{% url 'opcalendar:add_ingame_calendar' %}">
-        {% translate "Add Ingame Calendar Feed" %}
-        </a>
-    {% endif %}
-    <h5>Legend & Filters:</h5>
-    <div class="legend">
-    	<div>
-    		<span class="event import-event">Third Party Event</span>
-    		<span class="event public-event">Public Event</span>
-    		<span class="event member-event">Members Only Event</span>
-    	</div>
-    	<div>
-    		{% for event in category %}
-    			<span class="event {{ event.color }}">{{ event.name }}</span>
-    		{% endfor %}
-    	</div>
+<div class="allianceauth-opcalendar">
+    <div class="clearfix">
+    	<a class="btn btn-info right mr-2" href="{% url 'opcalendar:calendar' %}?{{ next_month }} "> Next Month >> </a>
+        <a class="btn btn-info right mr-2" href="{% url 'opcalendar:calendar' %}?{{ prev_month }}"> << Previous Month </a>
+            {% if perms.opcalendar.create_event %}
+        	<a class="btn btn-info right mr-2" href="{% url 'opcalendar:event_new' %}"> + New Event </a>
+        {% endif %}
+        {% if perms.opcalendar.add_ingame_calendar_owner %}
+            <a class="btn btn-success right mr-2" href="{% url 'opcalendar:add_ingame_calendar' %}">
+            {% translate "Add Ingame Calendar Feed" %}
+            </a>
+        {% endif %}
+        <h5>Legend & Filters:</h5>
+        <div class="legend">
+        	<div>
+        		<span class="event import-event">Third Party Event</span>
+        		<span class="event public-event">Public Event</span>
+        		<span class="event member-event">Members Only Event</span>
+        	</div>
+        	<div>
+        		{% for event in category %}
+        			<span class="event {{ event.color }}">{{ event.name }}</span>
+        		{% endfor %}
+        	</div>
+        </div>
     </div>
 </div>
 <div>
-    {{ calendar }}
+    <div class="allianceauth-opcalendar">
+        {{ calendar }}
+    </div>
 </div>
 {% endblock content %}
 
