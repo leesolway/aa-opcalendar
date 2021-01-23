@@ -36,6 +36,7 @@ opcalendar create_event | Can create events. | Fleet Commanders
 ## Settings
 
 Name | Description | Default
+ --- | --- | ---
 OPCALENDAR_NOTIFY_IMPORTS | Wheter to automatically send out discord notifications for fleets imported and deleted via API sources such as ingame calendar or the pre determined sources | True
 
 ## Usage
