@@ -54,7 +54,7 @@ def fleet_saved(sender, instance, created, **kwargs):
                     search=instance.owner_name, 
                     strict=True).results()
 
-                
+                logger.debug("Entity data is %s" % entity)
                 
                 main_char = instance.owner.character.character.character_name
                 
@@ -70,12 +70,16 @@ def fleet_saved(sender, instance, created, **kwargs):
                 
                 if instance.owner_type == "alliance":
                     portrait = "https://images.evetech.net/alliances/{}/logo".format(entity[instance.owner_type][0])
-                if instance.owner_type == "corporation":
-                    portrait = "https://images.evetech.net/characters/{}/portrait".format(entity[instance.owner_type][0])
-                if instance.owner_type == "character": 
-                    portrait = "https://images.evetech.net/corporations/{}}/logo".format(entity[instance.owner_type][0])
 
-                logger.debug(portrait)
+                if instance.owner_type == "corporation":
+                    portrait = "https://images.evetech.net/corporations/{}/logo".format(entity[instance.owner_type][0])
+                    
+                if instance.owner_type == "character": 
+                   portrait = "https://images.evetech.net/characters/{}/portrait".format(entity[instance.owner_type][0]) 
+                    
+
+
+                logger.debug("Portrait url is %s" % portrait)
 
                 character_name = instance.owner_name
 
