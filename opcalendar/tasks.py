@@ -156,9 +156,9 @@ def import_fleets():
 						event.save()
 
 		if feed.source=="Fun Inc.":
-			logger.debug("FUN INC: import feed active. Pulling events from %s" % OPCALENDAR_EVE_UNI_URL)
+			logger.debug("FUN INC: import feed active. Pulling events from %s" % OPCALENDAR_FUNINC_URL)
 			#Get fleets from EVE UNI Ical
-			url = OPCALENDAR_EVE_UNI_URL
+			url = OPCALENDAR_FUNINC_URL
 			c = Calendar(requests.get(url).text)
 			for entry in c.events:
 
