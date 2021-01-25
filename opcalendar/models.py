@@ -129,10 +129,12 @@ class EventImport(models.Model):
     """NPSI IMPORT OPTIONS"""
     SPECTRE_FLEET = "Spectre Fleet"
     EVE_UNIVERSITY = "EVE University"
+    FUN_INC = "Fun Inc."
     
     IMPORT_SOURCES = (
         (SPECTRE_FLEET, _("Spectre Fleet")),
         (EVE_UNIVERSITY, _("EVE University")),
+        (FUN_INC, _("Fun Inc.")),
         )
 
     source = models.CharField(
@@ -168,8 +170,8 @@ class EventImport(models.Model):
         return str(self.source)
 
     class Meta:
-        verbose_name = 'Event Import'
-        verbose_name_plural = 'Event Imports'   
+        verbose_name = 'NPSI Event Import'
+        verbose_name_plural = 'NPSI Event Imports'   
 
 class Event(models.Model):
     # visibility
