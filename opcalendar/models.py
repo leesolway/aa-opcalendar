@@ -362,7 +362,7 @@ class Owner(models.Model):
                     event_ids_to_remove.remove(original.event_id)
 
                 else:
-                    ingame_event = IngameEvents(
+                    IngameEvents.objects.create(
                         event_id=event["event_id"],
                         owner = self,
                         text = details['text'],
@@ -375,7 +375,6 @@ class Owner(models.Model):
                         title=event["title"],
         
                     )
-                    ingame_event.save()
                     logger.debug("New event created: %s" % event["title"])
 
             logger.debug("Removing all events that we did not get over API")

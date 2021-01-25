@@ -33,23 +33,20 @@ esi = EsiClientProvider()
 @receiver(post_save, sender=Event)
 @receiver(post_save, sender=IngameEvents)
 def fleet_saved(sender, instance, created, **kwargs):
-
+     
     # Translate titles if we have ingame events
     if sender == IngameEvents:
         instance.visibility = ""
 
     if not "import" in instance.visibility or OPCALENDAR_NOTIFY_IMPORTS:
         try:
-            logger.debug("Got an imported event %s" % instance.title)
-
             logger.debug("New signal fleet created for %s" % instance.title)
-            
-            url = get_site_url() + "/opcalendar/"
+            url = get_site_url() + "/optimer/"
             
             # Translate titles if we have ingame events
             if sender == IngameEvents:
                 
-                message = "New Fleet From API Feed"
+                message = "New Event Created From API Feed"
 
                 # Get the entity name from owner name
                 entity_id = esi.client.Search.get_search(
@@ -90,11 +87,11 @@ def fleet_saved(sender, instance, created, **kwargs):
 
                 logger.debug("Portrait url is %s" % portrait)
 
-                character_name = instance.owner_name   
+                character_name = instance.owner_name            
 
             else:
 
-                message = "New Fleet Event Posted"
+                message = "New Fleet Event "
 
                 main_char = instance.eve_character
                 
@@ -113,12 +110,13 @@ def fleet_saved(sender, instance, created, **kwargs):
                 character_name = main_char.character_name
 
                 ticker = "{}".format(main_char.corporation_ticker)
-            
-            col = GREEN
-            
+
+            #If we update instead of delete
             if not created:
-                message = "Fleet Event Updated"
+                message = "Event Updated"
                 col = BLUE
+            else:
+                col = GREEN
 
             embed = {'title': message, 
                     'description': ("**{}** from **{}**".format(title,formup_system)),
@@ -131,17 +129,8 @@ def fleet_saved(sender, instance, created, **kwargs):
                         "inline": True
                         },
                         {
-                        "name": "Doctrine",
-                        "value": doctrine,
-                        "inline": True
-                        },
-                        {
                         "name": "Eve Time",
                         "value": eve_time.strftime("%Y-%m-%d %H:%M:%S")
-                        },
-                        {
-                        "name": "Time Until",
-                        "value": time_helpers.get_time_until(eve_time)
                         }
 
                     ],
@@ -152,17 +141,16 @@ def fleet_saved(sender, instance, created, **kwargs):
                 }
 
             hooks = EventSignal.objects.all().select_related('webhook')
-            logger.debug("Hooks OK ")
             old = datetime.datetime.now(timezone.utc) > eve_time
-            logger.debug("Datetime OK")
+
             for hook in hooks:
                 if hook.webhook.enabled:
                     if old and hook.ignore_past_fleets:
                         continue
-            hook.webhook.send_embed(embed)
+                    hook.webhook.send_embed(embed)
 
         except Exception as e:
-            print(logger.error(e))
+            logger.error(e)
             pass  # shits fucked... Don't worry about it...
 
 @receiver(pre_delete, sender=Event)
@@ -181,7 +169,7 @@ def fleet_deleted(sender, instance, **kwargs):
             # Translate titles if we have ingame events
             if sender == IngameEvents:
                 
-                message = "Feed Removed From API Feed"
+                message = "Event Removed Via API Feed"
 
                 # Get the entity name from owner name
                 entity_id = esi.client.Search.get_search(
