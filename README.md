@@ -56,6 +56,7 @@ Opcalendar is currently supporting imports for the following NPSI fleets:
 
 - Spectre fleet
 - Eve University (classes only)
+- FUN INC
 
 To start importing fleets:
 
