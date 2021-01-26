@@ -41,11 +41,12 @@ def fleet_saved(sender, instance, created, **kwargs):
     if not "import" in instance.visibility or OPCALENDAR_NOTIFY_IMPORTS:
         try:
             logger.debug("New signal fleet created for %s" % instance.title)
-            url = get_site_url() + "/optimer/"
             
             # Translate titles if we have ingame events
             if sender == IngameEvents:
                 
+                url = get_site_url() + "/opcalendar/ingame/event/{}/details/".format(instance.pk)
+
                 message = "New Event Created From API Feed"
 
                 # Get the entity name from owner name
@@ -91,7 +92,12 @@ def fleet_saved(sender, instance, created, **kwargs):
 
             else:
 
-                message = "New Fleet Event "
+                url = get_site_url() + "/opcalendar/event/{}/details/".format(instance.pk)
+                
+                if "import" in instance.visibility:
+                    message = "New Public NPSI Fleet Event From API"
+                else:
+                     message = "New Fleet Event"
 
                 main_char = instance.eve_character
                 

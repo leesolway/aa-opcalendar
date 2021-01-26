@@ -79,7 +79,7 @@ def add_ingame_calendar(request, token):
 
             owner.save()
 
-        tasks.update_events_for_owner.delay(owner_pk=owner.pk)
+        tasks.update_events_for_owner(owner_pk=owner.pk)
         
         messages_plus.success(
             request,
