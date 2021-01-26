@@ -115,7 +115,7 @@ def import_fleets():
 		if feed.source=="EVE University":
 			logger.debug("EVE Uni: import feed active. Pulling events from %s" % OPCALENDAR_EVE_UNI_URL)
 			#Get fleets from EVE UNI Ical
-			url = OPCALENDAR_FUNINC_URL
+			url = OPCALENDAR_EVE_UNI_URL
 			c = Calendar(requests.get(url).text)
 			for entry in c.events:
 				#Filter only class events as they are the only public events in eveuni
