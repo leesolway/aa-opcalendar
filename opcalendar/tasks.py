@@ -55,7 +55,7 @@ TASK_ESI_KWARGS = {
 
 
 
-# Import eve uni classes
+# Import NPSI fleets
 @shared_task
 def import_fleets():
 	
@@ -70,22 +70,31 @@ def import_fleets():
 	
 	feed_errors = False
 
+	# Check for active NPSI feeds
 	for feed in feeds:
+		
+		# If Spectre Fleet is active
 		if feed.source=="Spectre Fleet":
 			
 			logger.debug("Spectre: import feed active. Pulling events from %s" % OPCALENDAR_SPECTRE_URL)
 			
 			try:
+				
+				# Get spectre fleets from ther RSS feed
 				d = feedparser.parse(OPCALENDAR_SPECTRE_URL)
 				
+				# Process each fleet entry
 				for entry in d.entries:
+					
 					##Look for SF fleets only
 					if entry.author_detail.name=='Spectre Fleet':
+						
 						#Only active fleets
 						if not "[RESERVED]" in entry.title:
 
 							logger.debug("Spectre: Import even found: %s" % entry.title)
 							
+							# Format datetimes
 							date_object = datetime.strptime(entry.published,'%a, %d %b %Y %H:%M:%S %z')
 							date_object.strftime('%Y-%m-%dT%H:%M')
 
@@ -94,10 +103,14 @@ def import_fleets():
 
 							#If we get the event from API it should not be removed
 							if original is not None:
+								
 								logger.debug("Spectre: Event: %s already in database" % entry.title)
+								
+								# Remove the found fleet from the to be removed list
 								event_ids_to_remove.remove(original.id)
 
 							else:
+								# Save new fleet to database
 								event = Event(
 									operation_type=feed.operation_type,
 									title=entry.title,
@@ -120,16 +133,21 @@ def import_fleets():
 				logger.error("Spectre: Error in fetching URL: %s" % err)
 				feed_errors = True
 
+		# Check for FUN Inc fleets
 		if feed.source=="Fun Inc.":
 			logger.debug("Fun Inc: import feed active. Pulling events from %s" % OPCALENDAR_FUNINC_URL)
 			
 			try:
+				# Get FUN Inc fleets from google ical
 				url = OPCALENDAR_FUNINC_URL
 				c = Calendar(requests.get(url).text)
+				
+				# Parse each entry we got
 				for entry in c.events:
 					#Filter only class events as they are the only public events in eveuni
 					logger.debug("Using entry %s" % entry)
 
+					# Format datetime
 					start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(tzinfo=pytz.utc)
 					end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(tzinfo=pytz.utc)
 					title = entry.name
@@ -141,10 +159,14 @@ def import_fleets():
 
 					#If we get the event from API it should not be removed	
 					if original is not None:
+						
 						logger.debug("Fun Inc: Event: %s already in database" % title)
+						
+						# Remove the found fleet from the to be removed list
 						event_ids_to_remove.remove(original.id)
 
 					else:		
+						# Save new fleet to database
 						event = Event(
 							operation_type=feed.operation_type,
 							title=title,
@@ -161,22 +183,27 @@ def import_fleets():
 						)
 
 						logger.debug("Fun Inc: Saved new EVE UNI event in database: %s" % title)
+						
 						event.save()
 			except:
 				logger.error("Fun Inc: Error in fetching URL: %s" % err)
 				feed_errors = True
 
+		# Check for EVE Uni events
 		if feed.source=="EVE University":
 			logger.debug("EVE Uni: import feed active. Pulling events from %s" % OPCALENDAR_EVE_UNI_URL)
 			
 			try:
+				#Get EVE Uni events from their API feed (ical)
 				url = OPCALENDAR_EVE_UNI_URL
 				c = Calendar(requests.get(url).text)
 				for entry in c.events:
+					
 					#Filter only class events as they are the only public events in eveuni
 					logger.debug("Using entry %s" % entry)
 					if "class" in entry.name.lower():
 
+						# Format datetime
 						start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(tzinfo=pytz.utc)
 						end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(tzinfo=pytz.utc)
 						title = re.sub("[\(\[].*?[\)\]]", "", entry.name)
@@ -188,10 +215,14 @@ def import_fleets():
 
 						#If we get the event from API it should not be removed	
 						if original is not None:
+							
 							logger.debug("EVE Uni: Event: %s already in database" % title)
+							
+							# Remove the found fleet from the to be removed list
 							event_ids_to_remove.remove(original.id)
 
 						else:		
+							# Save new event to database
 							event = Event(
 								operation_type=feed.operation_type,
 								title=title,
