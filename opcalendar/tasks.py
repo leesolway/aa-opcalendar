@@ -117,7 +117,7 @@ def import_fleets():
 								
 								event.save()
 			except:
-				logged.error("Spectre: Error in fetching URL: {}").format(err)
+				logger.error("Spectre: Error in fetching URL: {}").format(err)
 				feed_errors = True
 
 
@@ -129,7 +129,7 @@ def import_fleets():
 				c = Calendar(requests.get(url).text)
 				for entry in c.events:
 					#Filter only class events as they are the only public events in eveuni
-					
+					logger.debug("Using entry %s" % entry)
 					if "class" in entry.name.lower():
 
 						start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(tzinfo=pytz.utc)
@@ -165,7 +165,7 @@ def import_fleets():
 							logger.debug("EVE Uni: Saved new EVE UNI event in database: %s" % title)
 							event.save()
 			except:
-				logged.error("EVE Uni: Error in fetching URL: {}").format(err)
+				logger.error("EVE Uni: Error in fetching URL: {}").format(err)
 				feed_errors = True
 
 		if feed.source=="Fun Inc.":
@@ -176,9 +176,10 @@ def import_fleets():
 				c = Calendar(requests.get(url).text)
 				for entry in c.events:
 
+					logger.debug("Using entry %s" % entry)
 					start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(tzinfo=pytz.utc)
 					end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(tzinfo=pytz.utc)
-					title = re.sub("[\(\[].*?[\)\]]", "", entry.name)
+					title = entry.name
 
 					logger.debug("FUN INC: Import even found: %s" % title)
 
@@ -209,7 +210,7 @@ def import_fleets():
 						logger.debug("FUN INC: Saved new FUN INC. event in database: %s" % title)
 						event.save()
 			except:
-				logged.error("FUN INC: Error in fetching URL: {}").format(err)
+				logger.error("FUN INC: Error in fetching URL: {}").format(err)
 				feed_errors = True
 
 	logger.debug("Checking for NPSI fleets to be removed.")
