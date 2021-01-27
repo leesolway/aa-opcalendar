@@ -117,30 +117,31 @@ def import_fleets():
 								
 								event.save()
 			except:
-				logger.error("Spectre: Error in fetching URL: {}").format(err)
+				logger.error("Spectre: Error in fetching URL: %s" % err)
 				feed_errors = True
 
 		if feed.source=="Fun Inc.":
-			logger.debug("FUN INC: import feed active. Pulling events from %s" % OPCALENDAR_FUNINC_URL)
+			logger.debug("Fun Inc: import feed active. Pulling events from %s" % OPCALENDAR_FUNINC_URL)
 			
 			try:
 				url = OPCALENDAR_FUNINC_URL
 				c = Calendar(requests.get(url).text)
 				for entry in c.events:
-
+					#Filter only class events as they are the only public events in eveuni
 					logger.debug("Using entry %s" % entry)
+
 					start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(tzinfo=pytz.utc)
 					end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(tzinfo=pytz.utc)
 					title = entry.name
 
-					logger.debug("FUN INC: Import even found: %s" % title)
+					logger.debug("Fun Inc: Import even found: %s" % title)
 
 					# Check if we already have the event stored
 					original = Event.objects.filter(start_time=start_date, title=title).first()
 
 					#If we get the event from API it should not be removed	
 					if original is not None:
-						logger.debug("FUN INC: Event: %s already in database" % title)
+						logger.debug("Fun Inc: Event: %s already in database" % title)
 						event_ids_to_remove.remove(original.id)
 
 					else:		
@@ -159,10 +160,10 @@ def import_fleets():
 							eve_character_id = feed.eve_character.id
 						)
 
-						logger.debug("FUN INC: Saved new FUN INC. event in database: %s" % title)
+						logger.debug("Fun Inc: Saved new EVE UNI event in database: %s" % title)
 						event.save()
 			except:
-				logger.error("FUN INC: Error in fetching URL: {}").format(err)
+				logger.error("Fun Inc: Error in fetching URL: %s" % err)
 				feed_errors = True
 
 		if feed.source=="EVE University":
@@ -209,7 +210,7 @@ def import_fleets():
 							logger.debug("EVE Uni: Saved new EVE UNI event in database: %s" % title)
 							event.save()
 			except:
-				logger.error("EVE Uni: Error in fetching URL: {}").format(err)
+				logger.error("EVE Uni: Error in fetching URL: %s" % err)
 				feed_errors = True
 
 	logger.debug("Checking for NPSI fleets to be removed.")
@@ -222,7 +223,7 @@ def import_fleets():
 		else:
 			logger.debug("Removed unseen NPSI fleets")
 			# Remove all events we did not see from API					
-
+			Event.objects.filter(pk__in=event_ids_to_remove).delete()
 
 @shared_task(
     **{
