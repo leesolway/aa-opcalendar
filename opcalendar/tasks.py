@@ -120,6 +120,50 @@ def import_fleets():
 				logger.error("Spectre: Error in fetching URL: {}").format(err)
 				feed_errors = True
 
+		if feed.source=="Fun Inc.":
+			logger.debug("FUN INC: import feed active. Pulling events from %s" % OPCALENDAR_FUNINC_URL)
+			
+			try:
+				url = OPCALENDAR_FUNINC_URL
+				c = Calendar(requests.get(url).text)
+				for entry in c.events:
+
+					logger.debug("Using entry %s" % entry)
+					start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(tzinfo=pytz.utc)
+					end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(tzinfo=pytz.utc)
+					title = entry.name
+
+					logger.debug("FUN INC: Import even found: %s" % title)
+
+					# Check if we already have the event stored
+					original = Event.objects.filter(start_time=start_date, title=title).first()
+
+					#If we get the event from API it should not be removed	
+					if original is not None:
+						logger.debug("FUN INC: Event: %s already in database" % title)
+						event_ids_to_remove.remove(original.id)
+
+					else:		
+						event = Event(
+							operation_type=feed.operation_type,
+							title=title,
+							host=feed.host,
+							doctrine="see details",
+							formup_system=feed.source,
+							description=entry.description,
+							start_time=start_date, 
+							end_time=end_date, 
+							fc=feed.source,
+							visibility="import",
+							user_id = feed.creator.id,
+							eve_character_id = feed.eve_character.id
+						)
+
+						logger.debug("FUN INC: Saved new FUN INC. event in database: %s" % title)
+						event.save()
+			except:
+				logger.error("FUN INC: Error in fetching URL: {}").format(err)
+				feed_errors = True
 
 		if feed.source=="EVE University":
 			logger.debug("EVE Uni: import feed active. Pulling events from %s" % OPCALENDAR_EVE_UNI_URL)
@@ -166,51 +210,6 @@ def import_fleets():
 							event.save()
 			except:
 				logger.error("EVE Uni: Error in fetching URL: {}").format(err)
-				feed_errors = True
-
-		if feed.source=="Fun Inc.":
-			logger.debug("FUN INC: import feed active. Pulling events from %s" % OPCALENDAR_FUNINC_URL)
-			
-			try:
-				url = OPCALENDAR_FUNINC_URL
-				c = Calendar(requests.get(url).text)
-				for entry in c.events:
-
-					logger.debug("Using entry %s" % entry)
-					start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(tzinfo=pytz.utc)
-					end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(tzinfo=pytz.utc)
-					title = entry.name
-
-					logger.debug("FUN INC: Import even found: %s" % title)
-
-					# Check if we already have the event stored
-					original = Event.objects.filter(start_time=start_date, title=title).first()
-
-					#If we get the event from API it should not be removed	
-					if original is not None:
-						logger.debug("FUN INC: Event: %s already in database" % title)
-						event_ids_to_remove.remove(original.id)
-
-					else:		
-						event = Event(
-							operation_type=feed.operation_type,
-							title=title,
-							host=feed.host,
-							doctrine="see details",
-							formup_system=feed.source,
-							description=entry.description,
-							start_time=start_date, 
-							end_time=end_date, 
-							fc=feed.source,
-							visibility="import",
-							user_id = feed.creator.id,
-							eve_character_id = feed.eve_character.id
-						)
-
-						logger.debug("FUN INC: Saved new FUN INC. event in database: %s" % title)
-						event.save()
-			except:
-				logger.error("FUN INC: Error in fetching URL: {}").format(err)
 				feed_errors = True
 
 	logger.debug("Checking for NPSI fleets to be removed.")
