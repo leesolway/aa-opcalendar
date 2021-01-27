@@ -222,7 +222,7 @@ def import_fleets():
 		else:
 			logger.debug("Removed unseen NPSI fleets")
 			# Remove all events we did not see from API					
-			Event.objects.filter(pk__in=event_ids_to_remove).delete()
+
 
 @shared_task(
     **{
