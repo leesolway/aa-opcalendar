@@ -68,72 +68,126 @@ def import_fleets():
 	#Get all import feeds
 	feeds = EventImport.objects.all()
 	
+	feed_errors = False
+
 	for feed in feeds:
 		if feed.source=="Spectre Fleet":
+			
 			logger.debug("Spectre: import feed active. Pulling events from %s" % OPCALENDAR_SPECTRE_URL)
-			#Get fleets from SF RSS
-			d = feedparser.parse(OPCALENDAR_SPECTRE_URL)
-			for entry in d.entries:
-				##Look for SF fleets only
-				if entry.author_detail.name=='Spectre Fleet':
-					#Only active fleets
-					if not "[RESERVED]" in entry.title:
+			
+			try:
+				d = feedparser.parse(OPCALENDAR_SPECTRE_URL)
+				
+				for entry in d.entries:
+					##Look for SF fleets only
+					if entry.author_detail.name=='Spectre Fleet':
+						#Only active fleets
+						if not "[RESERVED]" in entry.title:
 
-						logger.debug("Spectre: Import even found: %s" % entry.title)
-						
-						date_object = datetime.strptime(entry.published,'%a, %d %b %Y %H:%M:%S %z')
-						date_object.strftime('%Y-%m-%dT%H:%M')
+							logger.debug("Spectre: Import even found: %s" % entry.title)
+							
+							date_object = datetime.strptime(entry.published,'%a, %d %b %Y %H:%M:%S %z')
+							date_object.strftime('%Y-%m-%dT%H:%M')
+
+							# Check if we already have the event stored
+							original = Event.objects.filter(start_time=date_object, title=entry.title).first()
+
+							#If we get the event from API it should not be removed
+							if original is not None:
+								logger.debug("Spectre: Event: %s already in database" % entry.title)
+								event_ids_to_remove.remove(original.id)
+
+							else:
+								event = Event(
+									operation_type=feed.operation_type,
+									title=entry.title,
+									host=feed.host,
+									doctrine="see details",
+									formup_system=feed.source,
+									description=entry.description,
+									start_time=date_object, 
+									end_time=date_object, 
+									fc=feed.source,
+									visibility="import",
+									user_id = feed.creator.id,
+									eve_character_id = feed.eve_character.id
+								)
+								
+								logger.debug("Spectre: Saved new event in database: %s" % entry.title)
+								
+								event.save()
+			except:
+				logged.error("Spectre: Error in fetching URL: {}").format(err)
+				feed_errors = True
+
+
+		if feed.source=="EVE University":
+			logger.debug("EVE Uni: import feed active. Pulling events from %s" % OPCALENDAR_EVE_UNI_URL)
+			
+			try:
+				url = OPCALENDAR_EVE_UNI_URL
+				c = Calendar(requests.get(url).text)
+				for entry in c.events:
+					#Filter only class events as they are the only public events in eveuni
+					
+					if "class" in entry.name.lower():
+
+						start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(tzinfo=pytz.utc)
+						end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(tzinfo=pytz.utc)
+						title = re.sub("[\(\[].*?[\)\]]", "", entry.name)
+
+						logger.debug("EVE Uni: Import even found: %s" % title)
 
 						# Check if we already have the event stored
-						original = Event.objects.filter(start_time=date_object, title=entry.title).first()
+						original = Event.objects.filter(start_time=start_date, title=title).first()
 
-						#If we get the event from API it should not be removed
+						#If we get the event from API it should not be removed	
 						if original is not None:
-							logger.debug("Spectre: Event: %s already in database" % entry.title)
+							logger.debug("EVE Uni: Event: %s already in database" % title)
 							event_ids_to_remove.remove(original.id)
 
-						else:
+						else:		
 							event = Event(
 								operation_type=feed.operation_type,
-								title=entry.title,
+								title=title,
 								host=feed.host,
 								doctrine="see details",
 								formup_system=feed.source,
 								description=entry.description,
-								start_time=date_object, 
-								end_time=date_object, 
+								start_time=start_date, 
+								end_time=end_date, 
 								fc=feed.source,
 								visibility="import",
 								user_id = feed.creator.id,
 								eve_character_id = feed.eve_character.id
 							)
-							
-							logger.debug("Spectre: Saved new event in database: %s" % entry.title)
-							
-							event.save()
 
-		if feed.source=="EVE University":
-			logger.debug("EVE Uni: import feed active. Pulling events from %s" % OPCALENDAR_EVE_UNI_URL)
-			#Get fleets from EVE UNI Ical
-			url = OPCALENDAR_EVE_UNI_URL
-			c = Calendar(requests.get(url).text)
-			for entry in c.events:
-				#Filter only class events as they are the only public events in eveuni
-				
-				if "class" in entry.name.lower():
+							logger.debug("EVE Uni: Saved new EVE UNI event in database: %s" % title)
+							event.save()
+			except:
+				logged.error("EVE Uni: Error in fetching URL: {}").format(err)
+				feed_errors = True
+
+		if feed.source=="Fun Inc.":
+			logger.debug("FUN INC: import feed active. Pulling events from %s" % OPCALENDAR_FUNINC_URL)
+			
+			try:
+				url = OPCALENDAR_FUNINC_URL
+				c = Calendar(requests.get(url).text)
+				for entry in c.events:
 
 					start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(tzinfo=pytz.utc)
 					end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(tzinfo=pytz.utc)
 					title = re.sub("[\(\[].*?[\)\]]", "", entry.name)
 
-					logger.debug("EVE Uni: Import even found: %s" % title)
+					logger.debug("FUN INC: Import even found: %s" % title)
 
 					# Check if we already have the event stored
 					original = Event.objects.filter(start_time=start_date, title=title).first()
 
 					#If we get the event from API it should not be removed	
 					if original is not None:
-						logger.debug("EVE Uni: Event: %s already in database" % title)
+						logger.debug("FUN INC: Event: %s already in database" % title)
 						event_ids_to_remove.remove(original.id)
 
 					else:		
@@ -152,52 +206,23 @@ def import_fleets():
 							eve_character_id = feed.eve_character.id
 						)
 
-						logger.debug("EVE Uni: Saved new EVE UNI event in database: %s" % title)
+						logger.debug("FUN INC: Saved new FUN INC. event in database: %s" % title)
 						event.save()
+			except:
+				logged.error("FUN INC: Error in fetching URL: {}").format(err)
+				feed_errors = True
 
-		if feed.source=="Fun Inc.":
-			logger.debug("FUN INC: import feed active. Pulling events from %s" % OPCALENDAR_FUNINC_URL)
-			#Get fleets from EVE UNI Ical
-			url = OPCALENDAR_FUNINC_URL
-			c = Calendar(requests.get(url).text)
-			for entry in c.events:
-
-				start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(tzinfo=pytz.utc)
-				end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(tzinfo=pytz.utc)
-				title = re.sub("[\(\[].*?[\)\]]", "", entry.name)
-
-				logger.debug("FUN INC: Import even found: %s" % title)
-
-				# Check if we already have the event stored
-				original = Event.objects.filter(start_time=start_date, title=title).first()
-
-				#If we get the event from API it should not be removed	
-				if original is not None:
-					logger.debug("FUN INC: Event: %s already in database" % title)
-					event_ids_to_remove.remove(original.id)
-
-				else:		
-					event = Event(
-						operation_type=feed.operation_type,
-						title=title,
-						host=feed.host,
-						doctrine="see details",
-						formup_system=feed.source,
-						description=entry.description,
-						start_time=start_date, 
-						end_time=end_date, 
-						fc=feed.source,
-						visibility="import",
-						user_id = feed.creator.id,
-						eve_character_id = feed.eve_character.id
-					)
-
-					logger.debug("FUN INC: Saved new FUN INC. event in database: %s" % title)
-					event.save()
-
-	logger.debug("Removing all events that we did not get over API")
-	# Remove all events we did not see from API					
-	Event.objects.filter(pk__in=event_ids_to_remove).delete()
+	logger.debug("Checking for NPSI fleets to be removed.")
+	
+	if feed_errors:
+		logger.error("Errors in feeds, not cleaning up operations on this run")
+	else:
+		if not event_ids_to_remove:
+			logger.debug("No NPSI fleets to be removed.")
+		else:
+			logger.debug("Removed unseen NPSI fleets")
+			# Remove all events we did not see from API					
+			Event.objects.filter(pk__in=event_ids_to_remove).delete()
 
 @shared_task(
     **{
