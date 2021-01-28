@@ -130,7 +130,8 @@ def import_fleets():
 								
 								event.save()
 			except:
-				logger.error("Spectre: Error in fetching URL: %s" % err)
+				raise
+				logger.error("Spectre: Error in fetching URL")
 				feed_errors = True
 
 		# Check for FUN Inc fleets
@@ -141,12 +142,15 @@ def import_fleets():
 				# Get FUN Inc fleets from google ical
 				url = OPCALENDAR_FUNINC_URL
 				c = Calendar(requests.get(url).text)
+
+				# Check if ical file loaded correctly with events
+				if not c:
+					feed_errors = True
+					raise Exception("Fun Inc: Error fetching calendar events, list is empty.") 
 				
 				# Parse each entry we got
 				for entry in c.events:
-					#Filter only class events as they are the only public events in eveuni
-					logger.debug("Using entry %s" % entry)
-
+					
 					# Format datetime
 					start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(tzinfo=pytz.utc)
 					end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(tzinfo=pytz.utc)
@@ -186,7 +190,8 @@ def import_fleets():
 						
 						event.save()
 			except:
-				logger.error("Fun Inc: Error in fetching URL: %s" % err)
+				raise
+				logger.error("Fun Inc: Error in fetching URL")
 				feed_errors = True
 
 		# Check for EVE Uni events
@@ -200,7 +205,6 @@ def import_fleets():
 				for entry in c.events:
 					
 					#Filter only class events as they are the only public events in eveuni
-					logger.debug("Using entry %s" % entry)
 					if "class" in entry.name.lower():
 
 						# Format datetime
@@ -241,7 +245,8 @@ def import_fleets():
 							logger.debug("EVE Uni: Saved new EVE UNI event in database: %s" % title)
 							event.save()
 			except:
-				logger.error("EVE Uni: Error in fetching URL: %s" % err)
+				raise
+				logger.error("EVE Uni: Error in fetching URL")
 				feed_errors = True
 
 	logger.debug("Checking for NPSI fleets to be removed.")
