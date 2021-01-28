@@ -101,6 +101,8 @@ def import_fleets():
 							# Check if we already have the event stored
 							original = Event.objects.filter(start_time=date_object, title=entry.title).first()
 
+							logger.debug("Spectre: Got match from database: %s" % original)
+
 							#If we get the event from API it should not be removed
 							if original is not None:
 								
@@ -161,6 +163,8 @@ def import_fleets():
 					# Check if we already have the event stored
 					original = Event.objects.filter(start_time=start_date, title=title).first()
 
+					logger.debug("Fun Inc: Got match from database: %s" % original)
+
 					#If we get the event from API it should not be removed	
 					if original is not None:
 						
@@ -217,6 +221,8 @@ def import_fleets():
 
 						# Check if we already have the event stored
 						original = Event.objects.filter(start_time=start_date, title=title).first()
+
+						logger.debug("EVE Uni: Got match from database: %s" % original)
 
 						#If we get the event from API it should not be removed	
 						if original is not None:
