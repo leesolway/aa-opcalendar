@@ -129,10 +129,10 @@ def import_fleets():
 								logger.debug("Spectre: Saved new event in database: %s" % entry.title)
 								
 								event.save()
-			except:
-				raise
-				logger.error("Spectre: Error in fetching URL")
+			except Exception as ex:
+				logger.error("Spectre: Error in fetching fleets", exc_info=True)
 				feed_errors = True
+				raise ex
 
 		# Check for FUN Inc fleets
 		if feed.source=="Fun Inc.":
@@ -189,10 +189,11 @@ def import_fleets():
 						logger.debug("Fun Inc: Saved new EVE UNI event in database: %s" % title)
 						
 						event.save()
-			except:
-				raise
-				logger.error("Fun Inc: Error in fetching URL")
+			
+			except Exception as ex:
+				logger.error("Spectre: Error in fetching fleets", exc_info=True)
 				feed_errors = True
+				raise ex
 
 		# Check for EVE Uni events
 		if feed.source=="EVE University":
@@ -244,10 +245,11 @@ def import_fleets():
 
 							logger.debug("EVE Uni: Saved new EVE UNI event in database: %s" % title)
 							event.save()
-			except:
-				raise
-				logger.error("EVE Uni: Error in fetching URL")
+			
+			except Exception as ex:
+				logger.error("Spectre: Error in fetching fleets", exc_info=True)
 				feed_errors = True
+				raise ex
 
 	logger.debug("Checking for NPSI fleets to be removed.")
 	
@@ -259,7 +261,7 @@ def import_fleets():
 		else:
 			logger.debug("Removed unseen NPSI fleets")
 			# Remove all events we did not see from API					
-			Event.objects.filter(pk__in=event_ids_to_remove).delete()
+			# Event.objects.filter(pk__in=event_ids_to_remove).delete()
 
 @shared_task(
     **{
