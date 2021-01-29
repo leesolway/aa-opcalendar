@@ -403,9 +403,10 @@ def import_fleets_without_fun_inc():
 							user_id = feed.creator.id,
 							eve_character_id = feed.eve_character.id
 						)
-
+						
 						logger.debug("Fun Inc: Saved new EVE UNI event in database: %s" % event)
 						
+						event.save()
 			
 			except Exception as ex:
 				logger.error("Spectre: Error in fetching fleets", exc_info=True)
