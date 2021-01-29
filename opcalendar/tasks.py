@@ -379,7 +379,17 @@ def import_fleets_without_fun_inc():
 
 					logger.debug("Fun Inc: Got match from database: %s" % original)
 
+					#If we get the event from API it should not be removed	
+					if original is not None:
+						
+						logger.debug("Fun Inc: Event: %s already in database" % title)
+						
+						# Remove the found fleet from the to be removed list
+						event_ids_to_remove.remove(original.id)
 
+						logger.debug("Fun Inc: Saved new EVE UNI event in database: %s" % title)
+						
+						event.save()
 			
 			except Exception as ex:
 				logger.error("Spectre: Error in fetching fleets", exc_info=True)
