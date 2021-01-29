@@ -240,7 +240,7 @@ def import_all_npsi_fleets():
                         end_date = datetime.utcfromtimestamp(
                             entry.end.timestamp
                         ).replace(tzinfo=pytz.utc)
-                        title = re.sub("[\(\[].*?[\)\]]", "", entry.name)  # noqa: W605
+                        title = re.sub(r"[\(\[].*?[\)\]]", "", entry.name)
 
                         logger.debug("EVE Uni: Import even found: %s" % title)
 
