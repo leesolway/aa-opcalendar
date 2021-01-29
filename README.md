@@ -68,11 +68,11 @@ To start importing fleets:
 
 **WARNING: Running the import function will delete all fleets labaled with the import label to get rid of possibly deleted operations.**
 
-To schedule the import runs either add the following line in your local.py file or set up a perioduc task for the `opcalendar.tasks.import_fleets` task on your admin menu to fetch fleets every hour.
+To schedule the import runs either add the following line in your local.py file or set up a perioduc task for the `opcalendar.tasks.import_all_npsi_fleets` task on your admin menu to fetch fleets every hour.
 
 ```
-CELERYBEAT_SCHEDULE['import_fleets'] = {
-    'task': 'opcalendar.tasks.import_fleets',
+CELERYBEAT_SCHEDULE['import_all_npsi_fleets'] = {
+    'task': 'opcalendar.tasks.import_all_npsi_fleets',
     'schedule': crontab(minute=0, hour='*'),
 }
 
