@@ -350,6 +350,27 @@ def import_fleets_without_fun_inc():
 				feed_errors = True
 				raise ex
 
+		# Check for FUN Inc fleets
+		if feed.source=="Fun Inc.":
+			logger.debug("Fun Inc: import feed active. Pulling events from %s" % OPCALENDAR_FUNINC_URL)
+			
+			try:
+				# Get FUN Inc fleets from google ical
+				url = OPCALENDAR_FUNINC_URL
+				c = Calendar(requests.get(url).text)
+
+				# Check if ical file loaded correctly with events
+				if not c:
+					feed_errors = True
+					raise Exception("Fun Inc: Error fetching calendar events, list is empty.") 
+				
+
+			
+			except Exception as ex:
+				logger.error("Spectre: Error in fetching fleets", exc_info=True)
+				feed_errors = True
+				raise ex
+
 		# Check for EVE Uni events
 		if feed.source=="EVE University":
 			logger.debug("EVE Uni: import feed active. Pulling events from %s" % OPCALENDAR_EVE_UNI_URL)
