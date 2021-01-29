@@ -387,6 +387,25 @@ def import_fleets_without_fun_inc():
 						# Remove the found fleet from the to be removed list
 						event_ids_to_remove.remove(original.id)
 
+					else:		
+						# Save new fleet to database
+						event = Event(
+							operation_type=feed.operation_type,
+							title=title,
+							host=feed.host,
+							doctrine="see details",
+							formup_system=feed.source,
+							description=entry.description,
+							start_time=start_date, 
+							end_time=end_date, 
+							fc=feed.source,
+							visibility="import",
+							user_id = feed.creator.id,
+							eve_character_id = feed.eve_character.id
+						)
+
+						logger.debug("Fun Inc: Saved new EVE UNI event in database: %s" % event)
+						
 			
 			except Exception as ex:
 				logger.error("Spectre: Error in fetching fleets", exc_info=True)
