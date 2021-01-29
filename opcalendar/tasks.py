@@ -364,6 +364,21 @@ def import_fleets_without_fun_inc():
 					feed_errors = True
 					raise Exception("Fun Inc: Error fetching calendar events, list is empty.") 
 				
+				# Parse each entry we got
+				for entry in c.events:
+					
+					# Format datetime
+					start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(tzinfo=pytz.utc)
+					end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(tzinfo=pytz.utc)
+					title = entry.name
+
+					logger.debug("Fun Inc: Import even found: %s" % title)
+
+					# Check if we already have the event stored
+					original = Event.objects.filter(start_time=start_date, title=title).first()
+
+					logger.debug("Fun Inc: Got match from database: %s" % original)
+
 
 			
 			except Exception as ex:
