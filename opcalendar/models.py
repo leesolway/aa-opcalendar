@@ -127,9 +127,9 @@ class EventCategory(models.Model):
 
 class EventImport(models.Model):
     """NPSI IMPORT OPTIONS"""
-    SPECTRE_FLEET = "SF"
-    EVE_UNIVERSITY = "EU"
-    FUN_INC = "FI"
+    SPECTRE_FLEET = "Spectre Fleet"
+    EVE_UNIVERSITY = "EVE University"
+    FUN_INC = "Fun Inc."
     
     IMPORT_SOURCES = [
         (SPECTRE_FLEET, _("Spectre Fleet")),
