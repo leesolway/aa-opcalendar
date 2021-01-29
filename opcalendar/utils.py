@@ -109,11 +109,15 @@ class Calendar(HTMLCalendar):
             event_start_date__year=self.year, event_start_date__month=self.month
         )
 
-        cal = '<table border="0" cellpadding="0" cellspacing="0" class="calendar">\n'
+        cal = '<table class="calendar">\n'
         cal += f"{self.formatmonthname(self.year, self.month, withyear=withyear)}\n"
         cal += f"{self.formatweekheader()}\n"
+
         for week in self.monthdays2calendar(self.year, self.month):
             cal += f"{self.formatweek(week, events, ingame_events)}\n"
+
+        cal += "</table>"
+
         return cal
 
 
