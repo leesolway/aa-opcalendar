@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0006_auto_20201104_1201'),
+        ("opcalendar", "0006_auto_20201104_1201"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventhost',
-            name='twitter',
+            model_name="eventhost",
+            name="twitter",
             field=models.CharField(blank=True, max_length=150),
         ),
     ]

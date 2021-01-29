@@ -7,21 +7,47 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0010_auto_20201105_1602'),
+        ("opcalendar", "0010_auto_20201105_1602"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='EventImport',
+            name="EventImport",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('source', models.CharField(choices=[('Spectre Fleet', 'Spectre Fleet')], max_length=32)),
-                ('host', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='opcalendar.eventhost')),
-                ('operation_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='opcalendar.eventcategory')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "source",
+                    models.CharField(
+                        choices=[("Spectre Fleet", "Spectre Fleet")], max_length=32
+                    ),
+                ),
+                (
+                    "host",
+                    models.ForeignKey(
+                        default=1,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="opcalendar.eventhost",
+                    ),
+                ),
+                (
+                    "operation_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="opcalendar.eventcategory",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Event Import',
-                'verbose_name_plural': 'Event Imports',
+                "verbose_name": "Event Import",
+                "verbose_name_plural": "Event Imports",
             },
         ),
     ]

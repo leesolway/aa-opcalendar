@@ -7,13 +7,17 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0003_eventhost'),
+        ("opcalendar", "0003_eventhost"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='event',
-            name='host',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='opcalendar.eventhost'),
+            model_name="event",
+            name="host",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="opcalendar.eventhost",
+            ),
         ),
     ]

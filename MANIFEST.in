@@ -4,4 +4,3 @@ include opcalendar/swagger.json
 recursive-include opcalendar *.py
 recursive-include opcalendar/static *
 recursive-include opcalendar/templates *
-

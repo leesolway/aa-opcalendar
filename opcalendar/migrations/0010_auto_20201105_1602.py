@@ -6,13 +6,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0009_auto_20201105_0859'),
+        ("opcalendar", "0009_auto_20201105_0859"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='event',
-            name='visibility',
-            field=models.CharField(choices=[('public', 'Public access'), ('member', 'Members only access')], db_index=True, default='public', max_length=7),
+            model_name="event",
+            name="visibility",
+            field=models.CharField(
+                choices=[
+                    ("public", "Public access"),
+                    ("member", "Members only access"),
+                ],
+                db_index=True,
+                default="public",
+                max_length=7,
+            ),
         ),
     ]

@@ -6,13 +6,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0018_auto_20210119_1701'),
+        ("opcalendar", "0018_auto_20210119_1701"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='eventimport',
-            name='source',
-            field=models.CharField(choices=[('Spectre Fleet', 'Spectre Fleet'), ('EVE University', 'EVE University'), ('Fun Inc.', 'Fun Inc.')], help_text='The API source where you want to pull events from', max_length=32),
+            model_name="eventimport",
+            name="source",
+            field=models.CharField(
+                choices=[
+                    ("Spectre Fleet", "Spectre Fleet"),
+                    ("EVE University", "EVE University"),
+                    ("Fun Inc.", "Fun Inc."),
+                ],
+                help_text="The API source where you want to pull events from",
+                max_length=32,
+            ),
         ),
     ]

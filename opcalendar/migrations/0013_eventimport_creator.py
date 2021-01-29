@@ -9,13 +9,17 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('opcalendar', '0012_auto_20210112_0934'),
+        ("opcalendar", "0012_auto_20210112_0934"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventimport',
-            name='creator',
-            field=models.ForeignKey(default='1', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="eventimport",
+            name="creator",
+            field=models.ForeignKey(
+                default="1",
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

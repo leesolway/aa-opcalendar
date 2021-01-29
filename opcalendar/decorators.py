@@ -1,7 +1,7 @@
 from functools import wraps
 
-from allianceauth.services.hooks import get_extension_logger
 from esi.errors import TokenError
+
 
 def fetch_token_for_owner(scopes):
     """returns valid token for owner.

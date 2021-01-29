@@ -37,7 +37,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 1px; 
+  margin-bottom: 1px;
   position: relative;
 }
 
@@ -112,7 +112,7 @@
 .allianceauth-opcalendar .event.past-event{
     opacity: 0.4;
 }
-  
+
 .allianceauth-opcalendar td.today {
     color: #50a5f1;
     font-weight: bold;

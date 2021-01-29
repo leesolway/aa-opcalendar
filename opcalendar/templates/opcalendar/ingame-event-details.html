@@ -12,7 +12,7 @@ Event Details
             <div class="clearfix">
                 <a class="btn btn-primary left" href="{% url 'opcalendar:calendar' %}"> Calendar </a>
             </div>
-            
+
             <div class="clearfix">
                 <div class="col-lg-12 text-center row">
                 <div class="label label-info text-left">
@@ -48,7 +48,7 @@ Event Details
                         <td>{{ event.duration }} minutes</td>
                     </tr>
                 </table>
-                <p style="padding-top:40px">{{ event.text|striptags|urlize}}</p>   
+                <p style="padding-top:40px">{{ event.text|striptags|urlize}}</p>
             </div>
         </div>
     </div>
