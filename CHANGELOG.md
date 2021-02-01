@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.4.0 - 2021-02-01
+
+### Changes
+
+- Adding code-style checks
+- Reformatted code to "black" code style so it's better readable
+- Fixed quite a number of code issues
+- Adding repo url to setup
+
 ## v1.3.0 - 2021-01-29
 
 ### Changes
