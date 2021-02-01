@@ -6,16 +6,22 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0017_auto_20210119_1626'),
+        ("opcalendar", "0017_auto_20210119_1626"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='ingameevents',
-            options={'verbose_name': 'Ingame Event', 'verbose_name_plural': 'Ingame Events'},
+            name="ingameevents",
+            options={
+                "verbose_name": "Ingame Event",
+                "verbose_name_plural": "Ingame Events",
+            },
         ),
         migrations.AlterModelOptions(
-            name='owner',
-            options={'verbose_name': 'Ingame Clanedar Owner', 'verbose_name_plural': 'Ingame Calendar Owners'},
+            name="owner",
+            options={
+                "verbose_name": "Ingame Clanedar Owner",
+                "verbose_name_plural": "Ingame Calendar Owners",
+            },
         ),
     ]

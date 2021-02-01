@@ -7,20 +7,36 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eveonline', '0012_index_additions'),
-        ('authentication', '0017_remove_fleetup_permission'),
-        ('opcalendar', '0016_auto_20210119_1545'),
+        ("eveonline", "0012_index_additions"),
+        ("authentication", "0017_remove_fleetup_permission"),
+        ("opcalendar", "0016_auto_20210119_1545"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='owner',
-            name='character',
-            field=models.ForeignKey(blank=True, default=None, help_text='Character used for syncing the calendar', null=True, on_delete=django.db.models.deletion.SET_DEFAULT, related_name='+', to='authentication.characterownership'),
+            model_name="owner",
+            name="character",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                help_text="Character used for syncing the calendar",
+                null=True,
+                on_delete=django.db.models.deletion.SET_DEFAULT,
+                related_name="+",
+                to="authentication.characterownership",
+            ),
         ),
         migrations.AlterField(
-            model_name='owner',
-            name='corporation',
-            field=models.OneToOneField(blank=True, default=None, help_text='Corporation owning the calendar', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='eveonline.evecorporationinfo'),
+            model_name="owner",
+            name="corporation",
+            field=models.OneToOneField(
+                blank=True,
+                default=None,
+                help_text="Corporation owning the calendar",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="+",
+                to="eveonline.evecorporationinfo",
+            ),
         ),
     ]

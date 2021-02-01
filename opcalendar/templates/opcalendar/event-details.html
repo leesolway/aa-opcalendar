@@ -8,7 +8,7 @@ Event Details
 
 {% block content %}
     <div class="container">
-        <div class="allianceauth-opcalendar">    
+        <div class="allianceauth-opcalendar">
             <div class="clearfix">
                 <a class="btn btn-primary left" href="{% url 'opcalendar:calendar' %}"> Calendar </a>
                 {% if perms.opcalendar.create_event %}
@@ -16,7 +16,7 @@ Event Details
                     <a class="btn btn-danger" href="{% url 'opcalendar:remove_event' event.id %}">Remove</a>
                 {% endif %}
             </div>
-            
+
             <div class="clearfix">
                 <div class="col-lg-12 text-center row">
                 <div class="label label-info text-left">
@@ -64,7 +64,7 @@ Event Details
                         <td>{{ event.fc }}</td>
                     </tr>
                 </table>
-                <p style="padding-top:40px">{{ event.description|striptags|urlize}}</p>   
+                <p style="padding-top:40px">{{ event.description|striptags|urlize}}</p>
                 <hr>
                 <h4>Host details</h4>
                 <table>
@@ -111,9 +111,9 @@ Event Details
                     <tr>
                         <td style="padding-right: 10px;"><b>Facebook:</b></td>
                         <td><span>{{ event.host.facebook|urlize }}</span></td>
-                    </tr>             
+                    </tr>
                 </table>
-                <p style="padding-top:40px">{{ event.host.details }}</p> 
+                <p style="padding-top:40px">{{ event.host.details }}</p>
             </div>
         </div>
     </div>

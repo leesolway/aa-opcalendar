@@ -6,58 +6,58 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0005_auto_20201104_1127'),
+        ("opcalendar", "0005_auto_20201104_1127"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventhost',
-            name='details',
+            model_name="eventhost",
+            name="details",
             field=models.CharField(blank=True, max_length=150),
         ),
         migrations.AddField(
-            model_name='eventhost',
-            name='discord',
+            model_name="eventhost",
+            name="discord",
             field=models.CharField(blank=True, max_length=150),
         ),
         migrations.AddField(
-            model_name='eventhost',
-            name='facebook',
+            model_name="eventhost",
+            name="facebook",
             field=models.CharField(blank=True, max_length=150),
         ),
         migrations.AddField(
-            model_name='eventhost',
-            name='fleet_comms',
+            model_name="eventhost",
+            name="fleet_comms",
             field=models.CharField(blank=True, max_length=150),
         ),
         migrations.AddField(
-            model_name='eventhost',
-            name='fleet_doctrines',
+            model_name="eventhost",
+            name="fleet_doctrines",
             field=models.CharField(blank=True, max_length=150),
         ),
         migrations.AddField(
-            model_name='eventhost',
-            name='ingame_channel',
+            model_name="eventhost",
+            name="ingame_channel",
             field=models.CharField(blank=True, max_length=150),
         ),
         migrations.AddField(
-            model_name='eventhost',
-            name='ingame_mailing_list',
+            model_name="eventhost",
+            name="ingame_mailing_list",
             field=models.CharField(blank=True, max_length=150),
         ),
         migrations.AddField(
-            model_name='eventhost',
-            name='twitch',
+            model_name="eventhost",
+            name="twitch",
             field=models.CharField(blank=True, max_length=150),
         ),
         migrations.AddField(
-            model_name='eventhost',
-            name='website',
+            model_name="eventhost",
+            name="website",
             field=models.CharField(blank=True, max_length=150),
         ),
         migrations.AddField(
-            model_name='eventhost',
-            name='youtube',
+            model_name="eventhost",
+            name="youtube",
             field=models.CharField(blank=True, max_length=150),
         ),
     ]

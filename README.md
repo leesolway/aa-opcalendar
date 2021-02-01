@@ -15,7 +15,7 @@ An operation calendar app for Alliance Auth to display fleet operations and othe
  * Importing fleets from corporation ingame calendar
 
 ![screenshot](https://i.imgur.com/bLepJGH.jpg)
- 
+
 ## Installation
  1. Install the Repo `pip install aa-opcalendar`
  2. Add `'opcalendar',` to your `INSTALLED_APPS` in your projects `local.py`
@@ -42,7 +42,7 @@ OPCALENDAR_NOTIFY_IMPORTS | Wheter to automatically send out discord notificatio
 ## Usage
 In order to use the calendar and create event you will need to create event hosts and event categories.
 
-- Go to the admin site 
+- Go to the admin site
 - **Add a Host**. The first host is most likely your own alliance/corporation. Fill in at least the community name ie. your alliance name. This name will be displayed on the calendar view on the event block. You may fill in additional information which will be displayed on the detailed view for the event.
 - **Add a category**. Next you will need to add at least one category for your events. Categories can be whatever you want to have such as STRATOP, mining, roam etc. The ticker for the event will be displayed both on the calendar view event block and on the detailed view for the event.
 - **Webhook for discord notifications (optional)**. If you want to receive notifications about your events (created/modified/deleted) on your discord you can add a webhook for the channel in discord you want to receive the notifications to. Add a webhook and connect it to the fleet signals.

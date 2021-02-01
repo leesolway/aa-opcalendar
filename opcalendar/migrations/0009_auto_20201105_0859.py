@@ -7,23 +7,27 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0008_auto_20201105_0846'),
+        ("opcalendar", "0008_auto_20201105_0846"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='event',
-            name='doctrine',
-            field=models.CharField(blank=True, default='', max_length=254),
+            model_name="event",
+            name="doctrine",
+            field=models.CharField(blank=True, default="", max_length=254),
         ),
         migrations.AlterField(
-            model_name='event',
-            name='formup_system',
-            field=models.CharField(blank=True, default='', max_length=254),
+            model_name="event",
+            name="formup_system",
+            field=models.CharField(blank=True, default="", max_length=254),
         ),
         migrations.AlterField(
-            model_name='event',
-            name='host',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='opcalendar.eventhost'),
+            model_name="event",
+            name="host",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="opcalendar.eventhost",
+            ),
         ),
     ]
