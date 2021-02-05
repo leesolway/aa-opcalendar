@@ -73,7 +73,7 @@ def import_all_npsi_fleets():
 
             try:
 
-                # Get spectre fleets from ther RSS feed
+                # Get spectre fleets from their RSS feed
                 d = feedparser.parse(OPCALENDAR_SPECTRE_URL)
 
                 # Process each fleet entry
