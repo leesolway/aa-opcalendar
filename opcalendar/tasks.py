@@ -151,7 +151,8 @@ def import_all_npsi_fleets():
             try:
                 # Get FUN Inc fleets from google ical
                 url = OPCALENDAR_FUNINC_URL
-                c = Calendar(requests.get(url).text)
+                r = requests.get(url)
+                c = Calendar(r.text)
 
                 # Check if ical file loaded correctly with events
                 if not c:

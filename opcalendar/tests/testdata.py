@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+from ics import Calendar, Event
+
 
 def _load_testdata() -> dict:
     testdata_path = Path(__file__).parent / "testdata.json"
@@ -11,7 +13,24 @@ def _load_testdata() -> dict:
 _testdata = _load_testdata()
 
 
+def generate_ical_string(key: str) -> str:
+    """generates iCalendar string from testdata and returns it"""
+    c = Calendar()
+    for row in _testdata["iCalendar"].get(key, []):
+        c.events.add(
+            Event(
+                name=row["name"],
+                begin=row["begin"],
+                end=row["end"],
+                description=row["description"],
+            )
+        )
+    return str(c)
+
+
 class FeedsStub:
+    """Generates feeds from testdata compatible with feedparser"""
+
     class FeedEntryStub:
         class AuthorDetail:
             def __init__(self, author_detail) -> None:
@@ -24,7 +43,9 @@ class FeedsStub:
             self.description = entry.get("description", "")
 
     def __init__(self, feed) -> None:
-        self.entries = [self.FeedEntryStub(row) for row in feed["entries"]]
+        self.entries = (
+            [self.FeedEntryStub(row) for row in feed["entries"]] if feed else []
+        )
 
 
 def feedparser_parse(url) -> list:
