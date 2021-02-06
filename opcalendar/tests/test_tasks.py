@@ -1,7 +1,6 @@
 import datetime as dt
 from unittest.mock import patch
 
-from django.test import TestCase
 from pytz import utc
 import requests
 import requests_mock
@@ -12,14 +11,14 @@ from allianceauth.tests.auth_utils import AuthUtils
 from ..models import Event, EventCategory, EventHost, EventImport
 from .. import tasks
 from .testdata import feedparser_parse, generate_ical_string
-
+from ..utils import NoSocketsTestCase
 
 MODULE_PATH = "opcalendar.tasks"
 
 
 @patch(MODULE_PATH + ".feedparser")
 @requests_mock.Mocker()
-class TestImportNpsiFleet(TestCase):
+class TestImportNpsiFleet(NoSocketsTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
@@ -145,7 +144,7 @@ class TestImportNpsiFleet(TestCase):
         # then
         self.assertEqual(Event.objects.count(), 0)
 
-    def test_should_raise_exception_when_spectre_fleet_has_error(
+    def test_should_report_when_spectre_fleet_has_error(
         self, mock_feedparser, requests_mocker
     ):
         # given
@@ -157,9 +156,11 @@ class TestImportNpsiFleet(TestCase):
             creator=self.user,
             eve_character=self.eve_character,
         )
-        # when/then
-        with self.assertRaises(Exception):
-            tasks.import_all_npsi_fleets()
+        # when
+        result = tasks.import_all_npsi_fleets()
+        # then
+        self.assertFalse(result)
+        self.assertEqual(Event.objects.count(), 0)
 
     ########################
     # fun inc only
@@ -287,7 +288,7 @@ class TestImportNpsiFleet(TestCase):
         # then
         self.assertEqual(Event.objects.count(), 0)
 
-    def test_should_raise_exception_when_fun_inc_calendar_is_invalid(
+    def test_should_report_when_fun_inc_calendar_is_invalid(
         self, mock_feedparser, requests_mocker
     ):
         # given
@@ -303,11 +304,13 @@ class TestImportNpsiFleet(TestCase):
             creator=self.user,
             eve_character=self.eve_character,
         )
-        # when / then
-        with self.assertRaises(Exception):
-            tasks.import_all_npsi_fleets()
+        # when
+        result = tasks.import_all_npsi_fleets()
+        # then
+        self.assertFalse(result)
+        self.assertEqual(Event.objects.count(), 0)
 
-    def test_should_raise_exception_when_fun_inc_calendar_request_has_error(
+    def test_should_report_when_fun_inc_calendar_request_has_error(
         self, mock_feedparser, requests_mocker
     ):
         # given
@@ -323,9 +326,11 @@ class TestImportNpsiFleet(TestCase):
             creator=self.user,
             eve_character=self.eve_character,
         )
-        # when / then
-        with self.assertRaises(Exception):
-            tasks.import_all_npsi_fleets()
+        # when
+        result = tasks.import_all_npsi_fleets()
+        # then
+        self.assertFalse(result)
+        self.assertEqual(Event.objects.count(), 0)
 
     ########################
     # eve uni only
@@ -453,7 +458,7 @@ class TestImportNpsiFleet(TestCase):
         # then
         self.assertEqual(Event.objects.count(), 0)
 
-    def test_should_raise_exception_when_eve_uni_request_has_error(
+    def test_should_report_when_eve_uni_request_has_error(
         self, mock_feedparser, requests_mocker
     ):
         # given
@@ -469,11 +474,13 @@ class TestImportNpsiFleet(TestCase):
             creator=self.user,
             eve_character=self.eve_character,
         )
-        # when / then
-        with self.assertRaises(Exception):
-            tasks.import_all_npsi_fleets()
+        # when
+        result = tasks.import_all_npsi_fleets()
+        # then
+        self.assertFalse(result)
+        self.assertEqual(Event.objects.count(), 0)
 
-    def test_should_raise_exception_when_eve_uni_calendar_is_invalid(
+    def test_should_report_when_eve_uni_calendar_is_invalid(
         self, mock_feedparser, requests_mocker
     ):
         # given
@@ -487,9 +494,11 @@ class TestImportNpsiFleet(TestCase):
             creator=self.user,
             eve_character=self.eve_character,
         )
-        # when / then
-        with self.assertRaises(Exception):
-            tasks.import_all_npsi_fleets()
+        # when
+        result = tasks.import_all_npsi_fleets()
+        # then
+        self.assertFalse(result)
+        self.assertEqual(Event.objects.count(), 0)
 
     ########################
     # multiple fleet types

@@ -1,5 +1,4 @@
-# calendarapp/utils.py
-
+import socket
 from datetime import datetime, date, timezone
 from calendar import HTMLCalendar
 from typing import Any
@@ -7,6 +6,7 @@ from typing import Any
 from django.contrib import messages
 from django.conf import settings
 from django.contrib.messages.constants import DEBUG, ERROR, INFO, SUCCESS, WARNING
+from django.test import TestCase
 from django.utils.html import format_html
 
 from allianceauth.services.hooks import get_extension_logger
@@ -259,3 +259,26 @@ class messages_plus:
         messages.error(
             request, cls._add_messages_icon(ERROR, message), extra_tags, fail_silently
         )
+
+
+class SocketAccessError(Exception):
+    pass
+
+
+class NoSocketsTestCase(TestCase):
+    """Variation of TestCase class that prevents any use of sockets"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.socket_original = socket.socket
+        socket.socket = cls.guard
+        return super().setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        socket.socket = cls.socket_original
+        return super().tearDownClass()
+
+    @staticmethod
+    def guard(*args, **kwargs):
+        raise SocketAccessError("Attempted to access network")

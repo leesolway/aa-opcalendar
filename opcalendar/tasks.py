@@ -46,7 +46,7 @@ TASK_ESI_KWARGS = {
 
 
 @shared_task
-def import_all_npsi_fleets():
+def import_all_npsi_fleets() -> bool:
     """Imports all NPSI fleets from their respective APIs"""
 
     # Get all current imported fleets in database
@@ -78,6 +78,8 @@ def import_all_npsi_fleets():
 
     if feed_errors:
         logger.error("Errors in feeds, not cleaning up operations on this run")
+        return False
+
     else:
         if not event_ids_to_remove:
             logger.debug("No NPSI fleets to be removed.")
@@ -85,6 +87,7 @@ def import_all_npsi_fleets():
             logger.debug("Removed unseen NPSI fleets")
             # Remove all events we did not see from API
             Event.objects.filter(pk__in=event_ids_to_remove).delete()
+        return True
 
 
 def _import_spectre_fleet(feed, event_ids_to_remove):
@@ -158,10 +161,9 @@ def _import_spectre_fleet(feed, event_ids_to_remove):
                             entry.title,
                         )
 
-    except Exception as ex:
+    except Exception:
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
-        # return True
-        raise ex
+        return True
 
     return False
 
@@ -226,10 +228,9 @@ def _import_fun_inc(feed, event_ids_to_remove):
 
                 event.save()
 
-    except Exception as ex:
+    except Exception:
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
-        # return True
-        raise ex
+        return True
 
     return False
 
@@ -300,10 +301,9 @@ def _import_eve_uni(feed, event_ids_to_remove):
                     )
                     event.save()
 
-    except Exception as ex:
+    except Exception:
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
-        # return True
-        raise ex
+        return True
 
     return False
 
