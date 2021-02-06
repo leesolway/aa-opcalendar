@@ -1,9 +1,11 @@
 import datetime as dt
 from unittest.mock import patch
+
 from django.test import TestCase
 from pytz import utc
 import requests
 import requests_mock
+
 
 from allianceauth.tests.auth_utils import AuthUtils
 
@@ -61,6 +63,22 @@ class TestImportNpsiFleet(TestCase):
         self.assertEqual(obj.visibility, Event.VISIBILITY_EXTERNAL)
         self.assertEqual(obj.user, self.user)
         self.assertEqual(obj.eve_character, self.eve_character)
+
+    def test_should_add_new_spectre_fleet_event_no_character(
+        self, mock_feedparser, requests_mocker
+    ):
+        # given
+        mock_feedparser.parse = feedparser_parse
+        EventImport.objects.create(
+            source=EventImport.SPECTRE_FLEET,
+            host=self.host,
+            operation_type=self.category,
+            creator=self.user,
+        )
+        # when
+        tasks.import_all_npsi_fleets()
+        # then
+        self.assertTrue(Event.objects.filter(title="Spectre Fleet 1").exists())
 
     def test_should_replace_existing_spectre_fleet_event(
         self, mock_feedparser, requests_mocker
@@ -127,6 +145,22 @@ class TestImportNpsiFleet(TestCase):
         # then
         self.assertEqual(Event.objects.count(), 0)
 
+    def test_should_raise_exception_when_spectre_fleet_has_error(
+        self, mock_feedparser, requests_mocker
+    ):
+        # given
+        mock_feedparser.parse.side_effect = RuntimeError
+        EventImport.objects.create(
+            source=EventImport.SPECTRE_FLEET,
+            host=self.host,
+            operation_type=self.category,
+            creator=self.user,
+            eve_character=self.eve_character,
+        )
+        # when/then
+        with self.assertRaises(Exception):
+            tasks.import_all_npsi_fleets()
+
     ########################
     # fun inc only
 
@@ -161,6 +195,26 @@ class TestImportNpsiFleet(TestCase):
         self.assertEqual(obj.visibility, Event.VISIBILITY_EXTERNAL)
         self.assertEqual(obj.user, self.user)
         self.assertEqual(obj.eve_character, self.eve_character)
+
+    def test_should_add_new_fun_inc_event_no_character(
+        self, mock_feedparser, requests_mocker
+    ):
+        # given
+        requests_mocker.register_uri(
+            "GET",
+            url="https://calendar.google.com/calendar/ical/og3uh76l8ul3dfgbie03fbbgs8%40group.calendar.google.com/private-f466889b44741fd7249e99e21ac171ff/basic.ics",
+            text=generate_ical_string("fun_inc"),
+        )
+        EventImport.objects.create(
+            source=EventImport.FUN_INC,
+            host=self.host,
+            operation_type=self.category,
+            creator=self.user,
+        )
+        # when
+        tasks.import_all_npsi_fleets()
+        # then
+        self.assertTrue(Event.objects.filter(title="Fun Fleet 1").exists())
 
     def test_should_replace_existing_fun_inc_event(
         self, mock_feedparser, requests_mocker
@@ -233,7 +287,27 @@ class TestImportNpsiFleet(TestCase):
         # then
         self.assertEqual(Event.objects.count(), 0)
 
-    def test_should_raise_exception_when_fun_inc_has_error(
+    def test_should_raise_exception_when_fun_inc_calendar_is_invalid(
+        self, mock_feedparser, requests_mocker
+    ):
+        # given
+        requests_mocker.register_uri(
+            "GET",
+            url="https://calendar.google.com/calendar/ical/og3uh76l8ul3dfgbie03fbbgs8%40group.calendar.google.com/private-f466889b44741fd7249e99e21ac171ff/basic.ics",
+            text="",
+        )
+        EventImport.objects.create(
+            source=EventImport.FUN_INC,
+            host=self.host,
+            operation_type=self.category,
+            creator=self.user,
+            eve_character=self.eve_character,
+        )
+        # when / then
+        with self.assertRaises(Exception):
+            tasks.import_all_npsi_fleets()
+
+    def test_should_raise_exception_when_fun_inc_calendar_request_has_error(
         self, mock_feedparser, requests_mocker
     ):
         # given
@@ -287,6 +361,26 @@ class TestImportNpsiFleet(TestCase):
         self.assertEqual(obj.visibility, Event.VISIBILITY_EXTERNAL)
         self.assertEqual(obj.user, self.user)
         self.assertEqual(obj.eve_character, self.eve_character)
+
+    def test_should_add_new_eve_uni_event_no_character(
+        self, mock_feedparser, requests_mocker
+    ):
+        # given
+        requests_mocker.register_uri(
+            "GET",
+            url="https://portal.eveuniversity.org/api/getcalendar",
+            text=generate_ical_string("eve_uni"),
+        )
+        EventImport.objects.create(
+            source=EventImport.EVE_UNIVERSITY,
+            host=self.host,
+            operation_type=self.category,
+            creator=self.user,
+        )
+        # when
+        tasks.import_all_npsi_fleets()
+        # then
+        self.assertTrue(Event.objects.filter(title="Eve Uni class 1").exists())
 
     def test_should_replace_existing_eve_uni_event(
         self, mock_feedparser, requests_mocker
@@ -359,7 +453,7 @@ class TestImportNpsiFleet(TestCase):
         # then
         self.assertEqual(Event.objects.count(), 0)
 
-    def test_should_raise_exception_when_eve_uni_has_error(
+    def test_should_raise_exception_when_eve_uni_request_has_error(
         self, mock_feedparser, requests_mocker
     ):
         # given
@@ -378,3 +472,66 @@ class TestImportNpsiFleet(TestCase):
         # when / then
         with self.assertRaises(Exception):
             tasks.import_all_npsi_fleets()
+
+    def test_should_raise_exception_when_eve_uni_calendar_is_invalid(
+        self, mock_feedparser, requests_mocker
+    ):
+        # given
+        requests_mocker.register_uri(
+            "GET", url="https://portal.eveuniversity.org/api/getcalendar", text=""
+        )
+        EventImport.objects.create(
+            source=EventImport.EVE_UNIVERSITY,
+            host=self.host,
+            operation_type=self.category,
+            creator=self.user,
+            eve_character=self.eve_character,
+        )
+        # when / then
+        with self.assertRaises(Exception):
+            tasks.import_all_npsi_fleets()
+
+    ########################
+    # multiple fleet types
+
+    def test_should_add_fleet_events_all_types(self, mock_feedparser, requests_mocker):
+        # given
+        mock_feedparser.parse = feedparser_parse
+        EventImport.objects.create(
+            source=EventImport.SPECTRE_FLEET,
+            host=self.host,
+            operation_type=self.category,
+            creator=self.user,
+            eve_character=self.eve_character,
+        )
+        requests_mocker.register_uri(
+            "GET",
+            url="https://calendar.google.com/calendar/ical/og3uh76l8ul3dfgbie03fbbgs8%40group.calendar.google.com/private-f466889b44741fd7249e99e21ac171ff/basic.ics",
+            text=generate_ical_string("fun_inc"),
+        )
+        EventImport.objects.create(
+            source=EventImport.FUN_INC,
+            host=self.host,
+            operation_type=self.category,
+            creator=self.user,
+            eve_character=self.eve_character,
+        )
+        requests_mocker.register_uri(
+            "GET",
+            url="https://portal.eveuniversity.org/api/getcalendar",
+            text=generate_ical_string("eve_uni"),
+        )
+        EventImport.objects.create(
+            source=EventImport.EVE_UNIVERSITY,
+            host=self.host,
+            operation_type=self.category,
+            creator=self.user,
+            eve_character=self.eve_character,
+        )
+        # when
+        tasks.import_all_npsi_fleets()
+        # then
+        self.assertEqual(Event.objects.count(), 3)
+        self.assertTrue(Event.objects.filter(title="Spectre Fleet 1").exists())
+        self.assertTrue(Event.objects.filter(title="Fun Fleet 1").exists())
+        self.assertTrue(Event.objects.filter(title="Eve Uni class 1").exists())
