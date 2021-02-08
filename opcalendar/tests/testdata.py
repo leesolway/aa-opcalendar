@@ -2,6 +2,11 @@ import json
 from pathlib import Path
 
 from ics import Calendar, Event
+from bravado.exception import HTTPNotFound
+
+from django.utils.dateparse import parse_datetime
+
+from ..utils import BravadoOperationStub, BravadoResponseStub
 
 
 def _load_testdata() -> dict:
@@ -50,3 +55,41 @@ class FeedsStub:
 
 def feedparser_parse(url) -> list:
     return FeedsStub(_testdata["feeds"].get(url))
+
+
+def esi_get_characters_character_id_calendar(character_id, token):
+    try:
+        data = _testdata["esi"]["get_characters_character_id_calendar"][
+            str(character_id)
+        ]
+        return BravadoOperationStub([_convert_rows(obj) for obj in data])
+    except KeyError:
+        raise HTTPNotFound(
+            BravadoResponseStub(
+                status_code=404, text=f"no data for character_id {character_id}"
+            )
+        )
+
+
+def esi_get_characters_character_id_calendar_event_id(character_id, event_id, token):
+    try:
+        obj = _testdata["esi"]["get_characters_character_id_calendar_event_id"][
+            str(character_id)
+        ][str(event_id)]
+        return BravadoOperationStub(_convert_rows(obj))
+    except KeyError:
+        raise HTTPNotFound(
+            BravadoResponseStub(
+                status_code=404,
+                text=(f"no data for character_id {character_id}, event_id {event_id}"),
+            )
+        )
+
+
+def _convert_rows(dct) -> dict:
+    for key, value in dct.items():
+        if isinstance(value, str):
+            my_dt = parse_datetime(value)
+            if my_dt:
+                dct[key] = my_dt
+    return dct

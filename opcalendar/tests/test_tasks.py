@@ -79,7 +79,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
         # then
         self.assertTrue(Event.objects.filter(title="Spectre Fleet 1").exists())
 
-    def test_should_replace_existing_spectre_fleet_event(
+    def test_should_not_replace_existing_spectre_fleet_event(
         self, mock_feedparser, requests_mocker
     ):
         # given
@@ -217,7 +217,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
         # then
         self.assertTrue(Event.objects.filter(title="Fun Fleet 1").exists())
 
-    def test_should_replace_existing_fun_inc_event(
+    def test_should_not_replace_existing_fun_inc_event(
         self, mock_feedparser, requests_mocker
     ):
         # given
@@ -387,7 +387,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
         # then
         self.assertTrue(Event.objects.filter(title="Eve Uni class 1").exists())
 
-    def test_should_replace_existing_eve_uni_event(
+    def test_should_not_replace_existing_eve_uni_event(
         self, mock_feedparser, requests_mocker
     ):
         # given

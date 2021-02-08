@@ -169,5 +169,34 @@
                 "description": "Testing Eve Uni fleet 2"
             }
         ]
+    },
+    "esi": {
+        "get_characters_character_id_calendar": {
+            "1001": [
+                {
+                    "event_date": "2016-06-26T21:00:00Z",
+                    "event_id": 1386435,
+                    "event_response": "accepted",
+                    "importance": 1,
+                    "title": "o7 The EVE Online Show"
+                }
+            ]
+        },
+        "get_characters_character_id_calendar_event_id": {
+            "1001": {
+                "1386435": {
+                    "date": "2016-06-26T21:00:00Z",
+                    "duration": 60,
+                    "event_id": 1386435,
+                    "importance": 1,
+                    "owner_id": 1,
+                    "owner_name": "EVE System",
+                    "owner_type": "eve_server",
+                    "response": "Undecided",
+                    "text": "The EVE Online Show features latest developer news",
+                    "title": "o7 The EVE Online Show"
+                }
+            }
+        }
     }
 }
