@@ -311,7 +311,8 @@ class Owner(models.Model):
         verbose_name = "Ingame Clanedar Owner"
         verbose_name_plural = "Ingame Calendar Owners"
 
-    def update_events_esi(self):
+    @fetch_token_for_owner(["esi-calendar.read_calendar_events.v1"])
+    def update_events_esi(self, token):
         if self.is_active:
 
             # Get all current imported fleets in database
@@ -325,12 +326,6 @@ class Owner(models.Model):
             )
 
             events = self._fetch_events()
-            token = self.token(
-                [
-                    "esi-calendar.read_calendar_events.v1",
-                ]
-            )[0]
-
             for event in events:
 
                 character_id = self.character.character.character_id
@@ -392,11 +387,10 @@ class Owner(models.Model):
         """returns a valid Token for the owner"""
         token = None
         error = None
-        add_prefix = ""
 
         # abort if character is not configured
         if self.character is None:
-            logger.error(add_prefix("No character configured to sync"))
+            logger.error("%s: No character configured to sync", self)
             error = self.ERROR_NO_CHARACTER
 
         # abort if character does not have sufficient permissions
@@ -404,18 +398,16 @@ class Owner(models.Model):
             "opcalendar.add_ingame_calendar_owner"
         ):
             logger.error(
-                add_prefix(
-                    "This character does not have sufficient permission to sync corporation calendars"
-                )
+                "%s: This character does not have sufficient permission to sync corporation calendars",
+                self,
             )
             error = self.ERROR_INSUFFICIENT_PERMISSIONS
 
         # abort if character does not have sufficient permissions
         elif not self.character.user.has_perm("opcalendar.add_ingame_calendar_owner"):
             logger.error(
-                add_prefix(
-                    "This character does not have sufficient permission to sync personal calendars"
-                )
+                "%s: This character does not have sufficient permission to sync personal calendars",
+                self,
             )
             error = self.ERROR_INSUFFICIENT_PERMISSIONS
 
@@ -432,14 +424,14 @@ class Owner(models.Model):
                     .first()
                 )
             except TokenInvalidError:
-                logger.error(add_prefix("Invalid token for fetching calendars"))
+                logger.error("%s: Invalid token for fetching calendars", self)
                 error = self.ERROR_TOKEN_INVALID
             except TokenExpiredError:
-                logger.error(add_prefix("Token expired for fetching calendars"))
+                logger.error("%s: Token expired for fetching calendars", self)
                 error = self.ERROR_TOKEN_EXPIRED
             else:
                 if not token:
-                    logger.error(add_prefix("No token found with sufficient scopes"))
+                    logger.error("%s: No token found with sufficient scopes", self)
                     error = self.ERROR_TOKEN_INVALID
 
         return token, error
