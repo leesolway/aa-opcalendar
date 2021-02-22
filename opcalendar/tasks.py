@@ -285,7 +285,7 @@ def _import_eve_uni(feed, event_ids_to_remove):
                         host=feed.host,
                         doctrine="see details",
                         formup_system=feed.source,
-                        description=entry.description,
+                        description=entry.description.replace("<br>","\n"),
                         start_time=start_date,
                         end_time=end_date,
                         fc=feed.source,

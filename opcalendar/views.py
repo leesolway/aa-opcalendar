@@ -152,6 +152,7 @@ def create_event(request):
         character = request.user.profile.main_character
         operation_type = form.cleaned_data["operation_type"]
         title = form.cleaned_data["title"]
+        host = form.cleaned_data["host"]
         doctrine = form.cleaned_data["doctrine"]
         formup_system = form.cleaned_data["formup_system"]
         description = form.cleaned_data["description"]
@@ -163,6 +164,7 @@ def create_event(request):
             user=request.user,
             operation_type=operation_type,
             title=title,
+            host=host,
             doctrine=doctrine,
             formup_system=formup_system,
             description=description,
@@ -211,6 +213,7 @@ class EventEdit(generic.UpdateView):
     fields = [
         "operation_type",
         "title",
+        "host",
         "doctrine",
         "formup_system",
         "description",
