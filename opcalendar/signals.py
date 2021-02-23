@@ -32,11 +32,13 @@ def fleet_saved(sender, instance, created, **kwargs):
     # Ingame Calendar Event
     if sender == IngameEvents:
         try:
-            logger.debug("New signal created for New Ingame Calendar Event: %s" % instance.title)
+            logger.debug(
+                "New signal created for New Ingame Calendar Event: %s" % instance.title
+            )
 
             url = get_site_url() + "/opcalendar/ingame/event/{}/details/".format(
-                    instance.pk
-                )
+                instance.pk
+            )
 
             message = "New ingame calendar event: %s" % instance.title
 
@@ -61,9 +63,9 @@ def fleet_saved(sender, instance, created, **kwargs):
 
             # Setup portrait URL based on owner type
             if instance.owner_type == "alliance":
-                
+
                 portrait = "https://images.evetech.net/alliances/%s/logo" % entity_id
-                
+
                 ticker = "[{}]".format(
                     esi.client.Alliance.get_alliances_alliance_id(
                         alliance_id=entity_id
@@ -71,9 +73,9 @@ def fleet_saved(sender, instance, created, **kwargs):
                 )
 
             if instance.owner_type == "corporation":
-                
+
                 portrait = "https://images.evetech.net/corporations/%s/logo" % entity_id
-                
+
                 ticker = "[{}]".format(
                     esi.client.Corporation.get_corporations_corporation_id(
                         corporation_id=entity_id
@@ -81,9 +83,11 @@ def fleet_saved(sender, instance, created, **kwargs):
                 )
 
             if instance.owner_type == "character":
-                
-                portrait = "https://images.evetech.net/characters/%s/portrait" % entity_id
-                
+
+                portrait = (
+                    "https://images.evetech.net/characters/%s/portrait" % entity_id
+                )
+
                 ticker = ""
 
             logger.debug("Portrait url is %s" % portrait)
@@ -104,7 +108,9 @@ def fleet_saved(sender, instance, created, **kwargs):
                 "color": col,
                 "fields": [
                     {"name": "Owner", "value": fc, "inline": True},
-                    {"name": "Eve Time","value": eve_time.strftime("%Y-%m-%d %H:%M:%S"),
+                    {
+                        "name": "Eve Time",
+                        "value": eve_time.strftime("%Y-%m-%d %H:%M:%S"),
                     },
                 ],
                 "footer": {
@@ -126,9 +132,8 @@ def fleet_saved(sender, instance, created, **kwargs):
             logger.error(e)
             pass  # shits fucked... Don't worry about it...
 
-
     # For Normal Events
-    if sender == Event:  
+    if sender == Event:
         # For normal events only
         if "import" not in instance.visibility:
             try:
@@ -168,9 +173,16 @@ def fleet_saved(sender, instance, created, **kwargs):
                     "color": col,
                     "fields": [
                         {"name": "FC", "value": fc, "inline": True},
-                        {"name": "Type", "value": instance.operation_type.name, "inline": True},
+                        {
+                            "name": "Type",
+                            "value": instance.operation_type.name,
+                            "inline": True,
+                        },
                         {"name": "Formup", "value": formup_system, "inline": True},
-                        {"name": "Eve Time","value": eve_time.strftime("%Y-%m-%d %H:%M:%S"), "inline": False,
+                        {
+                            "name": "Eve Time",
+                            "value": eve_time.strftime("%Y-%m-%d %H:%M:%S"),
+                            "inline": False,
                         },
                     ],
                     "footer": {
@@ -231,7 +243,15 @@ def fleet_saved(sender, instance, created, **kwargs):
                     "color": col,
                     "fields": [
                         {"name": "Community", "value": fc, "inline": True},
-                        {"name": "Eve Time","value": eve_time.strftime("%Y-%m-%d %H:%M:%S"), "inline": True,
+                        {
+                            "name": "Type",
+                            "value": instance.operation_type.name,
+                            "inline": True,
+                        },
+                        {
+                            "name": "Eve Time",
+                            "value": eve_time.strftime("%Y-%m-%d %H:%M:%S"),
+                            "inline": False,
                         },
                     ],
                     "footer": {
@@ -261,11 +281,14 @@ def fleet_deleted(sender, instance, **kwargs):
     # Ingame Calendar Event
     if sender == IngameEvents:
         try:
-            logger.debug("New signal created for Deleted Ingame Calendar Event: %s" % instance.title)
+            logger.debug(
+                "New signal created for Deleted Ingame Calendar Event: %s"
+                % instance.title
+            )
 
             url = get_site_url() + "/opcalendar/ingame/event/{}/details/".format(
-                    instance.pk
-                )
+                instance.pk
+            )
 
             message = "Ingame calendar event deleted: %s" % instance.title
 
@@ -292,9 +315,9 @@ def fleet_deleted(sender, instance, **kwargs):
 
             # Setup portrait URL based on owner type
             if instance.owner_type == "alliance":
-                
+
                 portrait = "https://images.evetech.net/alliances/%s/logo" % entity_id
-                
+
                 ticker = "[{}]".format(
                     esi.client.Alliance.get_alliances_alliance_id(
                         alliance_id=entity_id
@@ -302,9 +325,9 @@ def fleet_deleted(sender, instance, **kwargs):
                 )
 
             if instance.owner_type == "corporation":
-                
+
                 portrait = "https://images.evetech.net/corporations/%s/logo" % entity_id
-                
+
                 ticker = "[{}]".format(
                     esi.client.Corporation.get_corporations_corporation_id(
                         corporation_id=entity_id
@@ -312,9 +335,11 @@ def fleet_deleted(sender, instance, **kwargs):
                 )
 
             if instance.owner_type == "character":
-                
-                portrait = "https://images.evetech.net/characters/%s/portrait" % entity_id
-                
+
+                portrait = (
+                    "https://images.evetech.net/characters/%s/portrait" % entity_id
+                )
+
                 ticker = ""
 
             logger.debug("Portrait url is %s" % portrait)
@@ -328,7 +353,9 @@ def fleet_deleted(sender, instance, **kwargs):
                 "color": col,
                 "fields": [
                     {"name": "Owner", "value": fc, "inline": True},
-                    {"name": "Eve Time","value": eve_time.strftime("%Y-%m-%d %H:%M:%S"),
+                    {
+                        "name": "Eve Time",
+                        "value": eve_time.strftime("%Y-%m-%d %H:%M:%S"),
                     },
                 ],
                 "footer": {
@@ -350,9 +377,8 @@ def fleet_deleted(sender, instance, **kwargs):
             logger.error(e)
             pass  # shits fucked... Don't worry about it...
 
-
     # For Normal Events
-    if sender == Event:  
+    if sender == Event:
         # For normal events only
         if "import" not in instance.visibility:
             try:
@@ -387,8 +413,16 @@ def fleet_deleted(sender, instance, **kwargs):
                     "color": col,
                     "fields": [
                         {"name": "FC", "value": fc, "inline": True},
+                        {
+                            "name": "Type",
+                            "value": instance.operation_type.name,
+                            "inline": True,
+                        },
                         {"name": "Formup", "value": formup_system, "inline": True},
-                        {"name": "Eve Time","value": eve_time.strftime("%Y-%m-%d %H:%M:%S"), "inline": True,
+                        {
+                            "name": "Eve Time",
+                            "value": eve_time.strftime("%Y-%m-%d %H:%M:%S"),
+                            "inline": False,
                         },
                     ],
                     "footer": {
@@ -444,7 +478,10 @@ def fleet_deleted(sender, instance, **kwargs):
                     "color": col,
                     "fields": [
                         {"name": "Community", "value": fc, "inline": True},
-                        {"name": "Eve Time","value": eve_time.strftime("%Y-%m-%d %H:%M:%S"), "inline": True,
+                        {
+                            "name": "Eve Time",
+                            "value": eve_time.strftime("%Y-%m-%d %H:%M:%S"),
+                            "inline": True,
                         },
                     ],
                     "footer": {

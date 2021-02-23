@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0020_auto_20210125_1007'),
+        ("opcalendar", "0020_auto_20210125_1007"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventhost',
-            name='logo_url',
+            model_name="eventhost",
+            name="logo_url",
             field=models.CharField(blank=True, max_length=150),
         ),
     ]

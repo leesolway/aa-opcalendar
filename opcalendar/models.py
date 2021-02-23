@@ -83,68 +83,35 @@ class EventHost(models.Model):
     """Fleet Timer Create/Delete pings"""
 
     community = models.CharField(
-        max_length=150,
-        null=False,
-        help_text="Name of the community"
+        max_length=150, null=False, help_text="Name of the community"
     )
     logo_url = models.CharField(
-        max_length=256,
-        blank=True,
-        help_text="Absolute URL for the community logo"
+        max_length=256, blank=True, help_text="Absolute URL for the community logo"
     )
     ingame_channel = models.CharField(
-        max_length=150,
-        blank=True,
-        help_text="Ingame channel name"
+        max_length=150, blank=True, help_text="Ingame channel name"
     )
     ingame_mailing_list = models.CharField(
-        max_length=150,
-        blank=True,
-        help_text="Ingame mailing list name"
+        max_length=150, blank=True, help_text="Ingame mailing list name"
     )
     fleet_comms = models.CharField(
         max_length=150,
         blank=True,
-        help_text="Link or description for primary comms such as discord link"
+        help_text="Link or description for primary comms such as discord link",
     )
     fleet_doctrines = models.CharField(
-        max_length=150,
-        blank=True,
-        help_text="Link or description to the doctrines"
+        max_length=150, blank=True, help_text="Link or description to the doctrines"
     )
-    website = models.CharField(
-        max_length=150,
-        blank=True
-    )
-    discord = models.CharField(
-        max_length=150,
-        blank=True,
-        help_text="Discord link URL"
-    )
-    twitch = models.CharField(
-        max_length=150,
-        blank=True,
-        help_text="Twitch link URL"
-    )
-    twitter = models.CharField(
-        max_length=150,
-        blank=True,
-        help_text="Twitter link URL"
-    )
-    youtube = models.CharField(
-        max_length=150,
-        blank=True,
-        help_text="Youtube link URL"
-    )
+    website = models.CharField(max_length=150, blank=True)
+    discord = models.CharField(max_length=150, blank=True, help_text="Discord link URL")
+    twitch = models.CharField(max_length=150, blank=True, help_text="Twitch link URL")
+    twitter = models.CharField(max_length=150, blank=True, help_text="Twitter link URL")
+    youtube = models.CharField(max_length=150, blank=True, help_text="Youtube link URL")
     facebook = models.CharField(
-        max_length=150,
-        blank=True,
-        help_text="Facebook link URL"
+        max_length=150, blank=True, help_text="Facebook link URL"
     )
     details = models.CharField(
-        max_length=150,
-        blank=True,
-        help_text="Short description about the host."
+        max_length=150, blank=True, help_text="Short description about the host."
     )
 
     def __str__(self):

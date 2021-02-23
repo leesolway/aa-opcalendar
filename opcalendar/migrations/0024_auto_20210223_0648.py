@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0023_auto_20210222_1257'),
+        ("opcalendar", "0023_auto_20210222_1257"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='eventhost',
-            name='ingame_mailing_list',
-            field=models.CharField(blank=True, help_text='Ingame mailing list name', max_length=150),
+            model_name="eventhost",
+            name="ingame_mailing_list",
+            field=models.CharField(
+                blank=True, help_text="Ingame mailing list name", max_length=150
+            ),
         ),
     ]
