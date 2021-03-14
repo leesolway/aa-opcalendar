@@ -152,6 +152,7 @@ def _import_spectre_fleet(feed, event_ids_to_remove):
                             fc=feed.source,
                             external=True,
                             user=feed.creator,
+                            event_visibility=feed.event_visibility,
                             eve_character=feed.eve_character,
                         )
 
@@ -221,6 +222,7 @@ def _import_fun_inc(feed, event_ids_to_remove):
                     fc=feed.source,
                     external=True,
                     user=feed.creator,
+                    event_visibility=feed.event_visibility,
                     eve_character=feed.eve_character,
                 )
 
@@ -291,6 +293,7 @@ def _import_eve_uni(feed, event_ids_to_remove):
                         fc=feed.source,
                         external=True,
                         user=feed.creator,
+                        event_visibility=feed.event_visibility,
                         eve_character=feed.eve_character,
                     )
 

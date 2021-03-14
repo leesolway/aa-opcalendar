@@ -96,6 +96,7 @@ class EventVisibility(models.Model):
         WebHook,
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         help_text=_("Webhook to send over notifications about these fleet types"),
     )
     ignore_past_fleets = models.BooleanField(
@@ -242,6 +243,12 @@ class EventImport(models.Model):
         null=True,
         on_delete=models.SET_NULL,
         help_text="Event creator main character",
+    )
+    event_visibility = models.ForeignKey(
+        EventVisibility,
+        on_delete=models.CASCADE,
+        null=True,
+        help_text=_("Visibility filter that dictates who is able to see this event"),
     )
 
     def __str__(self):
