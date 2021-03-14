@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import Group
 
 from esi.errors import TokenExpiredError, TokenInvalidError
 from esi.models import Token
@@ -16,6 +17,7 @@ from esi.models import Token
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
 from allianceauth.services.hooks import get_extension_logger
+from allianceauth.authentication.models import State
 
 from .providers import esi
 from .decorators import fetch_token_for_owner
@@ -46,9 +48,15 @@ class General(models.Model):
 class WebHook(models.Model):
     """Discord Webhook for pings"""
 
-    name = models.CharField(max_length=150)
-    webhook_url = models.CharField(max_length=500)
-    enabled = models.BooleanField()
+    name = models.CharField(
+        max_length=150,
+        help_text=_("Name for this webhook"),
+    )
+    webhook_url = models.CharField(
+        max_length=500,
+        help_text=_("Webhook URL"),
+    )
+    enabled = models.BooleanField(default=True, help_text=_("Is the webhook enabled?"))
 
     def send_embed(self, embed):
         custom_headers = {"Content-Type": "application/json"}
@@ -64,19 +72,47 @@ class WebHook(models.Model):
         return "{}".format(self.name)
 
 
-class EventSignal(models.Model):
-    """Fleet Timer Create/Delete pings"""
+class EventVisibility(models.Model):
+    name = models.CharField(
+        max_length=150, null=False, help_text="Name for the visibility filter"
+    )
+    restricted_to_group = models.ManyToManyField(
+        Group,
+        blank=True,
+        related_name="eventvisibility_require_groups",
+        help_text=_(
+            "The group(s) that will be able to see this event visibility type ..."
+        ),
+    )
+    restricted_to_state = models.ManyToManyField(
+        State,
+        blank=True,
+        related_name="eventvisibility_require_states",
+        help_text=_(
+            "The state(s) that will be able to see this event visibility type ..."
+        ),
+    )
+    webhook = models.ForeignKey(
+        WebHook,
+        on_delete=models.CASCADE,
+        null=True,
+        help_text=_("Webhook to send over notifications about these fleet types"),
+    )
+    ignore_past_fleets = models.BooleanField(
+        default=True,
+        help_text=_("Should we ignore fleet signals that are in the past"),
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text=("Whether this visibility filter is active"),
+    )
 
-    webhook = models.ForeignKey(WebHook, on_delete=models.CASCADE)
-
-    ignore_past_fleets = models.BooleanField(default=True)
-
-    def __str__(self):
-        return 'Send Fleets to "{}"'.format(self.webhook.name)
+    def __str__(self) -> str:
+        return str(self.name)
 
     class Meta:
-        verbose_name = "Fleet Signal"
-        verbose_name_plural = "Fleet Signals"
+        verbose_name = "Event Visibility"
+        verbose_name_plural = "Event Visibilities"
 
 
 class EventHost(models.Model):
@@ -113,6 +149,12 @@ class EventHost(models.Model):
     details = models.CharField(
         max_length=150, blank=True, help_text="Short description about the host."
     )
+    external = models.BooleanField(
+        default=False,
+        help_text=_(
+            "External hosts are for NPSI API imports. Checking this box will hide the host in the manual event form."
+        ),
+    )
 
     def __str__(self):
         return str(self.community)
@@ -141,8 +183,14 @@ class EventCategory(models.Model):
         (COLOR_YELLOW, _("Yellow")),
         (COLOR_PURPLE, _("Purple")),
     )
-    name = models.CharField(max_length=150)
-    ticker = models.CharField(max_length=10)
+    name = models.CharField(
+        max_length=150,
+        help_text=_("Name for the category"),
+    )
+    ticker = models.CharField(
+        max_length=10,
+        help_text=_("Ticker for the category"),
+    )
     color = models.CharField(max_length=6, choices=COLOR_CHOICES, default="green")
 
     class Meta:
@@ -205,36 +253,75 @@ class EventImport(models.Model):
 
 
 class Event(models.Model):
-    # visibility
-    VISIBILITY_PUBLIC = "public"
-    VISIBILITY_MEMBER = "member"
-    VISIBILITY_EXTERNAL = "import"
-
-    VISIBILITY_CHOICES = [
-        (VISIBILITY_PUBLIC, _("Public access")),
-        (VISIBILITY_MEMBER, _("Members only access")),
-    ]
-
-    operation_type = models.ForeignKey(EventCategory, on_delete=models.CASCADE)
-    title = models.CharField(max_length=200, unique=False)
-    host = models.ForeignKey(EventHost, on_delete=models.CASCADE, default=1)
-    doctrine = models.CharField(max_length=254, default="", blank=True)
-    formup_system = models.CharField(max_length=254, default="", blank=True)
-    description = models.TextField()
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
-    fc = models.CharField(max_length=254, default="")
-    visibility = models.CharField(
-        max_length=7,
-        choices=VISIBILITY_CHOICES,
-        default=VISIBILITY_PUBLIC,
-        db_index=True,
+    operation_type = models.ForeignKey(
+        EventCategory,
+        on_delete=models.CASCADE,
+        help_text=_("Event category type"),
     )
-    created_date = models.DateTimeField(default=timezone.now)
+    title = models.CharField(
+        max_length=200,
+        unique=False,
+        help_text=_("Title for the event"),
+    )
+    host = models.ForeignKey(
+        EventHost,
+        on_delete=models.CASCADE,
+        default=1,
+        help_text=_("Host entity for the event"),
+    )
+    doctrine = models.CharField(
+        max_length=254,
+        default="",
+        blank=True,
+        help_text=_("Doctrine URL or name"),
+    )
+    formup_system = models.CharField(
+        max_length=254,
+        default="",
+        blank=True,
+        help_text=_("Location for formup"),
+    )
+    description = models.TextField(
+        null=True,
+        help_text=_("Description text for the operation"),
+    )
+    start_time = models.DateTimeField(
+        help_text=_("Event start date and time"),
+    )
+    end_time = models.DateTimeField(
+        help_text=_("Event end date and time"),
+    )
+    fc = models.CharField(
+        max_length=254,
+        default="",
+        help_text=_("Fleet commander/manager for the event"),
+    )
+    event_visibility = models.ForeignKey(
+        EventVisibility,
+        on_delete=models.CASCADE,
+        null=True,
+        help_text=_("Visibility filter that dictates who is able to see this event"),
+    )
+    external = models.BooleanField(
+        default=False,
+        null=False,
+        help_text=_("Is the event an external event over API"),
+    )
+    created_date = models.DateTimeField(
+        default=timezone.now,
+        help_text=_("When the event was created"),
+    )
     eve_character = models.ForeignKey(
-        EveCharacter, null=True, on_delete=models.SET_NULL
+        EveCharacter,
+        null=True,
+        on_delete=models.SET_NULL,
+        help_text=_("Character used to create the event"),
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        help_text=_("User who created the event"),
+    )
 
     class Meta:
         unique_together = ["title", "start_time"]
@@ -260,15 +347,6 @@ class Event(models.Model):
     @property
     def get_html_operation_color(self):
         return f"{self.operation_type.color}"
-
-    @property
-    def get_html_visibility_color(self):
-        if self.visibility == "public":
-            return "purple"
-        if self.visibility == "import":
-            return "grey"
-        if self.visibility == "member":
-            return "blue"
 
     def user_can_edit(self, user: user) -> bool:
         """Checks if the given user can edit this timer. Returns True or False"""

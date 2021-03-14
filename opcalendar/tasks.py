@@ -51,7 +51,7 @@ def import_all_npsi_fleets() -> bool:
 
     # Get all current imported fleets in database
     event_ids_to_remove = list(
-        Event.objects.filter(visibility="import").values_list("id", flat=True)
+        Event.objects.filter(external=True).values_list("id", flat=True)
     )
 
     # Get all import feeds
@@ -150,7 +150,7 @@ def _import_spectre_fleet(feed, event_ids_to_remove):
                             start_time=date_object,
                             end_time=date_object,
                             fc=feed.source,
-                            visibility="import",
+                            external=True,
                             user=feed.creator,
                             eve_character=feed.eve_character,
                         )
@@ -219,7 +219,7 @@ def _import_fun_inc(feed, event_ids_to_remove):
                     start_time=start_date,
                     end_time=end_date,
                     fc=feed.source,
-                    visibility="import",
+                    external=True,
                     user=feed.creator,
                     eve_character=feed.eve_character,
                 )
@@ -289,7 +289,7 @@ def _import_eve_uni(feed, event_ids_to_remove):
                         start_time=start_date,
                         end_time=end_date,
                         fc=feed.source,
-                        visibility="import",
+                        external=True,
                         user=feed.creator,
                         eve_character=feed.eve_character,
                     )

@@ -8,7 +8,6 @@ from allianceauth.services.hooks import get_extension_logger
 from django.contrib import messages
 from django.urls import reverse
 
-from django.views import generic
 from django.views.generic import ListView
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
@@ -20,9 +19,17 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy
 from django.utils.translation import ugettext_lazy as _
 from django.db import transaction
+from django.db.models import Q
 
 from esi.decorators import token_required
-from opcalendar.models import Event, EventCategory, EventMember, IngameEvents, Owner
+from opcalendar.models import (
+    Event,
+    EventCategory,
+    EventVisibility,
+    EventMember,
+    IngameEvents,
+    Owner,
+)
 
 from . import tasks
 from .utils import Calendar, messages_plus
@@ -136,10 +143,10 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         cal = Calendar(d.year, d.month, user)
         html_cal = cal.formatmonth(withyear=True)
         context["category"] = EventCategory.objects.all()
+        context["visibility"] = EventVisibility.objects.all()
         context["calendar"] = mark_safe(html_cal)
         context["prev_month"] = prev_month(d)
         context["next_month"] = next_month(d)
-        context["legend"] = "test"
         return context
 
 
@@ -159,7 +166,7 @@ def create_event(request):
         start_time = form.cleaned_data["start_time"]
         end_time = form.cleaned_data["end_time"]
         fc = form.cleaned_data["fc"]
-        visibility = form.cleaned_data["visibility"]
+        event_visibility = form.cleaned_data["event_visibility"]
         Event.objects.get_or_create(
             user=request.user,
             operation_type=operation_type,
@@ -172,7 +179,7 @@ def create_event(request):
             end_time=end_time,
             eve_character=character,
             fc=fc,
-            visibility=visibility,
+            event_visibility=event_visibility,
         )
         messages.success(
             request,
@@ -189,40 +196,67 @@ def create_event(request):
 @permission_required("opcalendar.basic_access")
 def event_details(request, event_id):
 
-    event = Event.objects.get(id=event_id)
+    try:
+        event = Event.objects.filter(
+            Q(event_visibility__restricted_to_group__in=request.user.groups.all())
+            | Q(event_visibility__restricted_to_state=request.user.profile.state),
+        ).get(id=event_id)
 
-    context = {"event": event}
+        context = {"event": event}
 
-    if (
-        request.user.has_perm("opcalendar.view_public")
-        and event.visibility == "public"
-        or event.visibility == "import"
-    ):
         return render(request, "opcalendar/event-details.html", context)
-    elif (
-        request.user.has_perm("opcalendar.view_member") and event.visibility == "member"
-    ):
-        return render(request, "opcalendar/event-details.html", context)
-    else:
+
+    except Event.DoesNotExist:
         return redirect("opcalendar:calendar")
 
 
-class EventEdit(generic.UpdateView):
-    permission_required = "opcalendar.create_event"
-    model = Event
-    fields = [
-        "operation_type",
-        "title",
-        "host",
-        "doctrine",
-        "formup_system",
-        "description",
-        "start_time",
-        "end_time",
-        "fc",
-        "visibility",
-    ]
-    template_name = "opcalendar/event-edit.html"
+@permission_required("opcalendar.create_event")
+def EventEdit(request, event_id):
+    logger.debug(
+        "edit_event called by user %s for optimer id %s" % (request.user, event_id)
+    )
+    event = get_object_or_404(Event, id=event_id)
+    if request.method == "POST":
+        form = EventForm(request.POST)
+        logger.debug(
+            "Received POST request containing update optimer form, is valid: %s"
+            % form.is_valid()
+        )
+        if form.is_valid():
+
+            event.operation_type = form.cleaned_data["operation_type"]
+            event.title = form.cleaned_data["title"]
+            event.host = form.cleaned_data["host"]
+            event.doctrine = form.cleaned_data["doctrine"]
+            event.formup_system = form.cleaned_data["formup_system"]
+            event.description = form.cleaned_data["description"]
+            event.start_time = form.cleaned_data["start_time"]
+            event.end_time = form.cleaned_data["end_time"]
+            event.fc = form.cleaned_data["fc"]
+            event.event_visibility = form.cleaned_data["event_visibility"]
+
+            logger.info("User %s updating optimer id %s " % (request.user, event_id))
+            event.save()
+            messages.success(
+                request,
+                _("Saved changes to event for %(event)s.") % {"event": event.title},
+            )
+            return redirect("opcalendar:calendar")
+    else:
+        data = {
+            "operation_type": event.operation_type,
+            "title": event.title,
+            "host": event.host,
+            "doctrine": event.doctrine,
+            "formup_system": event.formup_system,
+            "description": event.description,
+            "start_time": event.start_time,
+            "end_time": event.end_time,
+            "fc": event.fc,
+            "event_visibility": event.event_visibility,
+        }
+        form = EventForm(initial=data)
+    return render(request, "opcalendar/event-edit.html", context={"form": form})
 
 
 @login_required(login_url="signup")

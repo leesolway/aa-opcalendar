@@ -1,5 +1,5 @@
 from django.forms import ModelForm, DateInput
-from opcalendar.models import Event, EventMember, EventCategory
+from opcalendar.models import Event, EventMember, EventCategory, EventHost
 from django import forms
 
 
@@ -15,13 +15,14 @@ class EventForm(ModelForm):
                 attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
             ),
         }
-        exclude = ["user", "eve_character", "created_date"]
+        exclude = ["user", "eve_character", "created_date", "external"]
 
     def __init__(self, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
         # input_formats to parse HTML5 datetime-local input to datetime field
         self.fields["start_time"].input_formats = ("%Y-%m-%dT%H:%M",)
         self.fields["end_time"].input_formats = ("%Y-%m-%dT%H:%M",)
+        self.fields["host"].queryset = EventHost.objects.filter(external=False)
 
 
 class SignupForm(forms.Form):

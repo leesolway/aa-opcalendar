@@ -102,7 +102,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
             start_time=published,
             end_time=published,
             fc=EventImport.SPECTRE_FLEET,
-            visibility="import",
+            external=True,
             user=self.user,
             eve_character=self.eve_character,
         )
@@ -135,7 +135,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
             start_time=published,
             end_time=published,
             fc=EventImport.SPECTRE_FLEET,
-            visibility="import",
+            external=True,
             user=self.user,
             eve_character=self.eve_character,
         )
@@ -243,7 +243,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
             start_time=utc.localize(dt.datetime(2021, 2, 5, 22, 0)),
             end_time=utc.localize(dt.datetime(2021, 2, 5, 23, 0)),
             fc=EventImport.FUN_INC,
-            visibility="import",
+            external=True,
             user=self.user,
             eve_character=self.eve_character,
         )
@@ -279,7 +279,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
             start_time=utc.localize(dt.datetime(2021, 2, 4, 22, 0)),
             end_time=utc.localize(dt.datetime(2021, 2, 4, 23, 0)),
             fc=EventImport.FUN_INC,
-            visibility="import",
+            external=True,
             user=self.user,
             eve_character=self.eve_character,
         )
@@ -413,7 +413,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
             start_time=utc.localize(dt.datetime(2021, 2, 4, 22, 0)),
             end_time=utc.localize(dt.datetime(2021, 2, 4, 23, 0)),
             fc=EventImport.EVE_UNIVERSITY,
-            visibility="import",
+            external=True,
             user=self.user,
             eve_character=self.eve_character,
         )
@@ -449,7 +449,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
             start_time=utc.localize(dt.datetime(2021, 2, 3, 22, 0)),
             end_time=utc.localize(dt.datetime(2021, 2, 3, 23, 0)),
             fc=EventImport.EVE_UNIVERSITY,
-            visibility="import",
+            external=True,
             user=self.user,
             eve_character=self.eve_character,
         )

@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib.messages.constants import DEBUG, ERROR, INFO, SUCCESS, WARNING
 from django.test import TestCase
 from django.utils.html import format_html
+from django.db.models import Q
 
 from esi.models import Scope, Token
 
@@ -44,41 +45,21 @@ class Calendar(HTMLCalendar):
         if day != 0:
             # Parse events
             for event in events_per_day:
-                # Display public events
-                if (
-                    event.visibility == "public"
-                    or event.visibility == "import"
-                    and self.user.has_perm("opcalendar.view_public")
-                ):
-                    # Get past events
-                    if datetime.now(timezone.utc) > event.start_time:
-                        d += (
-                            f'<a class="nostyling" href="{event.get_html_url}">'
-                            f'<div class="event {event.get_html_operation_color} past-event {event.visibility}-event">{event.get_html_title}</div>'
-                            f"</a>"
-                        )
-                    if datetime.now(timezone.utc) <= event.start_time:
-                        d += (
-                            f'<a class="nostyling" href="{event.get_html_url}">'
-                            f'<div class="event {event.get_html_operation_color} {event.visibility}-event">{event.get_html_title}</div>'
-                            f"</a>"
-                        )
-                if event.visibility == "member" and self.user.has_perm(
-                    "opcalendar.view_member"
-                ):
-                    # Get past events
-                    if datetime.now(timezone.utc) > event.start_time:
-                        d += (
-                            f'<a class="nostyling" href="{event.get_html_url}">'
-                            f'<div class="event {event.get_html_operation_color} past-event {event.visibility}-event">{event.get_html_title}</div>'
-                            f"</a>"
-                        )
-                    if datetime.now(timezone.utc) <= event.start_time:
-                        d += (
-                            f'<a class="nostyling" href="{event.get_html_url}">'
-                            f'<div class="event {event.get_html_operation_color} {event.visibility}-event">{event.get_html_title}</div>'
-                            f"</a>"
-                        )
+                # Display events
+                # Get past events
+                if datetime.now(timezone.utc) > event.start_time:
+                    d += (
+                        f'<a class="nostyling" href="{event.get_html_url}">'
+                        f'<div class="event {event.get_html_operation_color} past-event {event.event_visibility}-event">{event.get_html_title}</div>'
+                        f"</a>"
+                    )
+                if datetime.now(timezone.utc) <= event.start_time:
+                    d += (
+                        f'<a class="nostyling" href="{event.get_html_url}">'
+                        f'<div class="event {event.get_html_operation_color} {event.event_visibility}-event">{event.get_html_title}</div>'
+                        f"</a>"
+                    )
+
             for event in ingame_events_per_day:
                 if self.user.has_perm("opcalendar.view_ingame"):
                     # Get past events
@@ -109,9 +90,15 @@ class Calendar(HTMLCalendar):
 
     # formats a month as a table
     # filter events by year and month
+
     def formatmonth(self, withyear=True):
+
         events = Event.objects.filter(
-            start_time__year=self.year, start_time__month=self.month
+            start_time__year=self.year,
+            start_time__month=self.month,
+        ).filter(
+            Q(event_visibility__restricted_to_group__in=self.user.groups.all())
+            | Q(event_visibility__restricted_to_state=self.user.profile.state),
         )
         ingame_events = IngameEvents.objects.filter(
             event_start_date__year=self.year, event_start_date__month=self.month

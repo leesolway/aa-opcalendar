@@ -2,13 +2,34 @@ from django.contrib import admin
 from opcalendar.models import (
     Event,
     EventCategory,
-    EventSignal,
     WebHook,
     EventHost,
     EventImport,
     Owner,
     IngameEvents,
+    EventVisibility,
 )
+
+
+def custom_filter(title):
+    """
+    custom filter for model properties
+    :param title:
+    :return:
+    """
+
+    class Wrapper(admin.FieldListFilter):
+        """
+        custom_filter :: wrapper
+        """
+
+        def __new__(cls, *args, **kwargs):
+            instance = admin.FieldListFilter.create(*args, **kwargs)
+            instance.title = title
+
+            return instance
+
+    return Wrapper
 
 
 class WebHookAdmin(admin.ModelAdmin):
@@ -16,19 +37,6 @@ class WebHookAdmin(admin.ModelAdmin):
 
 
 admin.site.register(WebHook, WebHookAdmin)
-
-
-class EventSignalAdmin(admin.ModelAdmin):
-    list_display = ("get_webhook", "ignore_past_fleets")
-
-    def get_webhook(self, obj):
-        return obj.webhook.name
-
-    get_webhook.short_description = "Webhook Name"
-    get_webhook.admin_order_field = "webhook__name"
-
-
-admin.site.register(EventSignal, EventSignalAdmin)
 
 
 class EventCategoryAdmin(admin.ModelAdmin):
@@ -49,8 +57,59 @@ class EventHostAdmin(admin.ModelAdmin):
     model = EventImport
 
 
-admin.site.register(EventImport, EventHostAdmin)
+@admin.register(EventVisibility)
+class EventVisibilityAdmin(admin.ModelAdmin):
+    """
+    FleetDoctrineAdmin
+    """
 
+    list_display = (
+        "_name",
+        "_restricted_to_group",
+        "_restricted_to_state",
+        "is_active",
+    )
+    filter_horizontal = ("restricted_to_group",)
+    ordering = ("name",)
+
+    list_filter = (
+        ("is_active", custom_filter(title="active")),
+        ("restricted_to_group", custom_filter(title="restriction")),
+    )
+
+    @classmethod
+    def _name(cls, obj):
+        return obj.name
+
+    _name.short_description = "Visibility"
+    _name.admin_order_field = "name"
+
+    @classmethod
+    def _restricted_to_group(cls, obj):
+        names = [x.name for x in obj.restricted_to_group.all().order_by("name")]
+
+        if names:
+            return ", ".join(names)
+        else:
+            return None
+
+    _restricted_to_group.short_description = "Restricted to"
+    _restricted_to_group.admin_order_field = "restricted_to_group__name"
+
+    @classmethod
+    def _restricted_to_state(cls, obj):
+        names = [x.name for x in obj.restricted_to_state.all().order_by("name")]
+
+        if names:
+            return ", ".join(names)
+        else:
+            return None
+
+    _restricted_to_state.short_description = "Restricted to"
+    _restricted_to_state.admin_order_field = "restricted_to_state__name"
+
+
+admin.site.register(EventImport, EventHostAdmin)
 
 admin.site.register(Owner)
 

@@ -20,10 +20,10 @@
         {% endif %}
         <h5>Legend & Filters:</h5>
         <div class="legend">
-        	<div>
-        		<span class="event import-event">Third Party Event</span>
-        		<span class="event public-event">Public Event</span>
-        		<span class="event member-event">Members Only Event</span>
+            <div>
+                {% for event in visibility %}
+                 <span class="event">{{ event.name }}</span>
+                {% endfor %}
         	</div>
         	<div>
         		{% for event in category %}

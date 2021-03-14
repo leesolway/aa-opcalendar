@@ -6,7 +6,7 @@ from django.dispatch import receiver
 
 
 from django.db.models.signals import post_save, pre_delete
-from .models import Event, EventSignal, IngameEvents
+from .models import Event, EventVisibility, IngameEvents
 import datetime
 from django.utils import timezone
 
@@ -119,7 +119,7 @@ def fleet_saved(sender, instance, created, **kwargs):
                 },
             }
 
-            hooks = EventSignal.objects.all().select_related("webhook")
+            hooks = EventVisibility.objects.all().select_related("webhook")
             old = datetime.datetime.now(timezone.utc) > eve_time
 
             for hook in hooks:
@@ -135,7 +135,7 @@ def fleet_saved(sender, instance, created, **kwargs):
     # For Normal Events
     if sender == Event:
         # For normal events only
-        if "import" not in instance.visibility:
+        if not instance.external:
             try:
                 logger.debug("New signal fleet created for %s" % instance.title)
 
@@ -191,7 +191,7 @@ def fleet_saved(sender, instance, created, **kwargs):
                     },
                 }
 
-                hooks = EventSignal.objects.all().select_related("webhook")
+                hooks = EventVisibility.objects.all().select_related("webhook")
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
                 for hook in hooks:
@@ -205,7 +205,7 @@ def fleet_saved(sender, instance, created, **kwargs):
                 pass  # shits fucked... Don't worry about it...
 
         # For automated fleets like NPSI imported fleets. Only post if OPCALENDAR_NOTIFY_IMPORTS set to True
-        if "import" in instance.visibility and OPCALENDAR_NOTIFY_IMPORTS:
+        if instance.external and OPCALENDAR_NOTIFY_IMPORTS:
             try:
                 logger.debug("New signal fleet created for %s" % instance.title)
 
@@ -260,7 +260,7 @@ def fleet_saved(sender, instance, created, **kwargs):
                     },
                 }
 
-                hooks = EventSignal.objects.all().select_related("webhook")
+                hooks = EventVisibility.objects.all().select_related("webhook")
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
                 for hook in hooks:
@@ -364,7 +364,7 @@ def fleet_deleted(sender, instance, **kwargs):
                 },
             }
 
-            hooks = EventSignal.objects.all().select_related("webhook")
+            hooks = EventVisibility.objects.all().select_related("webhook")
             old = datetime.datetime.now(timezone.utc) > eve_time
 
             for hook in hooks:
@@ -380,7 +380,7 @@ def fleet_deleted(sender, instance, **kwargs):
     # For Normal Events
     if sender == Event:
         # For normal events only
-        if "import" not in instance.visibility:
+        if not instance.external:
             try:
                 logger.debug("New signal fleet created for %s" % instance.title)
 
@@ -431,7 +431,7 @@ def fleet_deleted(sender, instance, **kwargs):
                     },
                 }
 
-                hooks = EventSignal.objects.all().select_related("webhook")
+                hooks = EventVisibility.objects.all().select_related("webhook")
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
                 for hook in hooks:
@@ -445,7 +445,7 @@ def fleet_deleted(sender, instance, **kwargs):
                 pass  # shits fucked... Don't worry about it...
 
         # For automated fleets like NPSI imported fleets. Only post if OPCALENDAR_NOTIFY_IMPORTS set to True
-        if "import" in instance.visibility and OPCALENDAR_NOTIFY_IMPORTS:
+        if instance.external and OPCALENDAR_NOTIFY_IMPORTS:
             try:
                 logger.debug("New signal fleet created for %s" % instance.title)
 
@@ -490,7 +490,7 @@ def fleet_deleted(sender, instance, **kwargs):
                     },
                 }
 
-                hooks = EventSignal.objects.all().select_related("webhook")
+                hooks = EventVisibility.objects.all().select_related("webhook")
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
                 for hook in hooks:
