@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 from opcalendar.models import (
     Event,
     EventCategory,
@@ -9,6 +10,7 @@ from opcalendar.models import (
     IngameEvents,
     EventVisibility,
 )
+from .forms import EventVisibilityAdminForm, EventCategoryAdminForm
 
 
 def custom_filter(title):
@@ -39,11 +41,20 @@ class WebHookAdmin(admin.ModelAdmin):
 admin.site.register(WebHook, WebHookAdmin)
 
 
+@admin.register(EventCategory)
 class EventCategoryAdmin(admin.ModelAdmin):
-    model = EventCategory
+    form = EventCategoryAdminForm
+    list_display = (
+        "name",
+        "ticker",
+        "_color",
+    )
 
-
-admin.site.register(EventCategory, EventCategoryAdmin)
+    def _color(self, obj):
+        html = (
+            f'<input type="color" value="{obj.color}" disabled>' if obj.color else "-"
+        )
+        return mark_safe(html)
 
 
 class EventHostAdmin(admin.ModelAdmin):
@@ -59,14 +70,13 @@ class EventHostAdmin(admin.ModelAdmin):
 
 @admin.register(EventVisibility)
 class EventVisibilityAdmin(admin.ModelAdmin):
-    """
-    FleetDoctrineAdmin
-    """
+    form = EventVisibilityAdminForm
 
     list_display = (
-        "_name",
+        "name",
         "_restricted_to_group",
         "_restricted_to_state",
+        "_color",
         "is_active",
     )
     filter_horizontal = ("restricted_to_group",)
@@ -76,6 +86,12 @@ class EventVisibilityAdmin(admin.ModelAdmin):
         ("is_active", custom_filter(title="active")),
         ("restricted_to_group", custom_filter(title="restriction")),
     )
+
+    def _color(self, obj):
+        html = (
+            f'<input type="color" value="{obj.color}" disabled>' if obj.color else "-"
+        )
+        return mark_safe(html)
 
     @classmethod
     def _name(cls, obj):

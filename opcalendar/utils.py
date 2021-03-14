@@ -49,14 +49,16 @@ class Calendar(HTMLCalendar):
                 # Get past events
                 if datetime.now(timezone.utc) > event.start_time:
                     d += (
+                        f"<style>#event-{event.id}:before{{border-color: transparent {event.event_visibility.color} transparent transparent;}} #event-{event.id} {{border-left: 6px solid {event.operation_type.color};}}</style>"
                         f'<a class="nostyling" href="{event.get_html_url}">'
-                        f'<div class="event {event.get_html_operation_color} past-event {event.event_visibility}-event">{event.get_html_title}</div>'
+                        f'<div id="event-{event.id}" class="event past-event {event.get_visibility_anchor}">{event.get_html_title}</div>'
                         f"</a>"
                     )
                 if datetime.now(timezone.utc) <= event.start_time:
                     d += (
+                        f"<style>.{event.get_visibility_anchor}:before{{border-color: transparent {event.event_visibility.color} transparent transparent;}} .{event.get_category_anchor} {{border-left: 6px solid {event.operation_type.color} !important;}}</style>"
                         f'<a class="nostyling" href="{event.get_html_url}">'
-                        f'<div class="event {event.get_html_operation_color} {event.event_visibility}-event">{event.get_html_title}</div>'
+                        f'<div class="event {event.get_visibility_anchor} {event.get_category_anchor}">{event.get_html_title}</div>'
                         f"</a>"
                     )
 
@@ -66,13 +68,13 @@ class Calendar(HTMLCalendar):
                     if datetime.now(timezone.utc) > event.event_start_date:
                         d += (
                             f'<a class="nostyling" href="{event.get_html_url}">'
-                            f'<div class="event {event.get_html_operation_color} past-event import-event">{event.get_html_title}</div>'
+                            f'<div class="event past-event">{event.get_html_title}</div>'
                             f"</a>"
                         )
                     if datetime.now(timezone.utc) <= event.event_start_date:
                         d += (
                             f'<a class="nostyling" href="{event.get_html_url}">'
-                            f'<div class="event {event.get_html_operation_color} import-event">{event.get_html_title}</div>'
+                            f'<div class="event">{event.get_html_title}</div>'
                             f"</a>"
                         )
 

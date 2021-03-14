@@ -41,72 +41,15 @@
   position: relative;
 }
 
-.allianceauth-opcalendar .public-event:before {
+.allianceauth-opcalendar .event:before {
     width: 0;
     height: 0;
     border-style: solid;
     border-width: 0px 15px 15px 0;
-    border-color: transparent #9C27B0 transparent transparent;
     content: '';
     position: absolute;
     right: 0;
     top: 0;
-}
-
-.allianceauth-opcalendar .import-event:before {
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0px 15px 15px 0;
-    border-color: transparent #607D8B transparent transparent;
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-}
-
-.allianceauth-opcalendar .member-event:before {
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0px 15px 15px 0;
-    border-color: transparent #50a5f1 transparent transparent;
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-}
-
-.allianceauth-opcalendar .event.purple{
-  border-left: 6px solid #9C27B0;
-}
-
-.allianceauth-opcalendar .event.green{
-  border-left: 6px solid #8BC34A;
-}
-
-.allianceauth-opcalendar .event.orange{
-  border-left: 6px solid #ff9800;
-}
-
-.allianceauth-opcalendar .event.yellow{
-  border-left: 6px solid #FFEB3B;
-}
-
-.allianceauth-opcalendar .event.blue{
-   border-left: 6px solid #50a5f1;
-}
-
-.allianceauth-opcalendar .event.red{
-  border-left: 6px solid #b71c1c;
-}
-
-.allianceauth-opcalendar .event.grey{
-  border-left: 6px solid #607D8B;
-}
-
-.allianceauth-opcalendar .event.black{
-  border-left: 6px solid #000000;
 }
 
 .allianceauth-opcalendar .event.past-event{

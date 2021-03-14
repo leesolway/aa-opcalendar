@@ -1,5 +1,12 @@
 from django.forms import ModelForm, DateInput
-from opcalendar.models import Event, EventMember, EventCategory, EventHost
+from opcalendar.models import (
+    Event,
+    EventMember,
+    EventCategory,
+    EventHost,
+    EventVisibility,
+)
+from django.forms.widgets import TextInput
 from django import forms
 
 
@@ -48,3 +55,21 @@ class AddCategoryForm(forms.ModelForm):
     class Meta:
         model = EventCategory
         fields = "__all__"
+
+
+class EventVisibilityAdminForm(forms.ModelForm):
+    class Meta:
+        model = EventVisibility
+        fields = "__all__"
+        widgets = {
+            "color": TextInput(attrs={"type": "color"}),
+        }
+
+
+class EventCategoryAdminForm(forms.ModelForm):
+    class Meta:
+        model = EventCategory
+        fields = "__all__"
+        widgets = {
+            "color": TextInput(attrs={"type": "color"}),
+        }

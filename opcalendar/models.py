@@ -103,6 +103,12 @@ class EventVisibility(models.Model):
         default=True,
         help_text=_("Should we ignore fleet signals that are in the past"),
     )
+    color = models.CharField(
+        max_length=7,
+        default="",
+        blank=True,
+        help_text=_("Color to be displayed on calendar"),
+    )
     is_active = models.BooleanField(
         default=True,
         help_text=("Whether this visibility filter is active"),
@@ -114,6 +120,10 @@ class EventVisibility(models.Model):
     class Meta:
         verbose_name = "Event Visibility"
         verbose_name_plural = "Event Visibilities"
+
+    @property
+    def get_visibility_anchor(self):
+        return f"{self.name.replace(' ', '-').lower()}"
 
 
 class EventHost(models.Model):
@@ -166,24 +176,6 @@ class EventHost(models.Model):
 
 
 class EventCategory(models.Model):
-    # Colors for calendar
-    COLOR_BLUE = "blue"
-    COLOR_GREEN = "green"
-    COLOR_RED = "red"
-    COLOR_ORANGE = "orange"
-    COLOR_GREY = "grey"
-    COLOR_YELLOW = "yellow"
-    COLOR_PURPLE = "purple"
-
-    COLOR_CHOICES = (
-        (COLOR_GREEN, _("Green")),
-        (COLOR_RED, _("Red")),
-        (COLOR_ORANGE, _("Orange")),
-        (COLOR_BLUE, _("Blue")),
-        (COLOR_GREY, _("Grey")),
-        (COLOR_YELLOW, _("Yellow")),
-        (COLOR_PURPLE, _("Purple")),
-    )
     name = models.CharField(
         max_length=150,
         help_text=_("Name for the category"),
@@ -192,7 +184,12 @@ class EventCategory(models.Model):
         max_length=10,
         help_text=_("Ticker for the category"),
     )
-    color = models.CharField(max_length=6, choices=COLOR_CHOICES, default="green")
+    color = models.CharField(
+        max_length=7,
+        default="",
+        blank=True,
+        help_text=_("Color to be displayed on calendar"),
+    )
 
     class Meta:
         verbose_name = "Category"
@@ -200,6 +197,10 @@ class EventCategory(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+    @property
+    def get_category_anchor(self):
+        return f"{self.name.replace(' ', '-').lower()}"
 
 
 class EventImport(models.Model):
@@ -343,6 +344,14 @@ class Event(models.Model):
         return reverse("opcalendar:event-detail", args=(self.id,))
 
     @property
+    def get_visibility_anchor(self):
+        return f"{self.event_visibility.name.replace(' ', '-').lower()}"
+
+    @property
+    def get_category_anchor(self):
+        return f"{self.operation_type.name.replace(' ', '-').lower()}"
+
+    @property
     def get_html_url(self):
         url = reverse("opcalendar:event-detail", args=(self.id,))
         return f"{url}"
@@ -350,10 +359,6 @@ class Event(models.Model):
     @property
     def get_html_title(self):
         return f'{self.start_time.strftime("%H:%M")} - {self.end_time.strftime("%H:%M")} <i>{self.host.community}</i> <br> <b>{self.operation_type.ticker} {self.title}</b>'
-
-    @property
-    def get_html_operation_color(self):
-        return f"{self.operation_type.color}"
 
     def user_can_edit(self, user: user) -> bool:
         """Checks if the given user can edit this timer. Returns True or False"""

@@ -22,12 +22,13 @@
         <div class="legend">
             <div>
                 {% for event in visibility %}
-                 <span class="event">{{ event.name }}</span>
+                 <style>.{{ event.get_visibility_anchor }}:before {border-color: transparent {{ event.color }} transparent transparent;}</style>
+                 <span class="event {{ event.get_visibility_anchor }}">{{ event.name }}</span>
                 {% endfor %}
         	</div>
         	<div>
         		{% for event in category %}
-        			<span class="event {{ event.color }}">{{ event.name }}</span>
+        			<span class="event {{ event.get_category_anchor }}">{{ event.name }}</span>
         		{% endfor %}
         	</div>
         </div>

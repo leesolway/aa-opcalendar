@@ -7,13 +7,19 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0025_auto_20210314_1043'),
+        ("opcalendar", "0025_auto_20210314_1043"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='eventvisibility',
-            name='webhook',
-            field=models.ForeignKey(blank=True, help_text='Webhook to send over notifications about these fleet types', null=True, on_delete=django.db.models.deletion.CASCADE, to='opcalendar.webhook'),
+            model_name="eventvisibility",
+            name="webhook",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Webhook to send over notifications about these fleet types",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="opcalendar.webhook",
+            ),
         ),
     ]
