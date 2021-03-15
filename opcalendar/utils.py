@@ -47,7 +47,7 @@ class Calendar(HTMLCalendar):
             # Parse events
             for event in events_per_day:
                 d += (
-                    f"<style>.{event.get_visibility_class}:before{{border-color: transparent {event.event_visibility.color} transparent transparent;border-style: solid;}} .{event.get_category_class} {{border-left: 6px solid {event.operation_type.color} !important;}}</style>"
+                    f"<style>{event.get_event_styling}</style>"
                     f'<a class="nostyling" href="{event.get_html_url}">'
                     f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class}">{event.get_html_title}</div>'
                     f"</a>"
@@ -86,8 +86,7 @@ class Calendar(HTMLCalendar):
             .filter(
                 Q(event_visibility__restricted_to_group__in=self.user.groups.all())
                 | Q(event_visibility__restricted_to_group__isnull=True),
-            )
-            .filter(
+            ).filter(
                 Q(event_visibility__restricted_to_state=self.user.profile.state)
                 | Q(event_visibility__restricted_to_state__isnull=True),
             )

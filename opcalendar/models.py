@@ -267,7 +267,6 @@ class Event(models.Model):
     operation_type = models.ForeignKey(
         EventCategory,
         null=True,
-        default=1,
         on_delete=models.CASCADE,
         help_text=_("Event category type"),
     )
@@ -279,24 +278,18 @@ class Event(models.Model):
     host = models.ForeignKey(
         EventHost,
         on_delete=models.CASCADE,
-        default=1,
-        null=True,
         help_text=_("Host entity for the event"),
     )
     doctrine = models.CharField(
         max_length=254,
-        default="",
-        null=True,
         help_text=_("Doctrine URL or name"),
     )
     formup_system = models.CharField(
         max_length=254,
-        null=True,
         help_text=_("Location for formup"),
     )
     description = models.TextField(
         help_text=_("Description text for the operation"),
-        null=True,
     )
     start_time = models.DateTimeField(
         help_text=_("Event start date and time"),
@@ -307,12 +300,12 @@ class Event(models.Model):
     fc = models.CharField(
         max_length=254,
         help_text=_("Fleet commander/manager for the event"),
-        null=True,
     )
     event_visibility = models.ForeignKey(
         EventVisibility,
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         help_text=_("Visibility filter that dictates who is able to see this event"),
     )
     external = models.BooleanField(
@@ -353,6 +346,11 @@ class Event(models.Model):
         if self.event_visibility:
             return f"{self.event_visibility.name.replace(' ', '-').lower()}"
 
+    @property
+    def get_event_styling(self):
+        if self.event_visibility:
+            return f".{self.event_visibility.name.replace(' ', '-').lower()}:before{{border-color: transparent {self.event_visibility.color} transparent transparent;border-style: solid;}} .{self.operation_type.name.replace(' ', '-').lower()} {{border-left: 6px solid {self.operation_type.color} !important;}}"
+    
     @property
     def get_category_class(self):
         if self.operation_type:

@@ -60,7 +60,7 @@ Before you are able to create new events on the front end you will need to setup
 
 - Go to the admin site
 - **Add a Host**. The first host is most likely your own alliance/corporation/community. Fill in at least the name ie. your alliance name. This name will be displayed on the calendar view on the event block. You may fill in additional information which will be displayed on the detailed view for the event.
-- **Add visibility**. Event visibilities will determine who will be able to see the events. You can limit visibilities to groups or auth states.
+- **Add visibility**. Event visibilities will determine who will be able to see the events. You can limit visibilities to groups or auth states. **If no filters are selected the event will be visible for everyone**
 - **Add a category**. Next you will need to add at least one category for your events. Categories can be whatever you want to have such as STRATOP, mining, roam etc. The ticker for the event will be displayed both on the calendar view event block and on the detailed view for the event.
 - **Webhook for discord notifications (optional)**. If you want to receive notifications about your events (created/modified/deleted) on your discord you can add a webhook for the channel in discord you want to receive the notifications to. Add a webhook and connect it to the fleet signals.
 - **Add new event**. To add new events simply go to the operation calendar and click on the add event button. Fill in the information for your event.
