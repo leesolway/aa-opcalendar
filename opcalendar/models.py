@@ -2,7 +2,7 @@ import requests
 import json
 
 from typing import Tuple
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from django.db import models
 from django.urls import reverse
@@ -122,7 +122,7 @@ class EventVisibility(models.Model):
         verbose_name_plural = "Event Visibilities"
 
     @property
-    def get_visibility_anchor(self):
+    def get_visibility_class(self):
         return f"{self.name.replace(' ', '-').lower()}"
 
 
@@ -199,7 +199,7 @@ class EventCategory(models.Model):
         return str(self.name)
 
     @property
-    def get_category_anchor(self):
+    def get_category_class(self):
         return f"{self.name.replace(' ', '-').lower()}"
 
 
@@ -344,12 +344,20 @@ class Event(models.Model):
         return reverse("opcalendar:event-detail", args=(self.id,))
 
     @property
-    def get_visibility_anchor(self):
+    def get_visibility_class(self):
         return f"{self.event_visibility.name.replace(' ', '-').lower()}"
 
     @property
-    def get_category_anchor(self):
+    def get_category_class(self):
         return f"{self.operation_type.name.replace(' ', '-').lower()}"
+
+    @property
+    def get_date_status(self):
+        
+        if datetime.now(timezone.utc) > self.start_time:
+            return f"past-event"
+        else:
+            return f"future-event"   
 
     @property
     def get_html_url(self):

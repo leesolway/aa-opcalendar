@@ -45,22 +45,12 @@ class Calendar(HTMLCalendar):
         if day != 0:
             # Parse events
             for event in events_per_day:
-                # Display events
-                # Get past events
-                if datetime.now(timezone.utc) > event.start_time:
-                    d += (
-                        f"<style>#event-{event.id}:before{{border-color: transparent {event.event_visibility.color} transparent transparent;}} #event-{event.id} {{border-left: 6px solid {event.operation_type.color};}}</style>"
-                        f'<a class="nostyling" href="{event.get_html_url}">'
-                        f'<div id="event-{event.id}" class="event past-event {event.get_visibility_anchor}">{event.get_html_title}</div>'
-                        f"</a>"
-                    )
-                if datetime.now(timezone.utc) <= event.start_time:
-                    d += (
-                        f"<style>.{event.get_visibility_anchor}:before{{border-color: transparent {event.event_visibility.color} transparent transparent;}} .{event.get_category_anchor} {{border-left: 6px solid {event.operation_type.color} !important;}}</style>"
-                        f'<a class="nostyling" href="{event.get_html_url}">'
-                        f'<div class="event {event.get_visibility_anchor} {event.get_category_anchor}">{event.get_html_title}</div>'
-                        f"</a>"
-                    )
+                d += (
+                    f"<style>.{event.get_visibility_class}:before{{border-color: transparent {event.event_visibility.color} transparent transparent;border-style: solid;}} .{event.get_category_class} {{border-left: 6px solid {event.operation_type.color} !important;}}</style>"
+                    f'<a class="nostyling" href="{event.get_html_url}">'
+                    f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class}">{event.get_html_title}</div>'
+                    f"</a>"
+                )
 
             for event in ingame_events_per_day:
                 if self.user.has_perm("opcalendar.view_ingame"):
