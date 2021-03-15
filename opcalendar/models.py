@@ -267,6 +267,7 @@ class Event(models.Model):
     operation_type = models.ForeignKey(
         EventCategory,
         null=True,
+        default=1,
         on_delete=models.CASCADE,
         help_text=_("Event category type"),
     )
@@ -312,6 +313,7 @@ class Event(models.Model):
         EventVisibility,
         on_delete=models.CASCADE,
         null=True,
+        default=1,
         help_text=_("Visibility filter that dictates who is able to see this event"),
     )
     external = models.BooleanField(
