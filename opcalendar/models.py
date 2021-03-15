@@ -263,6 +263,7 @@ class EventImport(models.Model):
 class Event(models.Model):
     operation_type = models.ForeignKey(
         EventCategory,
+        null=True,
         on_delete=models.CASCADE,
         help_text=_("Event category type"),
     )
@@ -275,23 +276,23 @@ class Event(models.Model):
         EventHost,
         on_delete=models.CASCADE,
         default=1,
+        null=True,
         help_text=_("Host entity for the event"),
     )
     doctrine = models.CharField(
         max_length=254,
         default="",
-        blank=True,
+        null=True,
         help_text=_("Doctrine URL or name"),
     )
     formup_system = models.CharField(
         max_length=254,
-        default="",
-        blank=True,
+        null=True,
         help_text=_("Location for formup"),
     )
     description = models.TextField(
-        null=True,
         help_text=_("Description text for the operation"),
+        null=True,
     )
     start_time = models.DateTimeField(
         help_text=_("Event start date and time"),
@@ -301,8 +302,8 @@ class Event(models.Model):
     )
     fc = models.CharField(
         max_length=254,
-        default="",
         help_text=_("Fleet commander/manager for the event"),
+        null=True,
     )
     event_visibility = models.ForeignKey(
         EventVisibility,
@@ -312,7 +313,7 @@ class Event(models.Model):
     )
     external = models.BooleanField(
         default=False,
-        null=False,
+        null=True,
         help_text=_("Is the event an external event over API"),
     )
     created_date = models.DateTimeField(

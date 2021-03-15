@@ -190,10 +190,12 @@ def fleet_saved(sender, instance, created, **kwargs):
                         "text": " %s %s, %s" % (character_name, ticker, instance.host),
                     },
                 }
-
+                logger.debug("Created embed: %s" % embed)
                 hooks = EventVisibility.objects.all().select_related("webhook")
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
+                logger.debug("got hooks: %s" % hooks)
+                
                 for hook in hooks:
                     if hook.webhook.enabled:
                         if old and hook.ignore_past_fleets:
@@ -365,6 +367,7 @@ def fleet_deleted(sender, instance, **kwargs):
             }
 
             hooks = EventVisibility.objects.all().select_related("webhook")
+
             old = datetime.datetime.now(timezone.utc) > eve_time
 
             for hook in hooks:
