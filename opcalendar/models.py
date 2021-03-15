@@ -313,7 +313,6 @@ class Event(models.Model):
         EventVisibility,
         on_delete=models.CASCADE,
         null=True,
-        default=1,
         help_text=_("Visibility filter that dictates who is able to see this event"),
     )
     external = models.BooleanField(
@@ -351,11 +350,13 @@ class Event(models.Model):
 
     @property
     def get_visibility_class(self):
-        return f"{self.event_visibility.name.replace(' ', '-').lower()}"
+        if self.event_visibility:
+            return f"{self.event_visibility.name.replace(' ', '-').lower()}"
 
     @property
     def get_category_class(self):
-        return f"{self.operation_type.name.replace(' ', '-').lower()}"
+        if self.operation_type:
+            return f"{self.operation_type.name.replace(' ', '-').lower()}"
 
     @property
     def get_date_status(self):
