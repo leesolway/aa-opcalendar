@@ -55,19 +55,11 @@ class Calendar(HTMLCalendar):
 
             for event in ingame_events_per_day:
                 if self.user.has_perm("opcalendar.view_ingame"):
-                    # Get past events
-                    if datetime.now(timezone.utc) > event.event_start_date:
-                        d += (
-                            f'<a class="nostyling" href="{event.get_html_url}">'
-                            f'<div class="event past-event">{event.get_html_title}</div>'
-                            f"</a>"
-                        )
-                    if datetime.now(timezone.utc) <= event.event_start_date:
-                        d += (
-                            f'<a class="nostyling" href="{event.get_html_url}">'
-                            f'<div class="event">{event.get_html_title}</div>'
-                            f"</a>"
-                        )
+                    d += (
+                        f'<a class="nostyling" href="{event.get_html_url}">'
+                        f'<div class="event ingame-event {event.get_date_status}">{event.get_html_title}</div>'
+                        f"</a>"
+                    )
 
             if date.today() == date(self.year, self.month, day):
                 return f"<td class='today'><div class='date'>{day}</div> {d}</td>"

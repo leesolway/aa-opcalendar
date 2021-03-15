@@ -462,26 +462,30 @@ class Owner(models.Model):
                     owner=self, event_id=event["event_id"]
                 ).first()
 
-                if original is not None:
+                
+                try:
+                    if original is not None:
 
-                    logger.debug("Event: %s already in database" % event["title"])
-                    event_ids_to_remove.remove(original.event_id)
-
-                else:
-                    IngameEvents.objects.create(
-                        event_id=event["event_id"],
-                        owner=self,
-                        text=details["text"],
-                        event_owner_id=details["owner_id"],
-                        owner_type=details["owner_type"],
-                        owner_name=details["owner_name"],
-                        importance=details["importance"],
-                        duration=details["duration"],
-                        event_start_date=event["event_date"],
-                        event_end_date=end_date,
-                        title=event["title"],
-                    )
-                    logger.debug("New event created: %s" % event["title"])
+                        logger.debug("Event: %s already in database" % event["title"])
+                        event_ids_to_remove.remove(original.event_id)
+                
+                    else:
+                        IngameEvents.objects.create(
+                            event_id=event["event_id"],
+                            owner=self,
+                            text=details["text"],
+                            event_owner_id=details["owner_id"],
+                            owner_type=details["owner_type"],
+                            owner_name=details["owner_name"],
+                            importance=details["importance"],
+                            duration=details["duration"],
+                            event_start_date=event["event_date"],
+                            event_end_date=end_date,
+                            title=event["title"],
+                        )
+                        logger.debug("New event created: %s" % event["title"])
+                except Exception as e:
+                    logger.debug("Error adding new event: %s" % e)
 
             logger.debug("Removing all events that we did not get over API")
             IngameEvents.objects.filter(pk__in=event_ids_to_remove).delete()
@@ -589,7 +593,7 @@ class IngameEvents(models.Model):
     @property
     def get_date_status(self):
         
-        if datetime.now(timezone.utc) > self.start_time:
+        if datetime.now(timezone.utc) > self.event_start_date:
             return f"past-event"
         else:
             return f"future-event"
@@ -598,10 +602,6 @@ class IngameEvents(models.Model):
     def get_html_url(self):
         url = reverse("opcalendar:ingame-event-detail", args=(self.event_id,))
         return f"{url}"
-
-    @property
-    def get_html_operation_color(self):
-        return "black"
 
     @property
     def get_html_title(self):

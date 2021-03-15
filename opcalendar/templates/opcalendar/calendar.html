@@ -44,7 +44,7 @@
 {% block extra_javascript %}
     {% include 'bundles/jquery-datetimepicker-js.html' %}
     <script>
-		$('.legend div:first-child').prepend('<span class="event show-all">Show all</span>')
+        $('.legend div:first-child').prepend('<span class="event ingame-event">Ingame</span>').prepend('<span class="event show-all">Show all</span>')
 
 		$('.legend').on('click', 'span', function(){
 		    const classes = $(this).attr('class')
