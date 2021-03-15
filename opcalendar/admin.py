@@ -129,6 +129,7 @@ admin.site.register(EventImport, EventHostAdmin)
 
 admin.site.register(Owner)
 
+
 @admin.register(IngameEvents)
 class IngameEventsAdmin(admin.ModelAdmin):
     model = IngameEvents
@@ -138,6 +139,7 @@ class IngameEventsAdmin(admin.ModelAdmin):
         "owner_type",
         "owner_name",
     )
+
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
@@ -150,4 +152,3 @@ class EventAdmin(admin.ModelAdmin):
         "event_visibility",
         "external",
     )
-

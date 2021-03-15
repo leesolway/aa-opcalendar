@@ -1,6 +1,6 @@
 import socket
 from calendar import HTMLCalendar
-from datetime import datetime, date, timezone, timedelta
+from datetime import datetime, date, timedelta
 import random
 import string
 from typing import Any
@@ -19,7 +19,7 @@ from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCharacter
 from allianceauth.services.hooks import get_extension_logger
 from allianceauth.tests.auth_utils import AuthUtils
-from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
+from allianceauth.eveonline.models import EveCorporationInfo
 
 from .models import Event, IngameEvents
 
@@ -88,22 +88,24 @@ class Calendar(HTMLCalendar):
 
         # Get ingame events
         if self.user.has_perm("opcalendar.view_ingame_all_events"):
-            
+
             logger.debug("User can see all ingame events")
             logger.debug("Fetching all ingame events for user: %s" % self.user)
-            
-            ingame_events = IngameEvents.objects.filter(event_start_date__year=self.year, event_start_date__month=self.month)
+
+            ingame_events = IngameEvents.objects.filter(
+                event_start_date__year=self.year, event_start_date__month=self.month
+            )
 
             logger.debug("Returning %s events" % ingame_events.count())
 
         else:
             if self.user.has_perm("opcalendar.view_ingame_events"):
-                
+
                 event_owners = list()
-                
+
                 logger.debug("User can see personal and corporation events")
                 logger.debug("Fetching character ids for user: %s" % self.user)
-                
+
                 character_ids = {
                     character.character.character_id
                     for character in self.user.character_ownerships.all()
@@ -116,7 +118,7 @@ class Calendar(HTMLCalendar):
                 logger.debug("Owner list is now: %s" % event_owners)
 
                 logger.debug("Fetching character ids for user: %s" % self.user)
-                
+
                 corporation_ids = {
                     character.character.corporation_id
                     for character in self.user.character_ownerships.all()
@@ -125,13 +127,15 @@ class Calendar(HTMLCalendar):
                 logger.debug("Got corporation ids: %s" % corporation_ids)
 
                 event_owners += corporation_ids
-                
+
                 logger.debug("Owner list is now: %s" % event_owners)
 
             if self.user.has_perm("opcalendar.view_ingame_alliance_events"):
-                
+
                 logger.debug("User can see own alliance events")
-                logger.debug("Fetching all ingame alliance events for user: %s" % self.user)
+                logger.debug(
+                    "Fetching all ingame alliance events for user: %s" % self.user
+                )
 
                 corporation_owners = list(
                     EveCorporationInfo.objects.select_related("alliance").filter(
@@ -152,9 +156,15 @@ class Calendar(HTMLCalendar):
 
                 logger.debug("Owner list is now: %s" % event_owners)
 
-            logger.debug("Fetching events from dagabase for owner ids: %s" % event_owners)
+            logger.debug(
+                "Fetching events from dagabase for owner ids: %s" % event_owners
+            )
 
-            ingame_events = IngameEvents.objects.filter(event_owner_id__in=event_owners).filter(event_start_date__year=self.year, event_start_date__month=self.month)
+            ingame_events = IngameEvents.objects.filter(
+                event_owner_id__in=event_owners
+            ).filter(
+                event_start_date__year=self.year, event_start_date__month=self.month
+            )
 
             logger.debug("Returning %s events" % ingame_events.count())
 

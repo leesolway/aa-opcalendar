@@ -32,7 +32,10 @@ class General(models.Model):
         managed = False
         default_permissions = ()
         permissions = (
-            ("basic_access", "Can access this app and see operations based on visibility rules"),
+            (
+                "basic_access",
+                "Can access this app and see operations based on visibility rules",
+            ),
             ("view_ingame_events", "Can see personal and corporation ingame events"),
             ("view_ingame_alliance_events", "Can see own alliance ingame events"),
             ("view_ingame_all_events", "Can see all ingame events"),
@@ -354,11 +357,11 @@ class Event(models.Model):
 
     @property
     def get_date_status(self):
-        
+
         if datetime.now(timezone.utc) > self.start_time:
-            return f"past-event"
+            return "past-event"
         else:
-            return f"future-event"   
+            return "future-event"
 
     @property
     def get_html_url(self):
@@ -462,13 +465,12 @@ class Owner(models.Model):
                     owner=self, event_id=event["event_id"]
                 ).first()
 
-                
                 try:
                     if original is not None:
 
                         logger.debug("Event: %s already in database" % event["title"])
                         event_ids_to_remove.remove(original.event_id)
-                
+
                     else:
                         IngameEvents.objects.create(
                             event_id=event["event_id"],
@@ -592,11 +594,11 @@ class IngameEvents(models.Model):
 
     @property
     def get_date_status(self):
-        
+
         if datetime.now(timezone.utc) > self.event_start_date:
-            return f"past-event"
+            return "past-event"
         else:
-            return f"future-event"
+            return "future-event"
 
     @property
     def get_html_url(self):
