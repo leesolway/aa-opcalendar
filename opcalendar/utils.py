@@ -78,12 +78,19 @@ class Calendar(HTMLCalendar):
 
     def formatmonth(self, withyear=True):
         # Get normal events
-        events = Event.objects.filter(
-            start_time__year=self.year,
-            start_time__month=self.month,
-        ).filter(
-            Q(event_visibility__restricted_to_group__in=self.user.groups.all())
-            | Q(event_visibility__restricted_to_state=self.user.profile.state),
+        events = (
+            Event.objects.filter(
+                start_time__year=self.year,
+                start_time__month=self.month,
+            )
+            .filter(
+                Q(event_visibility__restricted_to_group__in=self.user.groups.all())
+                | Q(event_visibility__restricted_to_group__isnull=True),
+            )
+            .filter(
+                Q(event_visibility__restricted_to_state=self.user.profile.state)
+                | Q(event_visibility__restricted_to_state__isnull=True),
+            )
         )
 
         # Get ingame events
