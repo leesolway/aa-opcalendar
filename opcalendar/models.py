@@ -350,7 +350,7 @@ class Event(models.Model):
     def get_event_styling(self):
         if self.event_visibility:
             return f".{self.event_visibility.name.replace(' ', '-').lower()}:before{{border-color: transparent {self.event_visibility.color} transparent transparent;border-style: solid;}} .{self.operation_type.name.replace(' ', '-').lower()} {{border-left: 6px solid {self.operation_type.color} !important;}}"
-    
+
     @property
     def get_category_class(self):
         if self.operation_type:

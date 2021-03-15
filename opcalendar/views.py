@@ -197,13 +197,17 @@ def create_event(request):
 def event_details(request, event_id):
 
     try:
-        event = Event.objects.filter(
+        event = (
+            Event.objects.filter(
                 Q(event_visibility__restricted_to_group__in=request.user.groups.all())
                 | Q(event_visibility__restricted_to_group__isnull=True),
-            ).filter(
+            )
+            .filter(
                 Q(event_visibility__restricted_to_state=request.user.profile.state)
                 | Q(event_visibility__restricted_to_state__isnull=True),
-            ).get(id=event_id)
+            )
+            .get(id=event_id)
+        )
 
         context = {"event": event}
 

@@ -30,7 +30,7 @@ class EventForm(ModelForm):
         self.fields["start_time"].input_formats = ("%Y-%m-%dT%H:%M",)
         self.fields["end_time"].input_formats = ("%Y-%m-%dT%H:%M",)
         self.fields["host"].queryset = EventHost.objects.filter(external=False)
-        self.fields['event_visibility'].required = True
+        self.fields["event_visibility"].required = True
 
 
 class SignupForm(forms.Form):

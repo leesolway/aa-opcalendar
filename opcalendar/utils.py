@@ -86,7 +86,8 @@ class Calendar(HTMLCalendar):
             .filter(
                 Q(event_visibility__restricted_to_group__in=self.user.groups.all())
                 | Q(event_visibility__restricted_to_group__isnull=True),
-            ).filter(
+            )
+            .filter(
                 Q(event_visibility__restricted_to_state=self.user.profile.state)
                 | Q(event_visibility__restricted_to_state__isnull=True),
             )
