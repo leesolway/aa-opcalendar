@@ -29,14 +29,16 @@ Event Details
                 <p>Created by: <span style="color: gray;">{{ event.eve_character }}</span> Starts in: <span id="countdown{{ event.id }}" style="color: gray;">{{ event.eve_character }}</span></p>
                 <hr>
                 <h4>Event details</h4>
+                <style>.{{event.get_visibility_class}}:before{border-color: transparent {{event.event_visibility.color}} transparent transparent;border-style: solid;} .{{event.get_category_class}} {border-left: 6px solid {{event.operation_type.color}} !important;}
+                </style>
                 <table>
                     <tr>
                         <td style="padding-right: 10px;"><b>Type:</b></td>
-                        <td><span class="event {{ event.operation_type.color }}">{{ event.operation_type }}</span></td>
+                        <td><span class="event {{ event.get_category_class }}">{{ event.operation_type }}</span></td>
                     </tr>
                     <tr>
                         <td style="padding-right: 10px;"><b>Availability:</b></td>
-                        <td><span class="event {{ event.get_html_visibility_color }}">{{ event.event_visibility }}</span></td>
+                        <td><span class="event {{ event.get_visibility_class }}">{{ event.event_visibility }}</span></td>
                     </tr>
                     <tr>
                         <td style="padding-right: 10px;"><b>Start time:</b></td>
