@@ -32,10 +32,10 @@ class General(models.Model):
         managed = False
         default_permissions = ()
         permissions = (
-            ("basic_access", "Can access this app"),
-            ("view_public", "Can see public events"),
-            ("view_member", "Can see member events"),
-            ("view_ingame", "Can see events from ingame calendar"),
+            ("basic_access", "Can access this app and see operations based on visibility rules"),
+            ("view_ingame_events", "Can see personal and corporation ingame events"),
+            ("view_ingame_alliance_events", "Can see own alliance ingame events"),
+            ("view_ingame_all_events", "Can see all ingame events"),
             ("create_event", "Can create and edit events"),
             ("manage_event", "Can delete and manage signups"),
             (
@@ -472,6 +472,7 @@ class Owner(models.Model):
                         event_id=event["event_id"],
                         owner=self,
                         text=details["text"],
+                        event_owner_id=details["owner_id"],
                         owner_type=details["owner_type"],
                         owner_name=details["owner_name"],
                         importance=details["importance"],
@@ -569,6 +570,7 @@ class IngameEvents(models.Model):
     event_end_date = models.DateTimeField(blank=True, null=True)
     title = models.CharField(max_length=128)
     text = models.TextField()
+    event_owner_id = models.IntegerField(null=True)
     owner_type = models.CharField(max_length=128)
     owner_name = models.CharField(max_length=128)
     importance = models.CharField(max_length=128)
@@ -583,6 +585,14 @@ class IngameEvents(models.Model):
 
     def get_absolute_url(self):
         return reverse("opcalendar:ingame-event-detail", args=(self.event_id,))
+
+    @property
+    def get_date_status(self):
+        
+        if datetime.now(timezone.utc) > self.start_time:
+            return f"past-event"
+        else:
+            return f"future-event"
 
     @property
     def get_html_url(self):

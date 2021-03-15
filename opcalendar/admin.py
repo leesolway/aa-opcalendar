@@ -129,6 +129,25 @@ admin.site.register(EventImport, EventHostAdmin)
 
 admin.site.register(Owner)
 
-admin.site.register(IngameEvents)
+@admin.register(IngameEvents)
+class IngameEventsAdmin(admin.ModelAdmin):
+    model = IngameEvents
 
-admin.site.register(Event)
+    list_display = (
+        "title",
+        "owner_type",
+        "owner_name",
+    )
+
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    model = Event
+
+    list_display = (
+        "title",
+        "host",
+        "operation_type",
+        "event_visibility",
+        "external",
+    )
+

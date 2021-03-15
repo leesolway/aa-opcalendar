@@ -19,6 +19,7 @@ from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCharacter
 from allianceauth.services.hooks import get_extension_logger
 from allianceauth.tests.auth_utils import AuthUtils
+from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
 
 from .models import Event, IngameEvents
 
@@ -84,7 +85,7 @@ class Calendar(HTMLCalendar):
     # filter events by year and month
 
     def formatmonth(self, withyear=True):
-
+        # Get normal events
         events = Event.objects.filter(
             start_time__year=self.year,
             start_time__month=self.month,
@@ -92,9 +93,78 @@ class Calendar(HTMLCalendar):
             Q(event_visibility__restricted_to_group__in=self.user.groups.all())
             | Q(event_visibility__restricted_to_state=self.user.profile.state),
         )
-        ingame_events = IngameEvents.objects.filter(
-            event_start_date__year=self.year, event_start_date__month=self.month
-        )
+
+        # Get ingame events
+        if self.user.has_perm("opcalendar.view_ingame_all_events"):
+            
+            logger.debug("User can see all ingame events")
+            logger.debug("Fetching all ingame events for user: %s" % self.user)
+            
+            ingame_events = IngameEvents.objects.filter(event_start_date__year=self.year, event_start_date__month=self.month)
+
+            logger.debug("Returning %s events" % ingame_events.count())
+
+        else:
+            if self.user.has_perm("opcalendar.view_ingame_events"):
+                
+                event_owners = list()
+                
+                logger.debug("User can see personal and corporation events")
+                logger.debug("Fetching character ids for user: %s" % self.user)
+                
+                character_ids = {
+                    character.character.character_id
+                    for character in self.user.character_ownerships.all()
+                }
+
+                logger.debug("Got character ids %s" % character_ids)
+
+                event_owners += character_ids
+
+                logger.debug("Owner list is now: %s" % event_owners)
+
+                logger.debug("Fetching character ids for user: %s" % self.user)
+                
+                corporation_ids = {
+                    character.character.corporation_id
+                    for character in self.user.character_ownerships.all()
+                }
+
+                logger.debug("Got corporation ids: %s" % corporation_ids)
+
+                event_owners += corporation_ids
+                
+                logger.debug("Owner list is now: %s" % event_owners)
+
+            if self.user.has_perm("opcalendar.view_ingame_alliance_events"):
+                
+                logger.debug("User can see own alliance events")
+                logger.debug("Fetching all ingame alliance events for user: %s" % self.user)
+
+                corporation_owners = list(
+                    EveCorporationInfo.objects.select_related("alliance").filter(
+                        corporation_id__in=corporation_ids
+                    )
+                )
+
+                alliances_ids = {
+                    corporation.alliance.alliance_id
+                    for corporation in corporation_owners
+                    if corporation.alliance
+                }
+
+                logger.debug("Got alliance ids: %s" % alliances_ids)
+
+                # Add alliance id to owner list
+                event_owners += alliances_ids
+
+                logger.debug("Owner list is now: %s" % event_owners)
+
+            logger.debug("Fetching events from dagabase for owner ids: %s" % event_owners)
+
+            ingame_events = IngameEvents.objects.filter(event_owner_id__in=event_owners).filter(event_start_date__year=self.year, event_start_date__month=self.month)
+
+            logger.debug("Returning %s events" % ingame_events.count())
 
         cal = '<table class="calendar">\n'
         cal += f"{self.formatmonthname(self.year, self.month, withyear=withyear)}\n"
