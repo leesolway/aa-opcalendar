@@ -621,8 +621,12 @@ class IngameEvents(models.Model):
 
     @property
     def get_event_styling(self):
+        d = ""
         if self.owner.event_visibility:
-            return f".{self.owner.event_visibility.name.replace(' ', '-').lower()}:before{{border-color: transparent {self.owner.event_visibility.color} transparent transparent;border-style: solid;}} .{self.owner.operation_type.name.replace(' ', '-').lower()} {{border-left: 6px solid {self.owner.operation_type.color} !important;}}"
+            d += f".{self.owner.event_visibility.name.replace(' ', '-').lower()}:before{{border-color: transparent {self.owner.event_visibility.color} transparent transparent;border-style: solid;}}"
+        if self.owner.operation_type:
+            d += f".{self.owner.operation_type.name.replace(' ', '-').lower()} {{border-left: 6px solid {self.owner.operation_type.color} !important;}}"
+        return d
 
     @property
     def get_category_class(self):
