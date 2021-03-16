@@ -54,12 +54,11 @@ class Calendar(HTMLCalendar):
                 )
 
             for event in ingame_events_per_day:
-                if self.user.has_perm("opcalendar.view_ingame"):
-                    d += (
-                        f'<a class="nostyling" href="{event.get_html_url}">'
-                        f'<div class="event ingame-event {event.get_date_status}">{event.get_html_title}</div>'
-                        f"</a>"
-                    )
+                d += (
+                    f'<a class="nostyling" href="{event.get_html_url}">'
+                    f'<div class="event ingame-event {event.get_date_status}">{event.get_html_title}</div>'
+                    f"</a>"
+                )
 
             if date.today() == date(self.year, self.month, day):
                 return f"<td class='today'><div class='date'>{day}</div> {d}</td>"
@@ -94,6 +93,7 @@ class Calendar(HTMLCalendar):
         )
 
         # Get ingame events
+        event_owners = list()
         if self.user.has_perm("opcalendar.view_ingame_all_events"):
 
             logger.debug("User can see all ingame events")
@@ -107,8 +107,6 @@ class Calendar(HTMLCalendar):
 
         else:
             if self.user.has_perm("opcalendar.view_ingame_events"):
-
-                event_owners = list()
 
                 logger.debug("User can see personal and corporation events")
                 logger.debug("Fetching character ids for user: %s" % self.user)
@@ -138,6 +136,11 @@ class Calendar(HTMLCalendar):
                 logger.debug("Owner list is now: %s" % event_owners)
 
             if self.user.has_perm("opcalendar.view_ingame_alliance_events"):
+
+                corporation_ids = {
+                    character.character.corporation_id
+                    for character in self.user.character_ownerships.all()
+                }
 
                 logger.debug("User can see own alliance events")
                 logger.debug(
