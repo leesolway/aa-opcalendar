@@ -64,8 +64,16 @@ class EventHostAdmin(admin.ModelAdmin):
 admin.site.register(EventHost, EventHostAdmin)
 
 
-class EventHostAdmin(admin.ModelAdmin):
+@admin.register(EventImport)
+class EventImportAdmin(admin.ModelAdmin):
     model = EventImport
+
+    list_display = (
+        "source",
+        "host",
+        "event_visibility",
+        "operation_type",
+    )
 
 
 @admin.register(EventVisibility)
@@ -125,9 +133,16 @@ class EventVisibilityAdmin(admin.ModelAdmin):
     _restricted_to_state.admin_order_field = "restricted_to_state__name"
 
 
-admin.site.register(EventImport, EventHostAdmin)
+@admin.register(Owner)
+class OwnerAdmin(admin.ModelAdmin):
+    model = Owner
 
-admin.site.register(Owner)
+    list_display = (
+        "character",
+        "event_visibility",
+        "operation_type",
+        "is_active",
+    )
 
 
 @admin.register(IngameEvents)

@@ -12,8 +12,10 @@ Event Details
             <div class="clearfix">
                 <a class="btn btn-primary left" href="{% url 'opcalendar:calendar' %}"> Calendar </a>
                 {% if perms.opcalendar.create_event %}
-                    <a class="btn btn-primary left mr-2" href="{% url 'opcalendar:event_edit' event.pk %}"> Edit Event </a>
-                    <a class="btn btn-danger" href="{% url 'opcalendar:remove_event' event.id %}">Remove</a>
+                    {% if not event.external %}
+                        <a class="btn btn-primary left mr-2" href="{% url 'opcalendar:event_edit' event.pk %}"> Edit Event </a>
+                        <a class="btn btn-danger" href="{% url 'opcalendar:remove_event' event.id %}">Remove</a>
+                    {% endif %}
                 {% endif %}
             </div>
 

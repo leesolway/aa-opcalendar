@@ -43,9 +43,6 @@ An operation calendar app for Alliance Auth to display fleet operations and othe
 Perm | Auth Site | Example Target Group
  --- | --- | ---
 opcalendar basic_access | Can access this app and see operations based on visibility rules | Everyone
-opcalendar view_ingame_events | Can see personal and corporation ingame events | Corporation members
-opcalendar view_ingame_alliance_events | Can see own alliance ingame events | Alliance members
-opcalendar view_ingame_all_events | Can see all ingame events | Leadership
 opcalendar create_event | Can create and edit events | Leadership, FCs
 opcalendar manage_event | Can delete and manage signups | Leadership, FCs
 
@@ -55,27 +52,46 @@ Name | Description | Default
  --- | --- | ---
 OPCALENDAR_NOTIFY_IMPORTS | Wheter to send out discord notifications for ingame and public NPSI events | True
 
-## Usage
-Before you are able to create new events on the front end you will need to setup the needed categories and filters for your events.
+## Setup
+Before you are able to create new events on the front end you will need to setup the needed categories and visibility filters for your events.
 
+### 1. Host
+Hosts are for identifying reasons. If you run a single corporation or alliance entity you most likely only want one host. If you want to extend the calendar with other hosts such as NPSI communities you can create a host for each different entity.
+- Host name is shown on the event and on discord notifications
+- You can customize host logos
 - Go to the admin site
-- **Add a Host**. The first host is most likely your own alliance/corporation/community. Fill in at least the name ie. your alliance name. This name will be displayed on the calendar view on the event block. You may fill in additional information which will be displayed on the detailed view for the event.
-- **Add visibility**. Event visibilities will determine who will be able to see the events. You can limit visibilities to groups or auth states. **If no filters are selected the event will be visible for everyone**
-- **Add a category**. Next you will need to add at least one category for your events. Categories can be whatever you want to have such as STRATOP, mining, roam etc. The ticker for the event will be displayed both on the calendar view event block and on the detailed view for the event.
-- **Webhook for discord notifications (optional)**. If you want to receive notifications about your events (created/modified/deleted) on your discord you can add a webhook for the channel in discord you want to receive the notifications to. Add a webhook and connect it to the fleet signals.
-- **Add new event**. To add new events simply go to the operation calendar and click on the add event button. Fill in the information for your event.
+
+### 2. Visibility filter
+These filters will determine who is able to see the events that are labeled with each different visibility filter.
+- Can be restricted to groups and states
+- If no groups or states are selected the events will be visible for everyone
+- You can determine a custom color tag that will be shown on the top right corner of the event
+- Each visibility filter will be displayed on the calendar and can be used for filtering events on the calendar
+- Discord notification webhooks can be assigned for each visibility filter. Events created, deleted or edited under this filter will then be sent over to discord.
+
+### 3. Categories
+Categories are displayed as a ticker infront of manually created events. Most common categories are: PvP, Stratop, Mining, CTA etc...
+- Ticker displayed on event
+- Custom colors
+
+### 4. Discord webhook
+If you want to receive notifications about your events (created/modified/deleted) on your discord you can add a webhook for the channel in discord you want to receive the notifications to. The webhooks you create will be used in the visibility filters.
+
+## Adding manual events
+To add a manual event simply go to the calendar page and press on the new event button. Fill in and select the needed information.
 
 
-### Importing NPSI fleets
-Opcalendar has  the ability to import predetermined NPSI fleets directly into your calendar. These operations will be labeled as `imported` operations.
+## Importing NPSI fleets
+Opcalendar has  the ability to import predetermined NPSI fleets directly into your calendar.
 
+### Supported NPSI communities
 Opcalendar is currently supporting imports for the following NPSI fleets:
 
 - Spectre fleet
 - Eve University (classes only)
 - FUN INC
 
-To start importing fleets:
+### Setup
 
 - **Go to admin panel and select NPSI Event Imports**
 - **Create a host** for each import and fill in the needed details for them.
@@ -94,13 +110,12 @@ CELERYBEAT_SCHEDULE['import_all_npsi_fleets'] = {
 
 ```
 
-### Importing fleets from ingame calendar
+## Importing fleets from ingame calendar
 You can import events that have been created in the ingame calendar. As the fields on the ingame calendar are limited the events will not be as detailed as when created directly from the calendar.
 
-1. Give the add_ingame_calendar_owner role for the wanter groups
+1. Give the `add_ingame_calendar_owner` role for the wanter groups
 2. Navigate to the opcalendar page and press the `Add Ingame Calendar Feed` button
 3. Log in with the character that holds the calendar
-4. Set up the view permissions for your members
 5. Add the following line into your local.py setting file or set up a periodic task for the `opcalendar.tasks.update_all_ingame_events` to pull fleets from ingame every 5 minutes.
 
 ```
@@ -109,6 +124,13 @@ CELERYBEAT_SCHEDULE['update_all_ingame_events'] = {
     'schedule': crontab(minute='*/5'),
 }
 ```
+
+### Ingame event visibility and categories
+On default the ingame events you import have no visibility filter and no category. This means they will be visible for everyone.
+
+If you wish to add a visibility filter or a category similar to the manual events simply go to the `admin panel -> Ingame event owners` and select a filter and a category for the owner.
+
+After selecing a visibility filter and a category the ingame events will behave similar to the manual events and respect the group and state restrictions set for the visibility filters.
 
 ## Contributing
 Make sure you have signed the [License Agreement](https://developers.eveonline.com/resource/license-agreement) by logging in at https://developers.eveonline.com before submitting any pull requests. All bug fixes or features must not include extra superfluous formatting changes.

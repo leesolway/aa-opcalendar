@@ -6,7 +6,7 @@ from django.dispatch import receiver
 
 
 from django.db.models.signals import post_save, pre_delete
-from .models import Event, EventVisibility, IngameEvents
+from .models import Event, IngameEvents
 import datetime
 from django.utils import timezone
 
@@ -30,7 +30,7 @@ esi = EsiClientProvider()
 def fleet_saved(sender, instance, created, **kwargs):
 
     # Ingame Calendar Event
-    if sender == IngameEvents:
+    if sender == IngameEvents and OPCALENDAR_NOTIFY_IMPORTS:
         try:
             logger.debug(
                 "New signal created for New Ingame Calendar Event: %s" % instance.title
@@ -119,14 +119,14 @@ def fleet_saved(sender, instance, created, **kwargs):
                 },
             }
 
-            hooks = EventVisibility.objects.all().select_related("webhook")
+            hook = instance.owner.event_visibility
+
             old = datetime.datetime.now(timezone.utc) > eve_time
 
-            for hook in hooks:
-                if hook.webhook.enabled:
-                    if old and hook.ignore_past_fleets:
-                        continue
-                    hook.webhook.send_embed(embed)
+            if hook.webhook.enabled:
+                if old and hook.ignore_past_fleets:
+                    logger.debug("Event is in the past, not sending webhook.")
+                hook.webhook.send_embed(embed)
 
         except Exception as e:
             logger.error(e)
@@ -190,17 +190,14 @@ def fleet_saved(sender, instance, created, **kwargs):
                         "text": " %s %s, %s" % (character_name, ticker, instance.host),
                     },
                 }
-                logger.debug("Created embed: %s" % embed)
-                hooks = EventVisibility.objects.all().select_related("webhook")
+                hook = instance.event_visibility
+
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
-                logger.debug("got hooks: %s" % hooks)
-
-                for hook in hooks:
-                    if hook.webhook.enabled:
-                        if old and hook.ignore_past_fleets:
-                            continue
-                        hook.webhook.send_embed(embed)
+                if hook.webhook.enabled:
+                    if old and hook.ignore_past_fleets:
+                        logger.debug("Event is in the past, not sending webhook.")
+                    hook.webhook.send_embed(embed)
 
             except Exception as e:
                 logger.error(e)
@@ -262,14 +259,14 @@ def fleet_saved(sender, instance, created, **kwargs):
                     },
                 }
 
-                hooks = EventVisibility.objects.all().select_related("webhook")
+                hook = instance.event_visibility
+
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
-                for hook in hooks:
-                    if hook.webhook.enabled:
-                        if old and hook.ignore_past_fleets:
-                            continue
-                        hook.webhook.send_embed(embed)
+                if hook.webhook.enabled:
+                    if old and hook.ignore_past_fleets:
+                        logger.debug("Event is in the past, not sending webhook.")
+                    hook.webhook.send_embed(embed)
 
             except Exception as e:
                 logger.error(e)
@@ -281,7 +278,7 @@ def fleet_saved(sender, instance, created, **kwargs):
 def fleet_deleted(sender, instance, **kwargs):
 
     # Ingame Calendar Event
-    if sender == IngameEvents:
+    if sender == IngameEvents and OPCALENDAR_NOTIFY_IMPORTS:
         try:
             logger.debug(
                 "New signal created for Deleted Ingame Calendar Event: %s"
@@ -366,15 +363,14 @@ def fleet_deleted(sender, instance, **kwargs):
                 },
             }
 
-            hooks = EventVisibility.objects.all().select_related("webhook")
+            hook = instance.owner.event_visibility
 
             old = datetime.datetime.now(timezone.utc) > eve_time
 
-            for hook in hooks:
-                if hook.webhook.enabled:
-                    if old and hook.ignore_past_fleets:
-                        continue
-                    hook.webhook.send_embed(embed)
+            if hook.webhook.enabled:
+                if old and hook.ignore_past_fleets:
+                    logger.debug("Event is in the past, not sending webhook.")
+                hook.webhook.send_embed(embed)
 
         except Exception as e:
             logger.error(e)
@@ -434,14 +430,14 @@ def fleet_deleted(sender, instance, **kwargs):
                     },
                 }
 
-                hooks = EventVisibility.objects.all().select_related("webhook")
+                hook = instance.event_visibility
+
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
-                for hook in hooks:
-                    if hook.webhook.enabled:
-                        if old and hook.ignore_past_fleets:
-                            continue
-                        hook.webhook.send_embed(embed)
+                if hook.webhook.enabled:
+                    if old and hook.ignore_past_fleets:
+                        logger.debug("Event is in the past, not sending webhook.")
+                    hook.webhook.send_embed(embed)
 
             except Exception as e:
                 logger.error(e)
@@ -493,14 +489,14 @@ def fleet_deleted(sender, instance, **kwargs):
                     },
                 }
 
-                hooks = EventVisibility.objects.all().select_related("webhook")
+                hook = instance.event_visibility
+
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
-                for hook in hooks:
-                    if hook.webhook.enabled:
-                        if old and hook.ignore_past_fleets:
-                            continue
-                        hook.webhook.send_embed(embed)
+                if hook.webhook.enabled:
+                    if old and hook.ignore_past_fleets:
+                        logger.debug("Event is in the past, not sending webhook.")
+                    hook.webhook.send_embed(embed)
 
             except Exception as e:
                 logger.error(e)

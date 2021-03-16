@@ -36,9 +36,6 @@ class General(models.Model):
                 "basic_access",
                 "Can access this app and see operations based on visibility rules",
             ),
-            ("view_ingame_events", "Can see personal and corporation ingame events"),
-            ("view_ingame_alliance_events", "Can see own alliance ingame events"),
-            ("view_ingame_all_events", "Can see all ingame events"),
             ("create_event", "Can create and edit events"),
             ("manage_event", "Can delete and manage signups"),
             (
@@ -121,8 +118,8 @@ class EventVisibility(models.Model):
         return str(self.name)
 
     class Meta:
-        verbose_name = "Event Visibility"
-        verbose_name_plural = "Event Visibilities"
+        verbose_name = "Event Visibility Filter"
+        verbose_name_plural = "Event Visibilities Filters"
 
     @property
     def get_visibility_class(self):
@@ -424,6 +421,22 @@ class Owner(models.Model):
         help_text="Character used for syncing the calendar",
         related_name="+",
     )
+    event_visibility = models.ForeignKey(
+        EventVisibility,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text=_("Visibility filter that dictates who is able to see this event"),
+    )
+    operation_type = models.ForeignKey(
+        EventCategory,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text=_(
+            "Event category that will be assigned for all of the events from this owner."
+        ),
+    )
     is_active = models.BooleanField(
         default=True,
         help_text=("whether this owner is currently included in the sync process"),
@@ -600,6 +613,21 @@ class IngameEvents(models.Model):
             return "past-event"
         else:
             return "future-event"
+
+    @property
+    def get_visibility_class(self):
+        if self.owner.event_visibility:
+            return f"{self.owner.event_visibility.name.replace(' ', '-').lower()}"
+
+    @property
+    def get_event_styling(self):
+        if self.owner.event_visibility:
+            return f".{self.owner.event_visibility.name.replace(' ', '-').lower()}:before{{border-color: transparent {self.owner.event_visibility.color} transparent transparent;border-style: solid;}} .{self.owner.operation_type.name.replace(' ', '-').lower()} {{border-left: 6px solid {self.owner.operation_type.color} !important;}}"
+
+    @property
+    def get_category_class(self):
+        if self.owner.operation_type:
+            return f"{self.owner.operation_type.name.replace(' ', '-').lower()}"
 
     @property
     def get_html_url(self):

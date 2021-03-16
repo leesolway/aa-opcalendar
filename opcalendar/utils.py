@@ -19,7 +19,6 @@ from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCharacter
 from allianceauth.services.hooks import get_extension_logger
 from allianceauth.tests.auth_utils import AuthUtils
-from allianceauth.eveonline.models import EveCorporationInfo
 
 from .models import Event, IngameEvents
 
@@ -55,8 +54,9 @@ class Calendar(HTMLCalendar):
 
             for event in ingame_events_per_day:
                 d += (
+                    f"<style>{event.get_event_styling}</style>"
                     f'<a class="nostyling" href="{event.get_html_url}">'
-                    f'<div class="event ingame-event {event.get_date_status}">{event.get_html_title}</div>'
+                    f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class}">{event.get_html_title}</div>'
                     f"</a>"
                 )
 
@@ -92,91 +92,23 @@ class Calendar(HTMLCalendar):
             )
         )
 
-        # Get ingame events
-        event_owners = list()
-        if self.user.has_perm("opcalendar.view_ingame_all_events"):
-
-            logger.debug("User can see all ingame events")
-            logger.debug("Fetching all ingame events for user: %s" % self.user)
-
-            ingame_events = IngameEvents.objects.filter(
+        ingame_events = (
+            IngameEvents.objects.filter(
                 event_start_date__year=self.year, event_start_date__month=self.month
             )
-
-            logger.debug("Returning %s events" % ingame_events.count())
-
-        else:
-            if self.user.has_perm("opcalendar.view_ingame_events"):
-
-                logger.debug("User can see personal and corporation events")
-                logger.debug("Fetching character ids for user: %s" % self.user)
-
-                character_ids = {
-                    character.character.character_id
-                    for character in self.user.character_ownerships.all()
-                }
-
-                logger.debug("Got character ids %s" % character_ids)
-
-                event_owners += character_ids
-
-                logger.debug("Owner list is now: %s" % event_owners)
-
-                logger.debug("Fetching character ids for user: %s" % self.user)
-
-                corporation_ids = {
-                    character.character.corporation_id
-                    for character in self.user.character_ownerships.all()
-                }
-
-                logger.debug("Got corporation ids: %s" % corporation_ids)
-
-                event_owners += corporation_ids
-
-                logger.debug("Owner list is now: %s" % event_owners)
-
-            if self.user.has_perm("opcalendar.view_ingame_alliance_events"):
-
-                corporation_ids = {
-                    character.character.corporation_id
-                    for character in self.user.character_ownerships.all()
-                }
-
-                logger.debug("User can see own alliance events")
-                logger.debug(
-                    "Fetching all ingame alliance events for user: %s" % self.user
+            .filter(
+                Q(
+                    owner__event_visibility__restricted_to_group__in=self.user.groups.all()
                 )
-
-                corporation_owners = list(
-                    EveCorporationInfo.objects.select_related("alliance").filter(
-                        corporation_id__in=corporation_ids
-                    )
-                )
-
-                alliances_ids = {
-                    corporation.alliance.alliance_id
-                    for corporation in corporation_owners
-                    if corporation.alliance
-                }
-
-                logger.debug("Got alliance ids: %s" % alliances_ids)
-
-                # Add alliance id to owner list
-                event_owners += alliances_ids
-
-                logger.debug("Owner list is now: %s" % event_owners)
-
-            logger.debug(
-                "Fetching events from dagabase for owner ids: %s" % event_owners
+                | Q(owner__event_visibility__restricted_to_group__isnull=True),
             )
-
-            ingame_events = IngameEvents.objects.filter(
-                event_owner_id__in=event_owners
-            ).filter(
-                event_start_date__year=self.year, event_start_date__month=self.month
+            .filter(
+                Q(owner__event_visibility__restricted_to_state=self.user.profile.state)
+                | Q(owner__event_visibility__restricted_to_state__isnull=True),
             )
+        )
 
-            logger.debug("Returning %s events" % ingame_events.count())
+        logger.debug("Returning %s events" % ingame_events.count())
 
         cal = '<table class="calendar">\n'
         cal += f"{self.formatmonthname(self.year, self.month, withyear=withyear)}\n"
