@@ -5,15 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.0.0a4
+
+### Fixed
+- Ingame events to fall in line with the correct time compared to normal events
+
+### Added
+- Support to structure timers plugin
+
+## v2.0.0a3
+
+### Changed
+- How ingame event visibility works
+
+### Fixed
+- #8
+- #9
+
+## v2.0.0a2
+
+### Fixed
+- #8
+- #9
+
 ## v2.0.0a1 - 2021-03-15
 This is a major update for opcalendar that will add the option for custom colors, visibility options and ingame event view permissions.
 
-## Added
+### Added
 - Custom colors
 - Visibility filters
 - Ingame event filters
 
-## To update:
+### To update:
 After updating you will need to create new visibility filters (the old public and member filters) and assign states or groups for it. If no states or groups are selected the event with this filter are visible for everyone.
 
 Customize your colors for the visibility filters and for the categories in the admin menu.

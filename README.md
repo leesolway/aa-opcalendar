@@ -15,6 +15,7 @@ An operation calendar app for Alliance Auth to display fleet operations and othe
 	* Automatic syncing with ingame events
 	* Supports moon mining calendar events
 	* Personal, Corporation and Alliance calendars
+* Supports [structure timers](https://gitlab.com/ErikKalkoken/aa-structuretimers)
 * Event visibility options
 	* Custom names
 	* Restrict to groups
