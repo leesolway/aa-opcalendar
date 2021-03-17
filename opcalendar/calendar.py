@@ -1,38 +1,24 @@
+import operator
+from calendar import HTMLCalendar
+from datetime import date
+from itertools import chain
+
+from django.db.models import Q, F
+
+from allianceauth.services.hooks import get_extension_logger
+
+from .models import Event, IngameEvents
 from .app_settings import (
     OPCALENDAR_DISPLAY_STRUCTURETIMERS,
 )
+
 from .app_settings import structuretimers_active
-
-import socket
-import operator
-from calendar import HTMLCalendar
-from datetime import datetime, date, timedelta
-import random
-import string
-from typing import Any
-from itertools import chain
-
-from django.contrib import messages
-from django.contrib.auth.models import User
-from django.conf import settings
-from django.contrib.messages.constants import DEBUG, ERROR, INFO, SUCCESS, WARNING
-from django.test import TestCase
-from django.utils.html import format_html
-from django.db.models import Q, F
-
-from esi.models import Scope, Token
-
-from allianceauth.authentication.models import CharacterOwnership
-from allianceauth.eveonline.models import EveCharacter
-from allianceauth.services.hooks import get_extension_logger
-from allianceauth.tests.auth_utils import AuthUtils
-
-from .models import Event, IngameEvents
 
 if structuretimers_active():
     from structuretimers.models import Timer
 
 logger = get_extension_logger(__name__)
+
 
 class Calendar(HTMLCalendar):
     def __init__(self, year=None, month=None, user=None):
@@ -47,14 +33,12 @@ class Calendar(HTMLCalendar):
 
         events_per_day = events.filter(start_time__day=day)
 
-        ingame_events_per_day = ingame_events.filter(
-            event_start_date__day=day
-        )
+        ingame_events_per_day = ingame_events.filter(event_start_date__day=day)
 
         structuretimers_per_day = structuretimer_events.filter(start_time__day=day)
 
         all_events_per_day = sorted(
-            chain(events_per_day, ingame_events_per_day,structuretimers_per_day),
+            chain(events_per_day, ingame_events_per_day, structuretimers_per_day),
             key=operator.attrgetter("start_time"),
         )
 
@@ -64,18 +48,16 @@ class Calendar(HTMLCalendar):
         if day != 0:
             # Parse events
             for event in all_events_per_day:
-                
-                if not type(event).__name__ == 'Timer':
+
+                if not type(event).__name__ == "Timer":
                     d += (
                         f"<style>{event.get_event_styling}</style>"
                         f'<a class="nostyling" href="{event.get_html_url}">'
                         f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class}">{event.get_html_title}</div>'
                         f"</a>"
                     )
-                if type(event).__name__ == 'Timer':
-                    d += (
-                        f'<div class="event event-structuretimer">{event.date.strftime("%H:%M")}<i> Structure timer: {event.structure_name}</i></div>'
-                    )
+                if type(event).__name__ == "Timer":
+                    d += f'<div class="event event-structuretimer">{event.date.strftime("%H:%M")}<i> Structure timer: {event.structure_name}</i></div>'
 
             if date.today() == date(self.year, self.month, day):
                 return f"<td class='today'><div class='date'>{day}</div> {d}</td>"
@@ -131,14 +113,20 @@ class Calendar(HTMLCalendar):
         # Check if structuretimers is active
         # Should we fetch timers
         if structuretimers_active() and OPCALENDAR_DISPLAY_STRUCTURETIMERS:
-            structuretimer_events = Timer.objects.all().visible_to_user(self.user).annotate(start_time=F("date")).filter(
-                    date__year=self.year, date__month=self.month
-                )
+            structuretimer_events = (
+                Timer.objects.all()
+                .visible_to_user(self.user)
+                .annotate(start_time=F("date"))
+                .filter(date__year=self.year, date__month=self.month)
+            )
         else:
             structuretimer_events = Event.objects.none()
 
-        logger.debug("Returning %s structure timers, display setting is %s" % (structuretimer_events.count(),OPCALENDAR_DISPLAY_STRUCTURETIMERS))
-        
+        logger.debug(
+            "Returning %s structure timers, display setting is %s"
+            % (structuretimer_events.count(), OPCALENDAR_DISPLAY_STRUCTURETIMERS)
+        )
+
         logger.debug("Returning %s events" % ingame_events.count())
 
         cal = '<table class="calendar">\n'
