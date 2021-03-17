@@ -41,7 +41,7 @@ class SignupForm(forms.Form):
 class AddMemberForm(forms.ModelForm):
     class Meta:
         model = EventMember
-        fields = ["user"]
+        fields = ["character"]
 
 
 class AddCategoryForm(forms.ModelForm):

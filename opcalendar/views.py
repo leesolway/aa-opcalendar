@@ -34,7 +34,7 @@ from opcalendar.models import (
 from . import tasks
 from .utils import messages_plus
 from .calendar import Calendar
-from .forms import EventForm, AddMemberForm
+from .forms import EventForm
 
 logger = get_extension_logger(__name__)
 
@@ -209,8 +209,9 @@ def event_details(request, event_id):
             )
             .get(id=event_id)
         )
+        eventmember = EventMember.objects.filter(event=event)
 
-        context = {"event": event}
+        context = {"event": event, "eventmember": eventmember}
 
         return render(request, "opcalendar/event-details.html", context)
 
@@ -282,21 +283,21 @@ def ingame_event_details(request, event_id):
 
 @login_required(login_url="signup")
 @permission_required("opcalendar.manage_event")
-def add_eventmember(request, event_id):
-    forms = AddMemberForm()
-    if request.method == "POST":
-        forms = AddMemberForm(request.POST)
-        if forms.is_valid():
-            member = EventMember.objects.filter(event=event_id)
-            event = Event.objects.get(id=event_id)
-            if member.count() <= 9:
-                user = forms.cleaned_data["user"]
-                EventMember.objects.create(event=event, user=user)
-                return redirect("opcalendar:calendar")
-            else:
-                print("--------------User limit exceed!-----------------")
-    context = {"form": forms}
-    return render(request, "opcalendar/add_member.html", context)
+def EventSignup(request, event_id):
+
+    event = Event.objects.get(id=event_id)
+
+    character = request.user.profile.main_character
+
+    EventMember.objects.create(event=event, character=character)
+
+    messages.success(
+        request,
+        _("Succesfully signed up for event: %(event)s with %(character)s.")
+        % {"event": event, "character": character},
+    )
+
+    return HttpResponseRedirect(reverse("opcalendar:calendar"))
 
 
 @login_required
@@ -311,3 +312,22 @@ def EventDeleteView(request, event_id):
     logger.info("Deleting optimer id %s by user %s" % (event_id, request.user))
     messages.error(request, _("Removed event %(opname)s.") % {"opname": op.title})
     return redirect("opcalendar:calendar")
+
+
+@login_required
+@permission_required("opcalendar.create_event")
+def EventMemberRemove(request, event_id):
+    logger.debug(
+        "remove_optimer called by user %s for operation id %s"
+        % (request.user, event_id)
+    )
+    op = get_object_or_404(EventMember, id=event_id)
+    character = request.user.profile.main_character
+
+    op.delete()
+    messages.error(
+        request,
+        _("Removed signup for %(character)s.") % {"character": character},
+    )
+
+    return HttpResponseRedirect(reverse("opcalendar:calendar"))

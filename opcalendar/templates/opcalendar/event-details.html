@@ -120,6 +120,32 @@ Event Details
                 <p style="padding-top:40px">{{ event.host.details }}</p>
             </div>
         </div>
+            <div>
+                <div>
+                    <a class="btn btn-success right" href="{% url 'opcalendar:event_signup' event.id %}">Sign up for event</a>
+                </div>
+                <table class="table table-bordered">
+                <thead>
+                    <tr>
+                      <th style="width: 10px">#</th>
+                      <th>Name</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for member in eventmember %}
+                    <tr role="row">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ member.character }}</td>
+                        <td>
+                            <a class="btn btn-danger" href="{% url 'opcalendar:remove_event_member' member.id %}">Remove</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+            </table>
+        </div>
+    </div>
     </div>
 {% include 'bundles/moment-js.html' with locale=True %}
     <script src="{% static 'js/timers.js' %}"></script>

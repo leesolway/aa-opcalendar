@@ -15,8 +15,11 @@ urlpatterns = [
         views.ingame_event_details,
         name="ingame-event-detail",
     ),
-    path(
-        "add_eventmember/<int:event_id>", views.add_eventmember, name="add_eventmember"
-    ),
+    path("add_eventmember/<int:event_id>", views.EventSignup, name="event_signup"),
     path("event/<int:event_id>/remove", views.EventDeleteView, name="remove_event"),
+    path(
+        "remove_eventmember/<int:event_id>",
+        views.EventMemberRemove,
+        name="remove_event_member",
+    ),
 ]

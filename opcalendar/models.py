@@ -645,10 +645,12 @@ class IngameEvents(models.Model):
 
 class EventMember(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    character = models.ForeignKey(
+        EveCharacter,
+        null=True,
+        on_delete=models.SET_NULL,
+        help_text="Event creator main character",
+    )
 
     class Meta:
-        unique_together = ["event", "user"]
-
-    def __str__(self):
-        return str(self.user)
+        unique_together = ["event", "character"]
