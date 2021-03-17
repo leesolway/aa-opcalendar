@@ -1,4 +1,4 @@
-from django.forms import ModelForm, DateInput
+from django.forms import ModelForm
 from opcalendar.models import (
     Event,
     EventMember,
@@ -14,14 +14,6 @@ class EventForm(ModelForm):
     class Meta:
         model = Event
         # datetime-local is a HTML5 input type, format to make date time show on fields
-        widgets = {
-            "start_time": DateInput(
-                attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
-            ),
-            "end_time": DateInput(
-                attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
-            ),
-        }
         exclude = ["user", "eve_character", "created_date", "external"]
 
     def __init__(self, *args, **kwargs):
