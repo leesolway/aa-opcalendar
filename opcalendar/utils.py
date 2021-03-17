@@ -1,9 +1,11 @@
 import socket
+import operator
 from calendar import HTMLCalendar
 from datetime import datetime, date, timedelta
 import random
 import string
 from typing import Any
+from itertools import chain
 
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -11,7 +13,7 @@ from django.conf import settings
 from django.contrib.messages.constants import DEBUG, ERROR, INFO, SUCCESS, WARNING
 from django.test import TestCase
 from django.utils.html import format_html
-from django.db.models import Q
+from django.db.models import Q, F
 
 from esi.models import Scope, Token
 
@@ -35,24 +37,25 @@ class Calendar(HTMLCalendar):
     # formats a day as a td
     # filter events by day
     def formatday(self, day, events, ingame_events):
+
         events_per_day = events.filter(start_time__day=day).order_by("start_time")
+
         ingame_events_per_day = ingame_events.filter(
             event_start_date__day=day
         ).order_by("event_start_date")
+
+        all_ingame_events = sorted(
+            chain(events_per_day, ingame_events_per_day),
+            key=operator.attrgetter("start_time"),
+        )
+
         d = ""
 
+        logger.debug(all_ingame_events)
         # Only events for current month
         if day != 0:
             # Parse events
-            for event in events_per_day:
-                d += (
-                    f"<style>{event.get_event_styling}</style>"
-                    f'<a class="nostyling" href="{event.get_html_url}">'
-                    f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class}">{event.get_html_title}</div>'
-                    f"</a>"
-                )
-
-            for event in ingame_events_per_day:
+            for event in all_ingame_events:
                 d += (
                     f"<style>{event.get_event_styling}</style>"
                     f'<a class="nostyling" href="{event.get_html_url}">'
@@ -96,6 +99,7 @@ class Calendar(HTMLCalendar):
             IngameEvents.objects.filter(
                 event_start_date__year=self.year, event_start_date__month=self.month
             )
+            .annotate(start_time=F("event_start_date"), end_time=F("event_end_date"))
             .filter(
                 Q(
                     owner__event_visibility__restricted_to_group__in=self.user.groups.all()
