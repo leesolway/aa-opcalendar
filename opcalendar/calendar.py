@@ -2,9 +2,9 @@ import operator
 from calendar import HTMLCalendar
 from datetime import date
 from itertools import chain
-
+from datetime import datetime
 from django.db.models import Q, F
-
+from django.utils import timezone
 from allianceauth.services.hooks import get_extension_logger
 
 from .models import Event, IngameEvents
@@ -57,8 +57,23 @@ class Calendar(HTMLCalendar):
                         f"</a>"
                     )
                 if type(event).__name__ == "Timer":
-                    d += f'<div class="event event-structuretimer">{event.date.strftime("%H:%M")}<i> Structure timer: {event.structure_name}</i></div>'
+                    OBJECTIVE_UNDEFINED = "UN"
+                    OBJECTIVE_HOSTILE = "HO"
+                    OBJECTIVE_FRIENDLY = "FR"
+                    OBJECTIVE_NEUTRAL = "NE"
 
+                    if event.objective == OBJECTIVE_HOSTILE:
+                        objective_verbosed = "Hostile"
+                    if event.objective == OBJECTIVE_FRIENDLY:
+                        objective_verbosed = "Friendly"
+                    if event.objective == OBJECTIVE_NEUTRAL:
+                        objective_verbosed = "Neutral"
+                    if event.objective == OBJECTIVE_UNDEFINED:
+                        objective_verbosed = "Undefined"
+
+                    d += f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.date else "future-event"} event-structuretimer">{event.date.strftime("%H:%M")} {objective_verbosed} <i>{event.structure_type.name}</i> timer in: <i>{event.eve_solar_system.name}</i></div>'
+
+                    logger.debug("Typer type is: %s " % event.get_objective_display())
             if date.today() == date(self.year, self.month, day):
                 return f"<td class='today'><div class='date'>{day}</div> {d}</td>"
             return f"<td><div class='date'>{day}</div> {d}</td>"
