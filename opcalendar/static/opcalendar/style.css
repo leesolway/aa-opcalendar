@@ -41,6 +41,10 @@
   position: relative;
 }
 
+.allianceauth-opcalendar .event-structuretimer{
+  background: #ffe1c0;
+}
+
 .allianceauth-opcalendar .event:before {
     width: 0;
     height: 0;

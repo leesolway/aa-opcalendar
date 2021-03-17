@@ -1,11 +1,8 @@
 import socket
-import operator
-from calendar import HTMLCalendar
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 import random
 import string
 from typing import Any
-from itertools import chain
 
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -13,7 +10,6 @@ from django.conf import settings
 from django.contrib.messages.constants import DEBUG, ERROR, INFO, SUCCESS, WARNING
 from django.test import TestCase
 from django.utils.html import format_html
-from django.db.models import Q, F
 
 from esi.models import Scope, Token
 
@@ -22,108 +18,7 @@ from allianceauth.eveonline.models import EveCharacter
 from allianceauth.services.hooks import get_extension_logger
 from allianceauth.tests.auth_utils import AuthUtils
 
-from .models import Event, IngameEvents
-
 logger = get_extension_logger(__name__)
-
-
-class Calendar(HTMLCalendar):
-    def __init__(self, year=None, month=None, user=None):
-        self.year = year
-        self.month = month
-        self.user = user
-        super(Calendar, self).__init__()
-
-    # formats a day as a td
-    # filter events by day
-    def formatday(self, day, events, ingame_events):
-
-        events_per_day = events.filter(start_time__day=day).order_by("start_time")
-
-        ingame_events_per_day = ingame_events.filter(
-            event_start_date__day=day
-        ).order_by("event_start_date")
-
-        all_ingame_events = sorted(
-            chain(events_per_day, ingame_events_per_day),
-            key=operator.attrgetter("start_time"),
-        )
-
-        d = ""
-
-        logger.debug(all_ingame_events)
-        # Only events for current month
-        if day != 0:
-            # Parse events
-            for event in all_ingame_events:
-                d += (
-                    f"<style>{event.get_event_styling}</style>"
-                    f'<a class="nostyling" href="{event.get_html_url}">'
-                    f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class}">{event.get_html_title}</div>'
-                    f"</a>"
-                )
-
-            if date.today() == date(self.year, self.month, day):
-                return f"<td class='today'><div class='date'>{day}</div> {d}</td>"
-            return f"<td><div class='date'>{day}</div> {d}</td>"
-        return "<td></td>"
-
-    # formats a week as a tr
-    def formatweek(self, theweek, events, ingame_events):
-        week = ""
-        for d, weekday in theweek:
-            week += self.formatday(d, events, ingame_events)
-        return f"<tr> {week} </tr>"
-
-    # formats a month as a table
-    # filter events by year and month
-
-    def formatmonth(self, withyear=True):
-        # Get normal events
-        events = (
-            Event.objects.filter(
-                start_time__year=self.year,
-                start_time__month=self.month,
-            )
-            .filter(
-                Q(event_visibility__restricted_to_group__in=self.user.groups.all())
-                | Q(event_visibility__restricted_to_group__isnull=True),
-            )
-            .filter(
-                Q(event_visibility__restricted_to_state=self.user.profile.state)
-                | Q(event_visibility__restricted_to_state__isnull=True),
-            )
-        )
-
-        ingame_events = (
-            IngameEvents.objects.filter(
-                event_start_date__year=self.year, event_start_date__month=self.month
-            )
-            .annotate(start_time=F("event_start_date"), end_time=F("event_end_date"))
-            .filter(
-                Q(
-                    owner__event_visibility__restricted_to_group__in=self.user.groups.all()
-                )
-                | Q(owner__event_visibility__restricted_to_group__isnull=True),
-            )
-            .filter(
-                Q(owner__event_visibility__restricted_to_state=self.user.profile.state)
-                | Q(owner__event_visibility__restricted_to_state__isnull=True),
-            )
-        )
-
-        logger.debug("Returning %s events" % ingame_events.count())
-
-        cal = '<table class="calendar">\n'
-        cal += f"{self.formatmonthname(self.year, self.month, withyear=withyear)}\n"
-        cal += f"{self.formatweekheader()}\n"
-
-        for week in self.monthdays2calendar(self.year, self.month):
-            cal += f"{self.formatweek(week, events, ingame_events)}\n"
-
-        cal += "</table>"
-
-        return cal
 
 
 def clean_setting(

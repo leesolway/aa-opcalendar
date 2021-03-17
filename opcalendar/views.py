@@ -32,7 +32,8 @@ from opcalendar.models import (
 )
 
 from . import tasks
-from .utils import Calendar, messages_plus
+from .utils import messages_plus
+from .calendar import Calendar
 from .forms import EventForm, AddMemberForm
 
 logger = get_extension_logger(__name__)
