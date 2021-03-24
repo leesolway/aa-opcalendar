@@ -151,7 +151,7 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         return context
 
 
-@login_required(login_url="signup")
+@login_required
 @permission_required("opcalendar.create_event")
 def create_event(request):
     form = EventForm(request.POST or None)
@@ -193,7 +193,7 @@ def create_event(request):
     return render(request, "opcalendar/event-add.html", {"form": form})
 
 
-@login_required(login_url="signup")
+@login_required
 @permission_required("opcalendar.basic_access")
 def event_details(request, event_id):
 
@@ -210,8 +210,11 @@ def event_details(request, event_id):
             .get(id=event_id)
         )
         eventmember = EventMember.objects.filter(event=event)
+        memberlist = []
+        for member in eventmember:
+            memberlist.append(member.character.character_name)
 
-        context = {"event": event, "eventmember": eventmember}
+        context = {"event": event, "eventmember": eventmember, "memberlist": memberlist}
 
         return render(request, "opcalendar/event-details.html", context)
 
@@ -219,6 +222,7 @@ def event_details(request, event_id):
         return redirect("opcalendar:calendar")
 
 
+@login_required
 @permission_required("opcalendar.create_event")
 def EventEdit(request, event_id):
     logger.debug(
@@ -250,7 +254,7 @@ def EventEdit(request, event_id):
                 request,
                 _("Saved changes to event for %(event)s.") % {"event": event.title},
             )
-            return redirect("opcalendar:calendar")
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
     else:
         data = {
             "operation_type": event.operation_type,
@@ -268,7 +272,7 @@ def EventEdit(request, event_id):
     return render(request, "opcalendar/event-edit.html", context={"form": form})
 
 
-@login_required(login_url="signup")
+@login_required
 @permission_required("opcalendar.basic_access")
 def ingame_event_details(request, event_id):
     event = IngameEvents.objects.get(event_id=event_id)
@@ -279,25 +283,6 @@ def ingame_event_details(request, event_id):
         return render(request, "opcalendar/ingame-event-details.html", context)
     else:
         return redirect("opcalendar:calendar")
-
-
-@login_required(login_url="signup")
-@permission_required("opcalendar.manage_event")
-def EventSignup(request, event_id):
-
-    event = Event.objects.get(id=event_id)
-
-    character = request.user.profile.main_character
-
-    EventMember.objects.create(event=event, character=character)
-
-    messages.success(
-        request,
-        _("Succesfully signed up for event: %(event)s with %(character)s.")
-        % {"event": event, "character": character},
-    )
-
-    return HttpResponseRedirect(reverse("opcalendar:calendar"))
 
 
 @login_required
@@ -315,19 +300,40 @@ def EventDeleteView(request, event_id):
 
 
 @login_required
-@permission_required("opcalendar.create_event")
-def EventMemberRemove(request, event_id):
-    logger.debug(
-        "remove_optimer called by user %s for operation id %s"
-        % (request.user, event_id)
-    )
-    op = get_object_or_404(EventMember, id=event_id)
+@permission_required("opcalendar.basic_access")
+def EventMemberSignup(request, event_id):
+
+    event = Event.objects.get(id=event_id)
+
     character = request.user.profile.main_character
 
-    op.delete()
-    messages.error(
+    EventMember.objects.create(event=event, character=character)
+
+    messages.success(
         request,
-        _("Removed signup for %(character)s.") % {"character": character},
+        _("Succesfully signed up for event: %(event)s with %(character)s.")
+        % {"event": event, "character": character},
     )
 
-    return HttpResponseRedirect(reverse("opcalendar:calendar"))
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+
+@login_required
+@permission_required("opcalendar.basic_access")
+def EventMemberRemove(request, event_id):
+
+    event = Event.objects.get(id=event_id)
+
+    character = request.user.profile.main_character
+
+    eventmember = EventMember.objects.filter(event=event, character=character)
+
+    eventmember.delete()
+
+    messages.error(
+        request,
+        _("Removed signup for event: %(event)s for %(character)s.")
+        % {"event": event, "character": character},
+    )
+
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))

@@ -122,14 +122,17 @@ Event Details
         </div>
             <div>
                 <div>
-                    <a class="btn btn-success right" href="{% url 'opcalendar:event_signup' event.id %}">Sign up for event</a>
+                    {% if not request.user.profile.main_character.character_name in memberlist %}
+                        <a class="btn btn-success right" href="{% url 'opcalendar:event_member_signup' event.id %}">Sign me up for the event</a>
+                    {% else %}
+                        <a class="btn btn-danger" href="{% url 'opcalendar:event_member_remove' event.id %}">Remove my event signup</a>
+                    {% endif %}
                 </div>
                 <table class="table table-bordered">
                 <thead>
                     <tr>
                       <th style="width: 10px">#</th>
-                      <th>Name</th>
-                      <th>Action</th>
+                      <th>Main Character</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -137,9 +140,6 @@ Event Details
                     <tr role="row">
                         <td>{{ forloop.counter }}</td>
                         <td>{{ member.character }}</td>
-                        <td>
-                            <a class="btn btn-danger" href="{% url 'opcalendar:remove_event_member' member.id %}">Remove</a>
-                        </td>
                     </tr>
                     {% endfor %}
                   </tbody>
