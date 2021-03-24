@@ -45,6 +45,10 @@
   background: #ffe1c0;
 }
 
+.allianceauth-opcalendar .event-moon-extraction{
+  background: #bcedff;
+}
+
 .allianceauth-opcalendar .event:before {
     width: 0;
     height: 0;

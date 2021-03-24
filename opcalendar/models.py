@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.utils.html import strip_tags
 from django.contrib.auth.models import Group
 
 from esi.errors import TokenExpiredError, TokenInvalidError
@@ -475,6 +476,13 @@ class Owner(models.Model):
                     owner=self, event_id=event["event_id"]
                 ).first()
 
+                if "Moon extraction for" in event["title"]:
+                    moon_extraction = True
+                    text = strip_tags(details["text"])
+                else:
+                    moon_extraction = False
+                    text = details["text"]
+
                 try:
                     if original is not None:
 
@@ -485,10 +493,11 @@ class Owner(models.Model):
                         IngameEvents.objects.create(
                             event_id=event["event_id"],
                             owner=self,
-                            text=details["text"],
+                            text=text,
                             event_owner_id=details["owner_id"],
                             owner_type=details["owner_type"],
                             owner_name=details["owner_name"],
+                            moon_extraction=moon_extraction,
                             importance=details["importance"],
                             duration=details["duration"],
                             event_start_date=event["event_date"],
@@ -589,6 +598,7 @@ class IngameEvents(models.Model):
     event_owner_id = models.IntegerField(null=True)
     owner_type = models.CharField(max_length=128)
     owner_name = models.CharField(max_length=128)
+    moon_extraction = models.BooleanField(null=True, default=False)
     importance = models.CharField(max_length=128)
     duration = models.CharField(max_length=128)
 
@@ -626,8 +636,11 @@ class IngameEvents(models.Model):
 
     @property
     def get_category_class(self):
-        if self.owner.operation_type:
-            return f"{self.owner.operation_type.name.replace(' ', '-').lower()}"
+        if self.moon_extraction:
+            return "event-moon-extraction"
+        else:
+            if self.owner.operation_type:
+                return f"{self.owner.operation_type.name.replace(' ', '-').lower()}"
 
     @property
     def get_html_url(self):
@@ -636,7 +649,10 @@ class IngameEvents(models.Model):
 
     @property
     def get_html_title(self):
-        return f'{self.event_start_date.strftime("%H:%M")} - {self.event_end_date.strftime("%H:%M")}<i> {self.owner_name}</i><br><b>{self.title}</b>'
+        if not self.moon_extraction:
+            return f'{self.event_start_date.strftime("%H:%M")} - {self.event_end_date.strftime("%H:%M")}<i> {self.owner_name}</i><br><b>{self.title}</b>'
+        else:
+            return f'{self.event_start_date.strftime("%H:%M")} {self.title}'
 
 
 class EventMember(models.Model):
