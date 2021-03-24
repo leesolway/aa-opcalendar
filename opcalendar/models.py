@@ -269,7 +269,6 @@ class Event(models.Model):
     )
     title = models.CharField(
         max_length=200,
-        unique=False,
         help_text=_("Title for the event"),
     )
     host = models.ForeignKey(
@@ -325,9 +324,6 @@ class Event(models.Model):
         on_delete=models.CASCADE,
         help_text=_("User who created the event"),
     )
-
-    class Meta:
-        unique_together = ["title", "start_time"]
 
     def duration(self):
         return self.end_time - self.start_time
