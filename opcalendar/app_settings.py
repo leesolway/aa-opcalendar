@@ -37,3 +37,8 @@ OPCALENDAR_FUNINC_URL = "https://calendar.google.com/calendar/ical/og3uh76l8ul3d
 
 def structuretimers_active():
     return "structuretimers" in settings.INSTALLED_APPS
+
+
+# Use a small helper to check if AA-Discordbot is installs
+def discord_bot_active():
+    return "aadiscordbot" in settings.INSTALLED_APPS

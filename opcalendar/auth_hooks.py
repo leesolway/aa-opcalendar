@@ -33,3 +33,8 @@ def register_menu():
 @hooks.register("url_hook")
 def register_urls():
     return UrlHook(urls, "opcalendar", r"^opcalendar/")
+
+
+@hooks.register("discord_cogs_hook")
+def register_cogs():
+    return ["opcalendar.cogs.ops"]
