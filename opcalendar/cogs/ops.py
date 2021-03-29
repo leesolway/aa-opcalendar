@@ -13,6 +13,7 @@ from opcalendar.models import Event, IngameEvents
 from django.db.models import Q, F
 from itertools import chain
 from app_utils.urls import static_file_absolute_url
+from datetime import datetime
 
 import logging
 
@@ -38,6 +39,8 @@ class Ops(commands.Cog):
         id = ctx.message.author.id
 
         url = get_site_url()
+
+        today = datetime.today()
 
         # Get user if discord service is active
         try:
@@ -65,12 +68,16 @@ class Ops(commands.Cog):
         if discord_active:
             # Get normal events
             # Filter by groups and states
-            events = Event.objects.filter(
-                Q(event_visibility__restricted_to_group__in=user.groups.all())
-                | Q(event_visibility__restricted_to_group__isnull=True),
-            ).filter(
-                Q(event_visibility__restricted_to_state=user.profile.state)
-                | Q(event_visibility__restricted_to_state__isnull=True),
+            events = (
+                Event.objects.filter(
+                    Q(event_visibility__restricted_to_group__in=user.groups.all())
+                    | Q(event_visibility__restricted_to_group__isnull=True),
+                )
+                .filter(
+                    Q(event_visibility__restricted_to_state=user.profile.state)
+                    | Q(event_visibility__restricted_to_state__isnull=True),
+                )
+                .filter(start_time__gte=today)
             )
             # Get ingame events
             # Filter by groups and states
@@ -88,6 +95,7 @@ class Ops(commands.Cog):
                     Q(owner__event_visibility__restricted_to_state=user.profile.state)
                     | Q(owner__event_visibility__restricted_to_state__isnull=True),
                 )
+                .filter(start_time__gte=today)
             )
 
             # Combine events, limit to 20 events
