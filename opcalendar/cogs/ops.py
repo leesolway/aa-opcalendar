@@ -42,6 +42,14 @@ class Ops(commands.Cog):
 
         today = datetime.today()
 
+        user_argument = ctx.message.content[5:]
+
+        if not user_argument:
+            host = "all hosts"
+
+        else:
+            host = user_argument
+
         # Get user if discord service is active
         try:
             discord_user = DiscordUser.objects.get(uid=id)
@@ -110,9 +118,8 @@ class Ops(commands.Cog):
 
             embed.colour = Color.blue()
 
-            embed.description = (
-                "Here is the list of the next 20 upcoming operations. A calendar view is located in [here](%s/opcalendar)"
-                % url
+            embed.description = "Here is the list of the next 20 upcoming operations for {}. A calendar view is located in [here]({}/opcalendar)".format(
+                host, url
             )
 
             # Format all events and ingame events
@@ -120,21 +127,25 @@ class Ops(commands.Cog):
                 if type(event) == Event:
                     embed.add_field(
                         name="Event: {0}".format(event.title),
-                        value="Host: {0}\nFC: {1}\nDoctrine: {2}\nLocation: {3}\nTime: {4}\n\n{5}\n".format(
+                        value="Host: {0}\nFC: {1}\nDoctrine: {2}\nLocation: {3}\nTime: {4}\n[Details]({5}/opcalendar/event/{6}/details/)\n".format(
                             event.host,
                             event.fc,
                             event.doctrine,
                             event.formup_system,
                             event.start_time,
-                            event.description,
+                            url,
+                            event.id,
                         ),
                         inline=False,
                     )
                 if type(event) == IngameEvents:
                     embed.add_field(
                         name="Ingame Event: {0}".format(event.title),
-                        value="Host: {0}\n Time:{1}\n\n{2}".format(
-                            event.owner_name, event.start_time, event.text
+                        value="Host: {0}\n Time:{1}\n[Details]({2}/opcalendar/ingame/event/{3}/details/)".format(
+                            event.owner_name,
+                            event.start_time,
+                            url,
+                            event.event_id,
                         ),
                         inline=False,
                     )
