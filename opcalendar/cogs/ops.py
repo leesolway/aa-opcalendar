@@ -12,7 +12,6 @@ import operator
 from opcalendar.models import Event, IngameEvents
 from django.db.models import Q, F
 from itertools import chain
-import asyncio
 from app_utils.urls import static_file_absolute_url
 
 import logging
@@ -31,8 +30,7 @@ class Ops(commands.Cog):
     @commands.command(pass_context=True)
     async def ops(self, ctx):
         """
-        Returns a link to the AllianceAuth Install
-        Used by many other Bots and is a common command that users will attempt to run.
+        Sends a direct message about the upcoming events visible for the user
         """
         await ctx.trigger_typing()
 
@@ -47,6 +45,24 @@ class Ops(commands.Cog):
 
             user = discord_user.user
 
+            discord_active = True
+
+        except Exception:
+            logger.error("Discord service is not active for user")
+
+            embed = Embed(title="Command failed")
+            embed.colour = Color.red()
+            embed.set_thumbnail(
+                url=static_file_absolute_url("opcalendar/terminate.png")
+            )
+            embed.description = "Activate the [discord service]({}/services) to access this command.".format(
+                url
+            )
+            discord_active = False
+
+            await ctx.reply(embed=embed)
+
+        if discord_active:
             # Get normal events
             # Filter by groups and states
             events = Event.objects.filter(
@@ -117,24 +133,14 @@ class Ops(commands.Cog):
 
             await ctx.author.send(embed=embed)
 
-            msg = await ctx.reply(
+            embed = Embed(title="Events sent")
+            embed.colour = Color.green()
+            embed.description = (
                 "I have sent you a direct message about upcoming events."
             )
+            discord_active = False
 
-            await asyncio.sleep(5)
-
-            await msg.delete()
-
-        except Exception:
-            logger.error("Discord service is not active for user")
-
-            msg = await ctx.reply(
-                "Activate the discord service to access this command."
-            )
-
-            await asyncio.sleep(5)
-
-            await msg.delete()
+            await ctx.reply(embed=embed)
 
 
 def setup(bot):
