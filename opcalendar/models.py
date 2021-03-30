@@ -648,6 +648,8 @@ class IngameEvents(models.Model):
     def get_visibility_class(self):
         if self.owner.event_visibility:
             return f"{self.owner.event_visibility.name.replace(' ', '-').lower()}"
+        else:
+            return "ingame-event"
 
     @property
     def get_event_styling(self):

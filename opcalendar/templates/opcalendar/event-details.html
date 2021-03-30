@@ -128,6 +128,8 @@ Event Details
                         <a class="btn btn-danger" href="{% url 'opcalendar:event_member_remove' event.id %}">Remove my event signup</a>
                     {% endif %}
                 </div>
+
+                {% if perms.opcalendar.see_signups %}
                 <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -143,7 +145,8 @@ Event Details
                     </tr>
                     {% endfor %}
                   </tbody>
-            </table>
+                </table>
+                {% endif %}
         </div>
     </div>
     </div>
