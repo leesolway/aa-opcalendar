@@ -30,6 +30,11 @@ OPCALENDAR_DISPLAY_STRUCTURETIMERS = clean_setting(
     "OPCALENDAR_DISPLAY_STRUCTURETIMERS", True
 )
 
+# whether we display external hosts in the discord ops command filters
+OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL = clean_setting(
+    "OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL", False
+)
+
 OPCALENDAR_EVE_UNI_URL = "https://portal.eveuniversity.org/api/getcalendar"
 OPCALENDAR_SPECTRE_URL = "https://www.spectre-fleet.space/engagement/events/rss"
 OPCALENDAR_FUNINC_URL = "https://calendar.google.com/calendar/ical/og3uh76l8ul3dfgbie03fbbgs8%40group.calendar.google.com/private-f466889b44741fd7249e99e21ac171ff/basic.ics"

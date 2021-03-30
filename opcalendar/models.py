@@ -38,7 +38,8 @@ class General(models.Model):
                 "Can access this app and see operations based on visibility rules",
             ),
             ("create_event", "Can create and edit events"),
-            ("manage_event", "Can delete and manage signups"),
+            ("see_signups", "Can see all signups for event"),
+            ("manage_event", "Can delete and manage other signups"),
             (
                 "add_ingame_calendar_owner",
                 "Can add ingame calendar feeds for their corporation",
@@ -150,7 +151,7 @@ class EventHost(models.Model):
     fleet_doctrines = models.CharField(
         max_length=150, blank=True, help_text="Link or description to the doctrines"
     )
-    website = models.CharField(max_length=150, blank=True)
+    website = models.CharField(max_length=150, blank=True, help_text="Website link URL")
     discord = models.CharField(max_length=150, blank=True, help_text="Discord link URL")
     twitch = models.CharField(max_length=150, blank=True, help_text="Twitch link URL")
     twitter = models.CharField(max_length=150, blank=True, help_text="Twitter link URL")
@@ -490,6 +491,22 @@ class Owner(models.Model):
                         event_ids_to_remove.remove(original.event_id)
 
                     else:
+
+                        # Check if we already have the host
+                        original_host = EventHost.objects.filter(
+                            community=details["owner_name"]
+                        ).first()
+
+                        logger.debug("Got original host: {}".format(original_host))
+
+                        if original_host is not None:
+                            host = original_host
+                        else:
+                            host = EventHost.objects.create(
+                                community=details["owner_name"],
+                                external=True,
+                            )
+
                         IngameEvents.objects.create(
                             event_id=event["event_id"],
                             owner=self,
@@ -497,6 +514,7 @@ class Owner(models.Model):
                             event_owner_id=details["owner_id"],
                             owner_type=details["owner_type"],
                             owner_name=details["owner_name"],
+                            host=host,
                             moon_extraction=moon_extraction,
                             importance=details["importance"],
                             duration=details["duration"],
@@ -598,6 +616,12 @@ class IngameEvents(models.Model):
     event_owner_id = models.IntegerField(null=True)
     owner_type = models.CharField(max_length=128)
     owner_name = models.CharField(max_length=128)
+    host = models.ForeignKey(
+        EventHost,
+        on_delete=models.CASCADE,
+        default=1,
+        help_text=_("Host entity for the event"),
+    )
     moon_extraction = models.BooleanField(null=True, default=False)
     importance = models.CharField(max_length=128)
     duration = models.CharField(max_length=128)

@@ -52,6 +52,8 @@ opcalendar manage_event | Can delete and manage signups | Leadership, FCs
 Name | Description | Default
  --- | --- | ---
 OPCALENDAR_NOTIFY_IMPORTS | Wheter to send out discord notifications for ingame and public NPSI events | True
+OPCALENDAR_DISPLAY_STRUCTURETIMERS | whether we should inculde timers from the structuretimers plugin in the calendar | False
+OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL | whether we display external hosts such as ingame hosts in the discord ops command filters | False
 
 ## Setup
 Before you are able to create new events on the front end you will need to setup the needed categories and visibility filters for your events.

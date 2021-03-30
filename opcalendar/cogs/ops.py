@@ -17,6 +17,10 @@ from datetime import datetime
 
 import logging
 
+from opcalendar.app_settings import (
+    OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -96,7 +100,6 @@ class Ops(commands.Cog):
                 IngameEvents.objects.annotate(
                     start_time=F("event_start_date"),
                     end_time=F("event_end_date"),
-                    host=F("owner_name"),
                 )
                 .filter(
                     Q(
@@ -111,12 +114,15 @@ class Ops(commands.Cog):
                 .filter(start_time__gte=today)
             )
 
-            hosts = EventHost.objects.all().filter(external=False)
+            hosts = EventHost.objects.all()
+
+            if not OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL:
+                hosts = hosts.filter(external=False)
 
             hosts = _hosts(hosts)
 
             if user_argument:
-                ingame_events = ingame_events.filter(owner_name=host)
+                ingame_events = ingame_events.filter(host__community=host)
 
             # Combine events, limit to 20 events
             all_events = sorted(
