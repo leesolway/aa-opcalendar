@@ -9,7 +9,7 @@ from allianceauth.services.modules.discord.models import DiscordUser
 
 # OPCALENDAR
 import operator
-from opcalendar.models import Event, IngameEvents
+from opcalendar.models import Event, IngameEvents, EventHost
 from django.db.models import Q, F
 from itertools import chain
 from app_utils.urls import static_file_absolute_url
@@ -87,11 +87,16 @@ class Ops(commands.Cog):
                 )
                 .filter(start_time__gte=today)
             )
+            if user_argument:
+                events = events.filter(host__community=host)
+
             # Get ingame events
             # Filter by groups and states
             ingame_events = (
                 IngameEvents.objects.annotate(
-                    start_time=F("event_start_date"), end_time=F("event_end_date")
+                    start_time=F("event_start_date"),
+                    end_time=F("event_end_date"),
+                    host=F("owner_name"),
                 )
                 .filter(
                     Q(
@@ -106,6 +111,13 @@ class Ops(commands.Cog):
                 .filter(start_time__gte=today)
             )
 
+            hosts = EventHost.objects.all().filter(external=False)
+
+            hosts = _hosts(hosts)
+
+            if user_argument:
+                ingame_events = ingame_events.filter(owner_name=host)
+
             # Combine events, limit to 20 events
             all_events = sorted(
                 chain(events, ingame_events),
@@ -118,15 +130,17 @@ class Ops(commands.Cog):
 
             embed.colour = Color.blue()
 
-            embed.description = "Here is the list of the next 20 upcoming operations for {}. A calendar view is located in [here]({}/opcalendar)".format(
-                host, url
+            embed.description = "List view of the next 20 upcoming operations for {}. A calendar view is located in [here]({}/opcalendar).\n\nFiltering: To filter events for a specific host add the name after the command ie. `!ops my coalition`\n\nAvailable hosts: *{}*".format(
+                host, url, hosts
             )
 
             # Format all events and ingame events
             for event in all_events:
                 if type(event) == Event:
                     embed.add_field(
-                        name="Event: {0}".format(event.title),
+                        name="Event: {0} {1}".format(
+                            event.title, event.operation_type.ticker
+                        ),
                         value="Host: {0}\nFC: {1}\nDoctrine: {2}\nLocation: {3}\nTime: {4}\n[Details]({5}/opcalendar/event/{6}/details/)\n".format(
                             event.host,
                             event.fc,
@@ -160,6 +174,15 @@ class Ops(commands.Cog):
             discord_active = False
 
             await ctx.reply(embed=embed)
+
+
+def _hosts(hosts):
+    hosts = [x.community for x in hosts]
+
+    if hosts:
+        return ", ".join(hosts)
+    else:
+        return None
 
 
 def setup(bot):
