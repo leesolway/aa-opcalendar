@@ -46,6 +46,7 @@ Perm | Auth Site | Example Target Group
 opcalendar basic_access | Can access this app and see operations based on visibility rules | Everyone
 opcalendar create_event | Can create and edit events | Leadership, FCs
 opcalendar manage_event | Can delete and manage signups | Leadership, FCs
+opcalendar see_signups | Can see all signups for event | Leadership, FCs, Members
 
 ## Settings
 
