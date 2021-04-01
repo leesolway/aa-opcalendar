@@ -14,6 +14,7 @@ from django.db.models import Q, F
 from itertools import chain
 from app_utils.urls import static_file_absolute_url
 from datetime import datetime
+import os
 
 import logging
 
@@ -22,6 +23,9 @@ from opcalendar.app_settings import (
 )
 
 logger = logging.getLogger(__name__)
+
+# i dont want to do this, but the below object get wont work without it, investigate.
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 
 class Ops(commands.Cog):
