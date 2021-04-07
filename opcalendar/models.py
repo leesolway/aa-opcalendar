@@ -477,12 +477,7 @@ class Owner(models.Model):
                     owner=self, event_id=event["event_id"]
                 ).first()
 
-                if "Moon extraction for" in event["title"]:
-                    moon_extraction = True
-                    text = strip_tags(details["text"])
-                else:
-                    moon_extraction = False
-                    text = details["text"]
+                text = strip_tags(details["text"])
 
                 try:
                     if original is not None:
@@ -515,7 +510,6 @@ class Owner(models.Model):
                             owner_type=details["owner_type"],
                             owner_name=details["owner_name"],
                             host=host,
-                            moon_extraction=moon_extraction,
                             importance=details["importance"],
                             duration=details["duration"],
                             event_start_date=event["event_date"],
@@ -622,7 +616,6 @@ class IngameEvents(models.Model):
         default=1,
         help_text=_("Host entity for the event"),
     )
-    moon_extraction = models.BooleanField(null=True, default=False)
     importance = models.CharField(max_length=128)
     duration = models.CharField(max_length=128)
 
@@ -662,11 +655,8 @@ class IngameEvents(models.Model):
 
     @property
     def get_category_class(self):
-        if self.moon_extraction:
-            return "event-moon-extraction"
-        else:
-            if self.owner.operation_type:
-                return f"{self.owner.operation_type.name.replace(' ', '-').lower()}"
+        if self.owner.operation_type:
+            return f"{self.owner.operation_type.name.replace(' ', '-').lower()}"
 
     @property
     def get_html_url(self):
@@ -675,10 +665,7 @@ class IngameEvents(models.Model):
 
     @property
     def get_html_title(self):
-        if not self.moon_extraction:
-            return f'{self.event_start_date.strftime("%H:%M")} - {self.event_end_date.strftime("%H:%M")}<i> {self.owner_name}</i><br><b>{self.title}</b>'
-        else:
-            return f'{self.event_start_date.strftime("%H:%M")} {self.title}'
+        return f'{self.event_start_date.strftime("%H:%M")} - {self.event_end_date.strftime("%H:%M")}<i> {self.owner_name}</i><br><b>{self.title}</b>'
 
 
 class EventMember(models.Model):
