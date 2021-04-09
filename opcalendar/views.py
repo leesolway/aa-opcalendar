@@ -7,6 +7,7 @@ from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
 from allianceauth.services.hooks import get_extension_logger
 from django.contrib import messages
 from django.urls import reverse
+from django_ical.views import ICalFeed
 
 from django.views.generic import ListView
 from django.shortcuts import render, redirect
@@ -337,3 +338,41 @@ def EventMemberRemove(request, event_id):
     )
 
     return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+
+class EventFeed(ICalFeed):
+    """
+    A simple event calender
+    """
+
+    timezone = "UTC"
+    file_name = "event.ics"
+
+    def items(self):
+        return (
+            Event.objects.all()
+            .order_by("-start_time")
+            .filter(event_visibility__include_in_feed=True)
+        )
+
+    def item_guid(self, item):
+        return "{}{}".format(item.id, "global_name")
+
+    def item_title(self, item):
+
+        return "{}".format(item.title)
+
+    def item_description(self, item):
+        return item.description
+
+    def item_class(self, item):
+        return item.title
+
+    def item_location(self, item):
+        return item.formup_system
+
+    def item_start_datetime(self, item):
+        return item.start_time
+
+    def item_end_datetime(self, item):
+        return item.end_time

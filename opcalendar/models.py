@@ -111,6 +111,10 @@ class EventVisibility(models.Model):
         blank=True,
         help_text=_("Color to be displayed on calendar"),
     )
+    include_in_feed = models.BooleanField(
+        default=False,
+        help_text=("Whether these events should be included in the ical feed."),
+    )
     is_active = models.BooleanField(
         default=True,
         help_text=("Whether this visibility filter is active"),

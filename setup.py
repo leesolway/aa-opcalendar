@@ -41,5 +41,6 @@ setup(
         "feedparser",
         "ics",
         "pytz",
+        "django-ical",
     ],
 )

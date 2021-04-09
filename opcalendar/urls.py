@@ -26,4 +26,5 @@ urlpatterns = [
         views.EventMemberRemove,
         name="event_member_remove",
     ),
+    path("feed.ics", views.EventFeed()),
 ]

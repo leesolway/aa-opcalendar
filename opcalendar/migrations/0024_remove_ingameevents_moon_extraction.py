@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0023_auto_20210330_0632'),
+        ("opcalendar", "0023_auto_20210330_0632"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='ingameevents',
-            name='moon_extraction',
+            model_name="ingameevents",
+            name="moon_extraction",
         ),
     ]
