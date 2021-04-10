@@ -6,13 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0027_eventvisibility_is_default'),
+        ("opcalendar", "0027_eventvisibility_is_default"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventhost',
-            name='is_default',
-            field=models.BooleanField(default=False, help_text='Whether this host is used as the default value on the event form'),
+            model_name="eventhost",
+            name="is_default",
+            field=models.BooleanField(
+                default=False,
+                help_text="Whether this host is used as the default value on the event form",
+            ),
         ),
     ]

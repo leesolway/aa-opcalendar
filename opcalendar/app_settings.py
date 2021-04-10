@@ -44,6 +44,7 @@ OPCALENDAR_CAS_URL = "https://calendar.google.com/calendar/ical/0sqru3js6pb1p71e
 OPCALENDAR_FWAMING_DWAGONS_URL = "https://calendar.google.com/calendar/ical/l0mnjo7ormaq9gomap0cke4kqk%40group.calendar.google.com/public/basic.ics"
 OPCALENDAR_FREE_RANGE_CHIKUNS_URL = "https://calendar.google.com/calendar/ical/2nabdlgsebhsv29qmhtjgd0u9k%40group.calendar.google.com/public/basic.ics"
 
+
 def structuretimers_active():
     return "structuretimers" in settings.INSTALLED_APPS
 

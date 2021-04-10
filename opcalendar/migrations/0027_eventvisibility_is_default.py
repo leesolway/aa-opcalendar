@@ -6,13 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0026_eventvisibility_is_visible'),
+        ("opcalendar", "0026_eventvisibility_is_visible"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventvisibility',
-            name='is_default',
-            field=models.BooleanField(default=False, help_text='Whether this visibility filter is used as the default value on the event form'),
+            model_name="eventvisibility",
+            name="is_default",
+            field=models.BooleanField(
+                default=False,
+                help_text="Whether this visibility filter is used as the default value on the event form",
+            ),
         ),
     ]

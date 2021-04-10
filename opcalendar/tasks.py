@@ -81,19 +81,27 @@ def import_all_npsi_fleets() -> bool:
 
         # Check for events via SPECTRE ical feed
         if feed.source == EventImport.FRIDAY_YARRRR:
-            feed_errors |= _import_ical(feed, event_ids_to_remove, OPCALENDAR_FRIDAY_YARRRR_URL) 
+            feed_errors |= _import_ical(
+                feed, event_ids_to_remove, OPCALENDAR_FRIDAY_YARRRR_URL
+            )
 
         if feed.source == EventImport.REDEMPTION_ROAD:
-            feed_errors |= _import_ical(feed, event_ids_to_remove, OPCALENDAR_REDEMPTION_ROAD_URL)
-            
+            feed_errors |= _import_ical(
+                feed, event_ids_to_remove, OPCALENDAR_REDEMPTION_ROAD_URL
+            )
+
         if feed.source == EventImport.CAS:
             feed_errors |= _import_ical(feed, event_ids_to_remove, OPCALENDAR_CAS_URL)
 
         if feed.source == EventImport.FWAMING_DWAGONS:
-            feed_errors |= _import_ical(feed, event_ids_to_remove, OPCALENDAR_FWAMING_DWAGONS_URL)  
+            feed_errors |= _import_ical(
+                feed, event_ids_to_remove, OPCALENDAR_FWAMING_DWAGONS_URL
+            )
 
         if feed.source == EventImport.FREE_RANGE_CHIKUNS:
-            feed_errors |= _import_ical(feed, event_ids_to_remove, OPCALENDAR_FREE_RANGE_CHIKUNS_URL)      
+            feed_errors |= _import_ical(
+                feed, event_ids_to_remove, OPCALENDAR_FREE_RANGE_CHIKUNS_URL
+            )
 
     logger.debug("Checking for NPSI fleets to be removed.")
 
@@ -331,6 +339,7 @@ def _import_eve_uni(feed, event_ids_to_remove):
 
     return False
 
+
 def _import_ical(feed, event_ids_to_remove, url):
     logger.debug(
         "%s: import feed active. Pulling events from %s",
@@ -356,9 +365,7 @@ def _import_ical(feed, event_ids_to_remove, url):
             logger.debug("%s: Import even found: %s", feed, title)
 
             # Check if we already have the event stored
-            original = Event.objects.filter(
-                start_time=start_date, title=title
-            ).first()
+            original = Event.objects.filter(start_time=start_date, title=title).first()
 
             logger.debug("%s: Got match from database: %s", feed, original)
 
@@ -398,6 +405,7 @@ def _import_ical(feed, event_ids_to_remove, url):
         return True
 
     return False
+
 
 @shared_task(
     **{
