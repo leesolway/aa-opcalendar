@@ -165,10 +165,10 @@ Your file `urls.py` file should now look like this:
 ```
 from django.conf.urls import include, url
 from allianceauth import urls
-**from opcalendar.views import EventFeed #Added import for opcalendar ical feed**
+from opcalendar.views import EventFeed #Added import for opcalendar ical feed
 
 urlpatterns = [
-    **url(r'^opcalendar/feed.ics', EventFeed()), #Opcalendar feed url**
+    url(r'^opcalendar/feed.ics', EventFeed()), #Opcalendar feed url
     url(r'', include(urls)),
 ]
 
