@@ -6,13 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0024_remove_ingameevents_moon_extraction'),
+        ("opcalendar", "0024_remove_ingameevents_moon_extraction"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventvisibility',
-            name='include_in_feed',
-            field=models.BooleanField(default=False, help_text='Whether these events should be included in the ical feed.'),
+            model_name="eventvisibility",
+            name="include_in_feed",
+            field=models.BooleanField(
+                default=False,
+                help_text="Whether these events should be included in the ical feed.",
+            ),
         ),
     ]

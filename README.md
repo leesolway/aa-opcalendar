@@ -9,6 +9,7 @@ An operation calendar app for Alliance Auth to display fleet operations and othe
  * Manual events
  	* User created
  	* Defailed view
+ 	* Ical feed for exporting events
 * Public NPSI events
  	* Automatic syncing with supported NPSI community events over APIs
 * Ingame events
@@ -28,6 +29,7 @@ An operation calendar app for Alliance Auth to display fleet operations and othe
 * Discord notifications
 	* Webhook
 	* For: new, edited and deleted events
+
 
 ![screenshot](https://i.imgur.com/bLepJGH.jpg)
 
@@ -135,6 +137,48 @@ On default the ingame events you import have no visibility filter and no categor
 If you wish to add a visibility filter or a category similar to the manual events simply go to the `admin panel -> Ingame event owners` and select a filter and a category for the owner.
 
 After selecing a visibility filter and a category the ingame events will behave similar to the manual events and respect the group and state restrictions set for the visibility filters.
+
+### Ical feed setup (optional)
+Opcalendar has the ability to generate a standard ical formated feed for pushing out events. To push out evets to the feed without login requirement requires editing the allianceauth url file as on default all pages are locked behind a login requirement.
+
+#### Feed setup
+1. Open up the event visibility category and check the box to include it in the ical feed.
+2. Open the alliance auth `urls.py` file that is located on default in the following path `/home/allianceserver/myauth/myauth/urls.py`
+3. On default the file looks something like this:
+```
+from django.conf.urls import include, url
+from allianceauth import urls
+
+urlpatterns = [
+    url(r'', include(urls)),
+]
+
+handler500 = 'allianceauth.views.Generic500Redirect'
+handler404 = 'allianceauth.views.Generic404Redirect'
+handler403 = 'allianceauth.views.Generic403Redirect'
+handler400 = 'allianceauth.views.Generic400Redirect'
+```
+4. Include the following 2 lines in the file:
+	- `from opcalendar.views import EventFeed #Added import for opcalendar ical feed` bellow the imports on top of the file
+	- `url(r'^opcalendar/feed.ics', EventFeed()), # *** New opcalendar URL override BEFORE THE MAIN IMPORT
+` in the `urlpatterns` **before** the `url(r'', include(urls)),` line
+Your file `urls.py` file should now look like this:
+```
+from django.conf.urls import include, url
+from allianceauth import urls
+from opcalendar.views import EventFeed #Added import for opcalendar ical feed
+
+urlpatterns = [
+    url(r'^opcalendar/feed.ics', EventFeed()), # *** New opcalendar URL override BEFORE THE MAIN IMPORT
+    url(r'', include(urls)),
+]
+
+handler500 = 'allianceauth.views.Generic500Redirect'
+handler404 = 'allianceauth.views.Generic404Redirect'
+handler403 = 'allianceauth.views.Generic403Redirect'
+handler400 = 'allianceauth.views.Generic400Redirect'
+```
+5. You can now access the ical feed at `auth.example.com/opcalendar/feed.ics`
 
 ## Contributing
 Make sure you have signed the [License Agreement](https://developers.eveonline.com/resource/license-agreement) by logging in at https://developers.eveonline.com before submitting any pull requests. All bug fixes or features must not include extra superfluous formatting changes.
