@@ -160,16 +160,15 @@ handler400 = 'allianceauth.views.Generic400Redirect'
 ```
 4. Include the following 2 lines in the file:
 	- `from opcalendar.views import EventFeed #Added import for opcalendar ical feed` bellow the imports on top of the file
-	- `url(r'^opcalendar/feed.ics', EventFeed()), # *** New opcalendar URL override BEFORE THE MAIN IMPORT
-` in the `urlpatterns` **before** the `url(r'', include(urls)),` line
+	- `url(r'^opcalendar/feed.ics', EventFeed()), #Opcalendar feed url` in the `urlpatterns` **before** the `url(r'', include(urls)),` line
 Your file `urls.py` file should now look like this:
 ```
 from django.conf.urls import include, url
 from allianceauth import urls
-from opcalendar.views import EventFeed #Added import for opcalendar ical feed
+**from opcalendar.views import EventFeed #Added import for opcalendar ical feed**
 
 urlpatterns = [
-    url(r'^opcalendar/feed.ics', EventFeed()), # *** New opcalendar URL override BEFORE THE MAIN IMPORT
+    **url(r'^opcalendar/feed.ics', EventFeed()), #Opcalendar feed url**
     url(r'', include(urls)),
 ]
 
