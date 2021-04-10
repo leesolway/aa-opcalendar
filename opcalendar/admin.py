@@ -60,6 +60,12 @@ class EventCategoryAdmin(admin.ModelAdmin):
 class EventHostAdmin(admin.ModelAdmin):
     model = EventHost
 
+    list_display = (
+        "community",
+        "is_default",
+        "external",
+    )
+
 
 admin.site.register(EventHost, EventHostAdmin)
 
@@ -85,6 +91,8 @@ class EventVisibilityAdmin(admin.ModelAdmin):
         "_restricted_to_group",
         "_restricted_to_state",
         "_color",
+        "is_default",
+        "is_visible",
         "is_active",
     )
     filter_horizontal = ("restricted_to_group",)

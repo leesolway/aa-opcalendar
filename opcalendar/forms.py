@@ -8,6 +8,9 @@ from opcalendar.models import (
 )
 from django.forms.widgets import TextInput
 from django import forms
+from allianceauth.services.hooks import get_extension_logger
+
+logger = get_extension_logger(__name__)
 
 
 class EventForm(ModelForm):
@@ -18,11 +21,26 @@ class EventForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
-        # input_formats to parse HTML5 datetime-local input to datetime field
+
         self.fields["start_time"].input_formats = ("%Y-%m-%dT%H:%M",)
         self.fields["end_time"].input_formats = ("%Y-%m-%dT%H:%M",)
         self.fields["host"].queryset = EventHost.objects.filter(external=False)
         self.fields["event_visibility"].required = True
+        self.fields["event_visibility"].queryset = EventVisibility.objects.filter(
+            is_visible=True, is_active=True
+        )
+
+        try:
+            self.initial["event_visibility"] = EventVisibility.objects.get(
+                is_default=True
+            )
+        except Exception:
+            logger.debug("Form defaults: No default visibility set")
+
+        try:
+            self.initial["host"] = EventHost.objects.get(is_default=True)
+        except Exception:
+            logger.debug("Form defaults: No default host set")
 
 
 class SignupForm(forms.Form):

@@ -115,6 +115,18 @@ class EventVisibility(models.Model):
         default=False,
         help_text=("Whether these events should be included in the ical feed."),
     )
+    is_visible = models.BooleanField(
+        default=True,
+        help_text=(
+            "Whether this visibility filter should be displayed on the event form. Disable for internal visibilities such as the NPSI import fleet visibilities."
+        ),
+    )
+    is_default = models.BooleanField(
+        default=False,
+        help_text=(
+            "Whether this visibility filter is used as the default value on the event form"
+        ),
+    )
     is_active = models.BooleanField(
         default=True,
         help_text=("Whether this visibility filter is active"),
@@ -126,6 +138,18 @@ class EventVisibility(models.Model):
     class Meta:
         verbose_name = "Event Visibility Filter"
         verbose_name_plural = "Event Visibilities Filters"
+
+    def save(self, *args, **kwargs):
+        if self.is_default:
+            # select all other is_default items
+            qs = type(self).objects.filter(is_default=True)
+            # except self (if self already exists)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            # and deactive them
+            qs.update(is_default=False)
+
+        super(EventVisibility, self).save(*args, **kwargs)
 
     @property
     def get_visibility_class(self):
@@ -166,6 +190,10 @@ class EventHost(models.Model):
     details = models.CharField(
         max_length=150, blank=True, help_text="Short description about the host."
     )
+    is_default = models.BooleanField(
+        default=False,
+        help_text=("Whether this host is used as the default value on the event form"),
+    )
     external = models.BooleanField(
         default=False,
         help_text=_(
@@ -179,6 +207,18 @@ class EventHost(models.Model):
     class Meta:
         verbose_name = "Host"
         verbose_name_plural = "Hosts"
+
+    def save(self, *args, **kwargs):
+        if self.is_default:
+            # select all other is_default items
+            qs = type(self).objects.filter(is_default=True)
+            # except self (if self already exists)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            # and deactive them
+            qs.update(is_default=False)
+
+        super(EventHost, self).save(*args, **kwargs)
 
 
 class EventCategory(models.Model):
