@@ -38,7 +38,11 @@ OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL = clean_setting(
 OPCALENDAR_EVE_UNI_URL = "https://portal.eveuniversity.org/api/getcalendar"
 OPCALENDAR_SPECTRE_URL = "https://www.spectre-fleet.space/engagement/events/rss"
 OPCALENDAR_FUNINC_URL = "https://calendar.google.com/calendar/ical/og3uh76l8ul3dfgbie03fbbgs8%40group.calendar.google.com/private-f466889b44741fd7249e99e21ac171ff/basic.ics"
-
+OPCALENDAR_FRIDAY_YARRRR_URL = "https://calendar.google.com/calendar/ical/vl43scrg7olk01fv7g79hsbe74%40group.calendar.google.com/public/basic.ics"
+OPCALENDAR_REDEMPTION_ROAD_URL = "https://calendar.google.com/calendar/ical/5o3gpum6ek2irk12f0hnhfdtrs%40group.calendar.google.com/public/basic.ics"
+OPCALENDAR_CAS_URL = "https://calendar.google.com/calendar/ical/0sqru3js6pb1p71e7n1ko91rqs%40group.calendar.google.com/public/basic.ics"
+OPCALENDAR_FWAMING_DWAGONS_URL = "https://calendar.google.com/calendar/ical/l0mnjo7ormaq9gomap0cke4kqk%40group.calendar.google.com/public/basic.ics"
+OPCALENDAR_FREE_RANGE_CHIKUNS_URL = "https://calendar.google.com/calendar/ical/2nabdlgsebhsv29qmhtjgd0u9k%40group.calendar.google.com/public/basic.ics"
 
 def structuretimers_active():
     return "structuretimers" in settings.INSTALLED_APPS

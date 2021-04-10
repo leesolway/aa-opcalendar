@@ -15,6 +15,11 @@ from .app_settings import (
     OPCALENDAR_EVE_UNI_URL,
     OPCALENDAR_SPECTRE_URL,
     OPCALENDAR_FUNINC_URL,
+    OPCALENDAR_FRIDAY_YARRRR_URL,
+    OPCALENDAR_REDEMPTION_ROAD_URL,
+    OPCALENDAR_CAS_URL,
+    OPCALENDAR_FWAMING_DWAGONS_URL,
+    OPCALENDAR_FREE_RANGE_CHIKUNS_URL,
 )
 from .app_settings import OPCALENDAR_TASKS_TIME_LIMIT
 from .models import Event, EventImport, Owner
@@ -73,6 +78,22 @@ def import_all_npsi_fleets() -> bool:
         # Check for EVE Uni events
         if feed.source == EventImport.EVE_UNIVERSITY:
             feed_errors |= _import_eve_uni(feed, event_ids_to_remove)
+
+        # Check for events via SPECTRE ical feed
+        if feed.source == EventImport.FRIDAY_YARRRR:
+            feed_errors |= _import_ical(feed, event_ids_to_remove, OPCALENDAR_FRIDAY_YARRRR_URL) 
+
+        if feed.source == EventImport.REDEMPTION_ROAD:
+            feed_errors |= _import_ical(feed, event_ids_to_remove, OPCALENDAR_REDEMPTION_ROAD_URL)
+            
+        if feed.source == EventImport.CAS:
+            feed_errors |= _import_ical(feed, event_ids_to_remove, OPCALENDAR_CAS_URL)
+
+        if feed.source == EventImport.FWAMING_DWAGONS:
+            feed_errors |= _import_ical(feed, event_ids_to_remove, OPCALENDAR_FWAMING_DWAGONS_URL)  
+
+        if feed.source == EventImport.FREE_RANGE_CHIKUNS:
+            feed_errors |= _import_ical(feed, event_ids_to_remove, OPCALENDAR_FREE_RANGE_CHIKUNS_URL)      
 
     logger.debug("Checking for NPSI fleets to be removed.")
 
@@ -310,6 +331,73 @@ def _import_eve_uni(feed, event_ids_to_remove):
 
     return False
 
+def _import_ical(feed, event_ids_to_remove, url):
+    logger.debug(
+        "%s: import feed active. Pulling events from %s",
+        feed,
+        url,
+    )
+
+    try:
+        # Get EVE Uni events from their API feed (ical)
+        r = requests.get(url)
+        c = Calendar(r.text)
+        for entry in c.events:
+
+            # Format datetime
+            start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(
+                tzinfo=pytz.utc
+            )
+            end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(
+                tzinfo=pytz.utc
+            )
+            title = re.sub(r"[\(\[].*?[\)\]]", "", entry.name)
+
+            logger.debug("%s: Import even found: %s", feed, title)
+
+            # Check if we already have the event stored
+            original = Event.objects.filter(
+                start_time=start_date, title=title
+            ).first()
+
+            logger.debug("%s: Got match from database: %s", feed, original)
+
+            # If we get the event from API it should not be removed
+            if original:
+
+                logger.debug("%s: Event: %s already in database", feed, title)
+
+                # Remove the found fleet from the to be removed list
+                event_ids_to_remove.remove(original.id)
+
+            else:
+                # Save new event to database
+                event = Event(
+                    operation_type=feed.operation_type,
+                    title=title,
+                    host=feed.host,
+                    formup_system=entry.location,
+                    description=entry.description.replace("<br>", "\n"),
+                    start_time=start_date,
+                    end_time=end_date,
+                    external=True,
+                    user=feed.creator,
+                    event_visibility=feed.event_visibility,
+                    eve_character=feed.eve_character,
+                )
+
+                logger.debug(
+                    "%s: Saved new EVE UNI event in database: %s",
+                    feed,
+                    title,
+                )
+                event.save()
+
+    except Exception:
+        logger.error("%s: Error in fetching fleets", feed, exc_info=True)
+        return True
+
+    return False
 
 @shared_task(
     **{

@@ -252,14 +252,24 @@ class EventCategory(models.Model):
 class EventImport(models.Model):
     """NPSI IMPORT OPTIONS"""
 
-    SPECTRE_FLEET = "Spectre Fleet"
-    EVE_UNIVERSITY = "EVE University"
-    FUN_INC = "Fun Inc."
+    SPECTRE_FLEET = "SF"
+    EVE_UNIVERSITY = "EU"
+    FUN_INC = "FI"
+    FRIDAY_YARRRR = "FY"
+    REDEMPTION_ROAD = "RR"
+    CAS = "CA"
+    FWAMING_DWAGONS = "FD"
+    FREE_RANGE_CHIKUNS = "FR"
 
     IMPORT_SOURCES = [
         (SPECTRE_FLEET, _("Spectre Fleet")),
         (EVE_UNIVERSITY, _("EVE University")),
         (FUN_INC, _("Fun Inc.")),
+        (FRIDAY_YARRRR, _("FRIDAY YARRRR")),
+        (REDEMPTION_ROAD, _("Redemption Road")),
+        (CAS, _("CAS")),
+        (FWAMING_DWAGONS, _("Fwaming Dwagons")),
+        (FREE_RANGE_CHIKUNS, _("FREE RANGE CHIKUNS")),
     ]
 
     source = models.CharField(
