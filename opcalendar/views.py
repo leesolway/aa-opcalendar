@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django_ical.views import ICalFeed
 
+from .app_settings import get_site_url
 from django.views.generic import ListView
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
@@ -376,3 +377,64 @@ class EventFeed(ICalFeed):
 
     def item_end_datetime(self, item):
         return item.end_time
+
+    def item_link(self, item):
+        return "{0}/opcalendar/event/{1}/details/".format(get_site_url(), item.id)
+
+
+class EventIcalView(ICalFeed):
+    """
+    A simple event calender
+    """
+
+    timezone = "UTC"
+    file_name = "event.ics"
+
+    def __call__(self, request, event_id, *args, **kwargs):
+        self.request = request
+        self.event_id = event_id
+        return super(EventIcalView, self).__call__(request, event_id, *args, **kwargs)
+
+    def items(self, event_id):
+        return (
+            Event.objects.all()
+            .filter(id=self.event_id)
+            .filter(
+                Q(
+                    event_visibility__restricted_to_group__in=self.request.user.groups.all()
+                )
+                | Q(event_visibility__restricted_to_group__isnull=True),
+            )
+            .filter(
+                Q(event_visibility__restricted_to_state=self.request.user.profile.state)
+                | Q(event_visibility__restricted_to_state__isnull=True),
+            )
+        )
+
+    def item_guid(self, item):
+        return "{}{}".format(item.id, "global_name")
+
+    def item_title(self, item):
+
+        return "{}".format(item.title)
+
+    def item_description(self, item):
+        return item.description
+
+    def item_class(self, item):
+        return item.title
+
+    def item_location(self, item):
+        return item.formup_system
+
+    def item_start_datetime(self, item):
+        return item.start_time
+
+    def item_end_datetime(self, item):
+        return item.end_time
+
+    def item_organizer(self, item):
+        return item.host
+
+    def item_link(self, item):
+        return "{0}/opcalendar/event/{1}/details/".format(get_site_url(), item.id)

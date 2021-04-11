@@ -27,4 +27,9 @@ urlpatterns = [
         name="event_member_remove",
     ),
     path("feed.ics", views.EventFeed()),
+    path(
+        "event/<int:event_id>/details/feed.ics",
+        views.EventIcalView(),
+        name="event-ical-view",
+    ),
 ]

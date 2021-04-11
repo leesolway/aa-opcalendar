@@ -10,11 +10,12 @@ Event Details
     <div class="container">
         <div class="allianceauth-opcalendar">
             <div class="clearfix">
-                <a class="btn btn-primary left" href="{% url 'opcalendar:calendar' %}"> Calendar </a>
+                <a class="btn btn-primary left" href="{% url 'opcalendar:calendar' %}"><i class="far fa-calendar-alt"></i> Calendar </a>
+                <a class="btn btn-success left" href="{% url 'opcalendar:event-ical-view' event.pk %}"><i class="fas fa-bookmark"></i> Add to my calendar </a>
                 {% if perms.opcalendar.create_event %}
                     {% if not event.external %}
-                        <a class="btn btn-primary left mr-2" href="{% url 'opcalendar:event_edit' event.pk %}"> Edit Event </a>
-                        <a class="btn btn-danger" href="{% url 'opcalendar:remove_event' event.id %}">Remove</a>
+                        <a class="btn btn-primary left mr-2" href="{% url 'opcalendar:event_edit' event.pk %}"><i class="fas fa-edit"></i> Edit Event </a>
+                        <a class="btn btn-danger" href="{% url 'opcalendar:remove_event' event.id %}"><i class="fas fa-trash"></i> Remove</a>
                     {% endif %}
                 {% endif %}
             </div>

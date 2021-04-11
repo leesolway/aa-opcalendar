@@ -8,13 +8,13 @@
 {% block content %}
 <div class="allianceauth-opcalendar">
     <div class="clearfix">
-    	<a class="btn btn-info right mr-2" href="{% url 'opcalendar:calendar' %}?{{ next_month }} "> Next Month >> </a>
-        <a class="btn btn-info right mr-2" href="{% url 'opcalendar:calendar' %}?{{ prev_month }}"> << Previous Month </a>
+    	<a class="btn btn-info right mr-2" href="{% url 'opcalendar:calendar' %}?{{ next_month }} "> Next Month <i class="fas fa-forward"></i></a>
+        <a class="btn btn-info right mr-2" href="{% url 'opcalendar:calendar' %}?{{ prev_month }}"><i class="fas fa-backward"></i> Previous Month </a>
             {% if perms.opcalendar.create_event %}
-        	<a class="btn btn-info right mr-2" href="{% url 'opcalendar:event_new' %}"> + New Event </a>
+        	<a class="btn btn-info right mr-2" href="{% url 'opcalendar:event_new' %}"><i class="fas fa-calendar-plus"></i> New Event </a>
         {% endif %}
         {% if perms.opcalendar.add_ingame_calendar_owner %}
-            <a class="btn btn-success right mr-2" href="{% url 'opcalendar:add_ingame_calendar' %}">
+            <a class="btn btn-success right mr-2" href="{% url 'opcalendar:add_ingame_calendar' %}"><i class="fas fa-sync"></i>
             {% translate "Add Ingame Calendar Feed" %}
             </a>
         {% endif %}
