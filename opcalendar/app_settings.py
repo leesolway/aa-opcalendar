@@ -30,6 +30,9 @@ OPCALENDAR_DISPLAY_STRUCTURETIMERS = clean_setting(
     "OPCALENDAR_DISPLAY_STRUCTURETIMERS", True
 )
 
+# whether we should inculde extractions from the moonmining plugin in the calendar
+OPCALENDAR_DISPLAY_MOONMINING = clean_setting("OPCALENDAR_DISPLAY_MOONMINING", True)
+
 # whether we display external hosts in the discord ops command filters
 OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL = clean_setting(
     "OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL", False
@@ -47,6 +50,10 @@ OPCALENDAR_FREE_RANGE_CHIKUNS_URL = "https://calendar.google.com/calendar/ical/2
 
 def structuretimers_active():
     return "structuretimers" in settings.INSTALLED_APPS
+
+
+def moonmining_active():
+    return "moonmining" in settings.INSTALLED_APPS
 
 
 # Use a small helper to check if AA-Discordbot is installs

@@ -10,12 +10,16 @@ from allianceauth.services.hooks import get_extension_logger
 from .models import Event, IngameEvents
 from .app_settings import (
     OPCALENDAR_DISPLAY_STRUCTURETIMERS,
+    OPCALENDAR_DISPLAY_MOONMINING,
 )
 
-from .app_settings import structuretimers_active
+from .app_settings import structuretimers_active, moonmining_active
 
 if structuretimers_active():
     from structuretimers.models import Timer
+
+if moonmining_active():
+    from moonmining.models import Extraction
 
 logger = get_extension_logger(__name__)
 
@@ -29,7 +33,9 @@ class Calendar(HTMLCalendar):
 
     # formats a day as a td
     # filter events by day
-    def formatday(self, day, events, ingame_events, structuretimer_events):
+    def formatday(
+        self, day, events, ingame_events, structuretimer_events, moonmining_events
+    ):
 
         events_per_day = events.filter(start_time__day=day)
 
@@ -37,8 +43,15 @@ class Calendar(HTMLCalendar):
 
         structuretimers_per_day = structuretimer_events.filter(start_time__day=day)
 
+        moonmining_per_day = moonmining_events.filter(auto_fracture_at__day=day)
+
         all_events_per_day = sorted(
-            chain(events_per_day, ingame_events_per_day, structuretimers_per_day),
+            chain(
+                events_per_day,
+                ingame_events_per_day,
+                structuretimers_per_day,
+                moonmining_per_day,
+            ),
             key=operator.attrgetter("start_time"),
         )
 
@@ -49,13 +62,6 @@ class Calendar(HTMLCalendar):
             # Parse events
             for event in all_events_per_day:
 
-                if not type(event).__name__ == "Timer":
-                    d += (
-                        f"<style>{event.get_event_styling}</style>"
-                        f'<a class="nostyling" href="{event.get_html_url}">'
-                        f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class}">{event.get_html_title}</div>'
-                        f"</a>"
-                    )
                 if type(event).__name__ == "Timer":
                     OBJECTIVE_UNDEFINED = "UN"
                     OBJECTIVE_HOSTILE = "HO"
@@ -71,19 +77,38 @@ class Calendar(HTMLCalendar):
                     if event.objective == OBJECTIVE_UNDEFINED:
                         objective_verbosed = "Undefined"
 
-                    d += f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.date else "future-event"} event-structuretimer">{event.date.strftime("%H:%M")} {objective_verbosed} <i>{event.structure_type.name}</i> timer in: <i>{event.eve_solar_system.name}</i></div>'
+                    d += f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.auto_fracture_at else "future-event"} event-structuretimer">{event.date.strftime("%H:%M")} {objective_verbosed} <i>{event.structure_type.name}</i> timer in: <i>{event.eve_solar_system.name}</i></div>'
 
                     logger.debug("Typer type is: %s " % event.get_objective_display())
+
+                if type(event).__name__ == "Extraction":
+
+                    d += (
+                        f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
+                        f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.auto_fracture_at else "future-event"} event-moonmining">{event.auto_fracture_at.strftime("%H:%M")} Moon fracture at <i>{event.refinery}</i></div>'
+                        f"</a>"
+                    )
+                else:
+                    d += (
+                        f"<style>{event.get_event_styling}</style>"
+                        f'<a class="nostyling" href="{event.get_html_url}">'
+                        f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class}">{event.get_html_title}</div>'
+                        f"</a>"
+                    )
             if date.today() == date(self.year, self.month, day):
                 return f"<td class='today'><div class='date'>{day}</div> {d}</td>"
             return f"<td><div class='date'>{day}</div> {d}</td>"
         return "<td></td>"
 
     # formats a week as a tr
-    def formatweek(self, theweek, events, ingame_events, structuretimer_events):
+    def formatweek(
+        self, theweek, events, ingame_events, structuretimer_events, moonmining_events
+    ):
         week = ""
         for d, weekday in theweek:
-            week += self.formatday(d, events, ingame_events, structuretimer_events)
+            week += self.formatday(
+                d, events, ingame_events, structuretimer_events, moonmining_events
+            )
         return f"<tr> {week} </tr>"
 
     # formats a month as a table
@@ -137,19 +162,34 @@ class Calendar(HTMLCalendar):
         else:
             structuretimer_events = Event.objects.none()
 
+        # Check if moonmining is active
+        # Should we fetch extractions
+        if moonmining_active() and OPCALENDAR_DISPLAY_MOONMINING:
+            moonmining_events = (
+                Extraction.objects.all()
+                .annotate(start_time=F("auto_fracture_at"))
+                .filter(auto_fracture_at__year=self.year)
+            )
+        else:
+            moonmining_events = Extraction.objects.none()
+
         logger.debug(
-            "Returning %s structure timers, display setting is %s"
-            % (structuretimer_events.count(), OPCALENDAR_DISPLAY_STRUCTURETIMERS)
+            "Returning %s extractions, display setting is %s. List is: %s"
+            % (
+                moonmining_events.count(),
+                OPCALENDAR_DISPLAY_MOONMINING,
+                moonmining_events,
+            )
         )
 
-        logger.debug("Returning %s events" % ingame_events.count())
+        logger.debug("Returning %s ingame events" % ingame_events.count())
 
         cal = '<table class="calendar">\n'
         cal += f"{self.formatmonthname(self.year, self.month, withyear=withyear)}\n"
         cal += f"{self.formatweekheader()}\n"
 
         for week in self.monthdays2calendar(self.year, self.month):
-            cal += f"{self.formatweek(week, events, ingame_events, structuretimer_events)}\n"
+            cal += f"{self.formatweek(week, events, ingame_events, structuretimer_events, moonmining_events)}\n"
 
         cal += "</table>"
 
