@@ -91,7 +91,10 @@ class Calendar(HTMLCalendar):
                             f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.auto_fracture_at else "future-event"} event-moonmining">{event.auto_fracture_at.strftime("%H:%M")} Moon fracture at <i>{event.refinery}</i></div>'
                             f"</a>"
                         )
-                else:
+                if (
+                    not type(event).__name__ == "Extraction"
+                    and not type(event).__name__ == "Timer"
+                ):
                     d += (
                         f"<style>{event.get_event_styling}</style>"
                         f'<a class="nostyling" href="{event.get_html_url}">'
