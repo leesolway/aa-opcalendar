@@ -77,7 +77,7 @@ class Calendar(HTMLCalendar):
                     if event.objective == OBJECTIVE_UNDEFINED:
                         objective_verbosed = "Undefined"
 
-                    d += f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.auto_fracture_at else "future-event"} event-structuretimer">{event.date.strftime("%H:%M")} {objective_verbosed} <i>{event.structure_type.name}</i> timer in: <i>{event.eve_solar_system.name}</i></div>'
+                    d += f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.date else "future-event"} event-structuretimer">{event.date.strftime("%H:%M")} {objective_verbosed} <i>{event.structure_type.name}</i> timer in: <i>{event.eve_solar_system.name}</i></div>'
 
                     logger.debug("Typer type is: %s " % event.get_objective_display())
 
