@@ -55,8 +55,8 @@ opcalendar see_signups | Can see all signups for event | Leadership, FCs, Member
 Name | Description | Default
  --- | --- | ---
 OPCALENDAR_NOTIFY_IMPORTS | Wheter to send out discord notifications for ingame and public NPSI events | True
-OPCALENDAR_DISPLAY_STRUCTURETIMERS | whether we should inculde timers from the structuretimers plugin in the calendar | True
-OPCALENDAR_DISPLAY_MOONMINING | whether we should inculde extractions from the aa-moonmining plugin in the calendar | True
+OPCALENDAR_DISPLAY_STRUCTURETIMERS | whether we should inculde timers from the structuretimers plugin in the calendar. Inherits view permissions from aa-structuretimers | True
+OPCALENDAR_DISPLAY_MOONMINING | whether we should inculde extractions from the aa-moonmining plugin in the calendar. Inherits view permissions from aa-moonmining | True
 OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL | whether we display external hosts such as ingame hosts in the discord ops command filters | False
 
 ## Setup

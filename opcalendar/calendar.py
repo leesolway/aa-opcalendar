@@ -82,12 +82,15 @@ class Calendar(HTMLCalendar):
                     logger.debug("Typer type is: %s " % event.get_objective_display())
 
                 if type(event).__name__ == "Extraction":
-
-                    d += (
-                        f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
-                        f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.auto_fracture_at else "future-event"} event-moonmining">{event.auto_fracture_at.strftime("%H:%M")} Moon fracture at <i>{event.refinery}</i></div>'
-                        f"</a>"
-                    )
+                    # WIP currently only required view permission
+                    if self.user.has_perm(
+                        "moonmining.extractions_access"
+                    ) and self.user.has_perm("moonmining.extractions_access"):
+                        d += (
+                            f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
+                            f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.auto_fracture_at else "future-event"} event-moonmining">{event.auto_fracture_at.strftime("%H:%M")} Moon fracture at <i>{event.refinery}</i></div>'
+                            f"</a>"
+                        )
                 else:
                     d += (
                         f"<style>{event.get_event_styling}</style>"
@@ -152,6 +155,7 @@ class Calendar(HTMLCalendar):
 
         # Check if structuretimers is active
         # Should we fetch timers
+
         if structuretimers_active() and OPCALENDAR_DISPLAY_STRUCTURETIMERS:
             structuretimer_events = (
                 Timer.objects.all()
