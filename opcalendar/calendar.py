@@ -92,8 +92,8 @@ class Calendar(HTMLCalendar):
                             f"</a>"
                         )
                 if (
-                    not type(event).__name__ == "Extraction"
-                    and not type(event).__name__ == "Timer"
+                    type(event).__name__ == "Event"
+                    or type(event).__name__ == "IngameEvents"
                 ):
                     d += (
                         f"<style>{event.get_event_styling}</style>"
