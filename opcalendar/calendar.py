@@ -175,7 +175,9 @@ class Calendar(HTMLCalendar):
             moonmining_events = (
                 Extraction.objects.all()
                 .annotate(start_time=F("auto_fracture_at"))
-                .filter(auto_fracture_at__year=self.year)
+                .filter(
+                    auto_fracture_at__year=self.year, auto_fracture_at__month=self.month
+                )
             )
         else:
             moonmining_events = Extraction.objects.none()
