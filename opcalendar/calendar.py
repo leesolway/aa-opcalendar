@@ -80,9 +80,9 @@ class Calendar(HTMLCalendar):
                     d += (
                         f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.date else "future-event"} event-structuretimer">'
                         f'{event.date.strftime("%H:%M")}<i> {objective_verbosed} structure timer</i><br>{event.eve_solar_system.name} - {event.structure_type.name}'
-                        f'</div>'
-                        )
-                    
+                        f"</div>"
+                    )
+
                     logger.debug("Typer type is: %s " % event.get_objective_display())
 
                 if type(event).__name__ == "Extraction":
@@ -94,7 +94,7 @@ class Calendar(HTMLCalendar):
                             f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
                             f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.auto_fracture_at else "future-event"} event-moonmining">'
                             f'{event.auto_fracture_at.strftime("%H:%M")} <i>Moon fracture</i><br>{event.refinery}'
-                            f'</div>'
+                            f"</div>"
                             f"</a>"
                         )
                 if (
@@ -104,9 +104,9 @@ class Calendar(HTMLCalendar):
                     d += (
                         f"<style>{event.get_event_styling}</style>"
                         f'<a class="nostyling" href="{event.get_html_url}">'
-                            f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class}">'
-                                f'{event.get_html_title}'
-                            f'</div>'
+                        f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class}">'
+                        f"{event.get_html_title}"
+                        f"</div>"
                         f"</a>"
                     )
             if date.today() == date(self.year, self.month, day):

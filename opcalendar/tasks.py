@@ -7,7 +7,7 @@ import feedparser
 from ics import Calendar
 import requests
 import pytz
-
+from django.utils.html import strip_tags
 from allianceauth.services.hooks import get_extension_logger
 from allianceauth.services.tasks import QueueOnce
 
@@ -175,7 +175,7 @@ def _import_spectre_fleet(feed, event_ids_to_remove):
                             host=feed.host,
                             doctrine="see details",
                             formup_system=feed.source,
-                            description=entry.description,
+                            description=strip_tags(entry.description),
                             start_time=date_object,
                             end_time=date_object,
                             fc=feed.source,
@@ -245,7 +245,7 @@ def _import_fun_inc(feed, event_ids_to_remove):
                     host=feed.host,
                     doctrine="see details",
                     formup_system=feed.source,
-                    description=entry.description,
+                    description=strip_tags(entry.description),
                     start_time=start_date,
                     end_time=end_date,
                     fc=feed.source,
@@ -316,7 +316,7 @@ def _import_eve_uni(feed, event_ids_to_remove):
                         host=feed.host,
                         doctrine="see details",
                         formup_system=feed.source,
-                        description=entry.description.replace("<br>", "\n"),
+                        description=strip_tags(entry.description.replace("<br>", "\n")),
                         start_time=start_date,
                         end_time=end_date,
                         fc=feed.source,
@@ -384,7 +384,7 @@ def _import_ical(feed, event_ids_to_remove, url):
                     title=title,
                     host=feed.host,
                     formup_system=entry.location,
-                    description=entry.description.replace("<br>", "\n"),
+                    description=strip_tags(entry.description.replace("<br>", "\n")),
                     start_time=start_date,
                     end_time=end_date,
                     external=True,
