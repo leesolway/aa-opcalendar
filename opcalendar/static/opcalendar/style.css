@@ -41,6 +41,15 @@
   position: relative;
 }
 
+.allianceauth-opcalendar .event span {
+    display: block; 
+}
+
+.allianceauth-opcalendar .event img {
+    vertical-align: middle; 
+    display: inline-block;
+}
+
 .allianceauth-opcalendar .event-structuretimer{
   background: #ffe1c0;
 }

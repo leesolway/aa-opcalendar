@@ -420,7 +420,7 @@ class Event(models.Model):
 
     @property
     def get_html_title(self):
-        return f'{self.start_time.strftime("%H:%M")} - {self.end_time.strftime("%H:%M")} <i>{self.host.community}</i> <br> <b>{self.operation_type.ticker} {self.title}</b>'
+        return f'<span>{self.start_time.strftime("%H:%M")} - {self.end_time.strftime("%H:%M")} <i>{self.host.community}</i></span><span><b>{self.operation_type.ticker} {self.title}</b></span>'
 
     def user_can_edit(self, user: user) -> bool:
         """Checks if the given user can edit this timer. Returns True or False"""
@@ -719,7 +719,7 @@ class IngameEvents(models.Model):
 
     @property
     def get_html_title(self):
-        return f'{self.event_start_date.strftime("%H:%M")} - {self.event_end_date.strftime("%H:%M")}<i> {self.owner_name}</i><br><b>{self.title}</b>'
+        return f'<span>{self.event_start_date.strftime("%H:%M")} - {self.event_end_date.strftime("%H:%M")}<i> {self.owner_name}</i></span><span><b>{self.title}</b></span>'
 
 
 class EventMember(models.Model):
