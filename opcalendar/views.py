@@ -8,7 +8,7 @@ from allianceauth.services.hooks import get_extension_logger
 from django.contrib import messages
 from django.urls import reverse
 from django_ical.views import ICalFeed
-
+from django.http import JsonResponse
 from .app_settings import get_site_url
 from django.views.generic import ListView
 from django.shortcuts import render, redirect
@@ -32,7 +32,7 @@ from opcalendar.models import (
     IngameEvents,
     Owner,
 )
-
+from django.core import serializers
 from . import tasks
 from .utils import messages_plus
 from .calendar import Calendar
@@ -195,6 +195,17 @@ def create_event(request):
     return render(request, "opcalendar/event-add.html", {"form": form})
 
 
+def get_category(request):
+    catecoty_id = request.GET.get("category", None)
+
+    data = {
+        "category": serializers.serialize(
+            "json", EventCategory.objects.all().filter(id=catecoty_id)
+        )
+    }
+    return JsonResponse(data)
+
+
 @login_required
 @permission_required("opcalendar.basic_access")
 def event_details(request, event_id):
@@ -256,7 +267,8 @@ def EventEdit(request, event_id):
                 request,
                 _("Saved changes to event for %(event)s.") % {"event": event.title},
             )
-            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+            url = reverse("opcalendar:event-detail", kwargs={"event_id": event.id})
+            return HttpResponseRedirect(url)
     else:
         data = {
             "operation_type": event.operation_type,

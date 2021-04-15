@@ -1,4 +1,5 @@
 from django.urls import path
+from django.conf.urls import url
 
 from . import views
 
@@ -31,5 +32,10 @@ urlpatterns = [
         "event/<int:event_id>/details/feed.ics",
         views.EventIcalView(),
         name="event-ical-view",
+    ),
+    url(
+        r"^event/new/ajax/get_category/$",
+        views.get_category,
+        name="get_category",
     ),
 ]

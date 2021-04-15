@@ -236,6 +236,10 @@ class EventCategory(models.Model):
         blank=True,
         help_text=_("Color to be displayed on calendar"),
     )
+    description = models.TextField(
+        blank=True,
+        help_text="Prefilled description that will be added on default on the event description.",
+    )
 
     class Meta:
         verbose_name = "Category"
