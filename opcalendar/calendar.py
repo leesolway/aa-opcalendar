@@ -79,7 +79,8 @@ class Calendar(HTMLCalendar):
 
                     d += (
                         f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.date else "future-event"} event-structuretimer">'
-                        f'{event.date.strftime("%H:%M")}<i> {objective_verbosed} structure timer</i><br>{event.eve_solar_system.name} - {event.structure_type.name}'
+                        f'<span>{event.date.strftime("%H:%M")}<i> {objective_verbosed} structure timer</i></span>'
+                        f"<span>{event.eve_solar_system.name} - {event.structure_type.name}</span>"
                         f"</div>"
                     )
 
@@ -93,7 +94,8 @@ class Calendar(HTMLCalendar):
                         d += (
                             f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
                             f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.auto_fracture_at else "future-event"} event-moonmining">'
-                            f'{event.auto_fracture_at.strftime("%H:%M")} <i>Moon fracture</i><br>{event.refinery}'
+                            f'<span>{event.auto_fracture_at.strftime("%H:%M")} <i>Moon fracture</i></span>'
+                            f"<span>{event.refinery.moon}</span>"
                             f"</div>"
                             f"</a>"
                         )
