@@ -37,13 +37,19 @@ class Calendar(HTMLCalendar):
         self, day, events, ingame_events, structuretimer_events, moonmining_events
     ):
 
+        structuretimers_per_day = []
+
+        moonmining_per_day = []
+
         events_per_day = events.filter(start_time__day=day)
 
-        ingame_events_per_day = ingame_events.filter(event_start_date__day=day)
+        if structuretimers_active() and OPCALENDAR_DISPLAY_STRUCTURETIMERS:
+            ingame_events_per_day = ingame_events.filter(event_start_date__day=day)
 
         structuretimers_per_day = structuretimer_events.filter(start_time__day=day)
 
-        moonmining_per_day = moonmining_events.filter(auto_fracture_at__day=day)
+        if moonmining_active() and OPCALENDAR_DISPLAY_MOONMINING:
+            moonmining_per_day = moonmining_events.filter(auto_fracture_at__day=day)
 
         all_events_per_day = sorted(
             chain(
@@ -190,7 +196,7 @@ class Calendar(HTMLCalendar):
                 )
             )
         else:
-            moonmining_events = Extraction.objects.none()
+            moonmining_events = Event.objects.none()
 
         logger.debug(
             "Returning %s extractions, display setting is %s. List is: %s"
