@@ -20,6 +20,7 @@ from .app_settings import (
     OPCALENDAR_CAS_URL,
     OPCALENDAR_FWAMING_DWAGONS_URL,
     OPCALENDAR_FREE_RANGE_CHIKUNS_URL,
+    OPCALENDAR_EVE_LINKNET_URL,
 )
 from .app_settings import OPCALENDAR_TASKS_TIME_LIMIT
 from .models import Event, EventImport, Owner
@@ -101,6 +102,11 @@ def import_all_npsi_fleets() -> bool:
         if feed.source == EventImport.FREE_RANGE_CHIKUNS:
             feed_errors |= _import_ical(
                 feed, event_ids_to_remove, OPCALENDAR_FREE_RANGE_CHIKUNS_URL
+            )
+
+        if feed.source == EventImport.EVE_LINKNET:
+            feed_errors |= _import_ical(
+                feed, event_ids_to_remove, OPCALENDAR_EVE_LINKNET_URL
             )
 
     logger.debug("Checking for NPSI fleets to be removed.")

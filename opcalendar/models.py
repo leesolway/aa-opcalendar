@@ -264,8 +264,10 @@ class EventImport(models.Model):
     CAS = "CA"
     FWAMING_DWAGONS = "FD"
     FREE_RANGE_CHIKUNS = "FR"
+    EVE_LINKNET = "LN"
 
     IMPORT_SOURCES = [
+        (EVE_LINKNET, _("EVE LinkNet")),
         (SPECTRE_FLEET, _("Spectre Fleet")),
         (EVE_UNIVERSITY, _("EVE University")),
         (FUN_INC, _("Fun Inc.")),

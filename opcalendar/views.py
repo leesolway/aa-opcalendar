@@ -358,6 +358,7 @@ class EventFeed(ICalFeed):
     A simple event calender
     """
 
+    product_id = "-//{}//Opcalendar//FEED".format(get_site_url())
     timezone = "UTC"
     file_name = "event.ics"
 
@@ -399,6 +400,7 @@ class EventIcalView(ICalFeed):
     A simple event calender
     """
 
+    product_id = "-//{}//Opcalendar//FEED".format(get_site_url())
     timezone = "UTC"
     file_name = "event.ics"
 
