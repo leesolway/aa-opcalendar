@@ -46,24 +46,44 @@
     <script>
         $('.legend div:first-child').prepend('<span class="event ingame-event">Ingame</span>').prepend('<span class="event show-all">Show all</span>')
 
-		$('.legend').on('click', 'span', function(){
-		    const classes = $(this).attr('class')
-		    const selectors = '.' + classes.split(' ').join('.')
-		    applyCalendarFilters(selectors)
-		})
+        let selectedEvents = []
 
-		function applyCalendarFilters(selectors){
-		    $('.calendar .event').hide()
-		    $('.legend span').removeClass('active')
+        $('.legend').on('click', 'span', function(){
+            const classes = $(this).attr('class')
+            const selectors = '.' + classes.split(' ').join('.').replace('.active', '')
 
-		    if(selectors.includes('show-all')){
-		        $('.calendar .event').show()
-		        $('.legend .show-all').addClass('active')
-		    }
-		    else{
-		        $('.calendar ' + selectors).show()
-		        $('.legend ' + selectors).addClass('active')
-		    }
-		}
+            // clear all selections on show-all
+            if(selectors.includes('show-all')){
+                selectedEvents = []
+                $('.legend .event').removeClass('active')
+                $(this).addClass('active')
+            }
+
+            // remove current selection if it's already present in the selectedEvents array
+            else if(selectedEvents.includes(selectors)){
+                selectedEvents = selectedEvents.filter(event => event !== selectors)
+                $(this).removClass('active')
+            }
+
+            // add the current selection to the selectedEvents array
+            else{
+                selectedEvents.push(selectors)
+                $(this).addClass('active')
+            }
+
+            applyCalendarFilters(selectedEvents)
+
+        })
+
+        function applyCalendarFilters(selectedEvents){
+            $('.calendar .event').hide()
+
+            if(selectedEvents.length){
+                selectedEvents.forEach(selectors => $('.calendar ' + selectors).show())
+            }
+            else{
+                $('.calendar .event').show()
+            }
+        }
     </script>
 {% endblock %}
