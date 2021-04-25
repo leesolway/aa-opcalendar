@@ -21,9 +21,11 @@
         <h5>Legend & Filters:</h5>
         <div class="legend">
             <div>
+                <span class="event show-all">Show all</span>
+                <span class="event ingame-event">Ingame</span>
                 {% for event in visibility %}
-                 <style>.{{ event.get_visibility_class }}:before {border-color: transparent {{ event.color }} transparent transparent;border-style: solid;}</style>
-                 <span class="event {{ event.get_visibility_class }}">{{ event.name }}</span>
+                     <style>.{{ event.get_visibility_class }}:before {border-color: transparent {{ event.color }} transparent transparent;border-style: solid;}</style>
+                     <span class="event {{ event.get_visibility_class }}">{{ event.name }}</span>
                 {% endfor %}
         	</div>
         	<div>
@@ -44,8 +46,6 @@
 {% block extra_javascript %}
     {% include 'bundles/jquery-datetimepicker-js.html' %}
     <script>
-        $('.legend div:first-child').prepend('<span class="event ingame-event">Ingame</span>').prepend('<span class="event show-all">Show all</span>')
-
         let selectedEvents = []
 
         $('.legend').on('click', 'span', function(){
@@ -62,7 +62,7 @@
             // remove current selection if it's already present in the selectedEvents array
             else if(selectedEvents.includes(selectors)){
                 selectedEvents = selectedEvents.filter(event => event !== selectors)
-                $(this).removClass('active')
+                $(this).removeClass('active')
             }
 
             // add the current selection to the selectedEvents array
