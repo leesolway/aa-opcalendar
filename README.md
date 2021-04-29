@@ -14,24 +14,53 @@ An operation calendar app for Alliance Auth to display fleet operations and othe
  	* Automatic syncing with supported NPSI community events over APIs
 * Ingame events
 	* Automatic syncing with ingame events
-	* Supports moon mining calendar events
 	* Personal, Corporation and Alliance calendars
 * Supports [structure timers](https://gitlab.com/ErikKalkoken/aa-structuretimers)
+* Supports [aa-moonmining](https://gitlab.com/ErikKalkoken/aa-moonmining)
+* Supports [aa-discordbot](https://github.com/pvyParts/allianceauth-discordbot)
 * Event visibility options
-	* Custom names
+	* Custom names and colors
 	* Restrict to groups
 	* Restrict to states
+	* Webhook for sending event notifications
+	* Filter to include in ical feed
 * Event categories
  	* Custom names
  	* Custom tickers
  	* Custom colors
+ 	* Pre-fill text to add on events with the category
 * Multihost support
 * Discord notifications
 	* Webhook
 	* For: new, edited and deleted events
 
+![screenshot](https://imgur.com/92nBoO7)
+![screenshot](https://imgur.com/Mbvq3So)
+Dark and white themes
 
-![screenshot](https://i.imgur.com/bLepJGH.jpg)
+![screenshot](https://imgur.com/IAZ5GRi)
+aa-moonmining support
+
+![screenshot](https://imgur.com/7k9SfSX)
+aa-structuretimers support
+
+![screenshot](https://imgur.com/JbAT5UW)
+Custom event visibility filters and categories
+
+![screenshot](https://imgur.com/kbhDLBS)
+details for manual events
+
+![screenshot](https://imgur.com/a8v2gO2)
+Supports importing public NPSI events right into opcalendar
+
+![screenshot](https://imgur.com/riuI8sM)
+Pull ingame events from personal, corporation and alliance
+
+![screenshot](https://imgur.com/1L8h526)
+Discord feed based on visibility filter
+
+![screenshot](https://imgur.com/fMUAc4H)
+Supports aa-discordbot to fetch events over discord
 
 ## Installation
  1. Install the Repo `pip install aa-opcalendar`
@@ -89,14 +118,20 @@ To add a manual event simply go to the calendar page and press on the new event 
 
 
 ## Importing NPSI fleets
-Opcalendar has  the ability to import predetermined NPSI fleets directly into your calendar.
+Opcalendar has  the ability to import predetermined NPSI fleets directly into your calendar from public NPSI community APIs.
 
 ### Supported NPSI communities
 Opcalendar is currently supporting imports for the following NPSI fleets:
 
-- Spectre fleet
-- Eve University (classes only)
-- FUN INC
+- EVE LinkNet
+- Spectre Fleet
+- EVE University (classes)
+- Fun Inc.
+- FRIDAY YARRRR
+- Redemption Road
+- CAS
+- Fwaming Dwagons
+- FREE RANGE CHIKUNS
 
 ### Setup
 
@@ -133,7 +168,7 @@ CELERYBEAT_SCHEDULE['update_all_ingame_events'] = {
 ```
 
 ### Ingame event visibility and categories
-On default the ingame events you import have no visibility filter and no category. This means they will be visible for everyone.
+On default the ingame events you import have no visibility filter and no category. This means they **will be visible for everyone**.
 
 If you wish to add a visibility filter or a category similar to the manual events simply go to the `admin panel -> Ingame event owners` and select a filter and a category for the owner.
 
