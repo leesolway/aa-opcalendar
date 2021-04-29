@@ -34,32 +34,32 @@ An operation calendar app for Alliance Auth to display fleet operations and othe
 	* Webhook
 	* For: new, edited and deleted events
 
-![screenshot](https://imgur.com/92nBoO7)
-![screenshot](https://imgur.com/Mbvq3So)
+![screenshot](https://i.imgur.com/92nBoO7.jpg)
+![screenshot](https://i.imgur.com/Mbvq3So.jpg)
 Dark and white themes
 
-![screenshot](https://imgur.com/IAZ5GRi)
+![screenshot](https://i.imgur.com/IAZ5GRi.jpg)
 aa-moonmining support
 
-![screenshot](https://imgur.com/7k9SfSX)
+![screenshot](https://i.imgur.com/7k9SfSX.jpg)
 aa-structuretimers support
 
-![screenshot](https://imgur.com/JbAT5UW)
+![screenshot](https://i.imgur.com/JbAT5UW.jpg)
 Custom event visibility filters and categories
 
-![screenshot](https://imgur.com/kbhDLBS)
+![screenshot](https://i.imgur.com/kbhDLBS.jpg)
 details for manual events
 
-![screenshot](https://imgur.com/a8v2gO2)
+![screenshot](https://i.imgur.com/a8v2gO2.jpg)
 Supports importing public NPSI events right into opcalendar
 
-![screenshot](https://imgur.com/riuI8sM)
+![screenshot](https://i.imgur.com/riuI8sM.jpg)
 Pull ingame events from personal, corporation and alliance
 
-![screenshot](https://imgur.com/1L8h526)
+![screenshot](https://i.imgur.com/1L8h526.jpg)
 Discord feed based on visibility filter
 
-![screenshot](https://imgur.com/fMUAc4H)
+![screenshot](https://i.imgur.com/fMUAc4H.jpg)
 Supports aa-discordbot to fetch events over discord
 
 ## Installation
