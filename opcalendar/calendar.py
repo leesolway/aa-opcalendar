@@ -43,10 +43,10 @@ class Calendar(HTMLCalendar):
 
         events_per_day = events.filter(start_time__day=day)
 
-        if structuretimers_active() and OPCALENDAR_DISPLAY_STRUCTURETIMERS:
-            ingame_events_per_day = ingame_events.filter(event_start_date__day=day)
+        ingame_events_per_day = ingame_events.filter(event_start_date__day=day)
 
-        structuretimers_per_day = structuretimer_events.filter(start_time__day=day)
+        if structuretimers_active() and OPCALENDAR_DISPLAY_STRUCTURETIMERS:
+            structuretimers_per_day = structuretimer_events.filter(start_time__day=day)
 
         if moonmining_active() and OPCALENDAR_DISPLAY_MOONMINING:
             moonmining_per_day = moonmining_events.filter(auto_fracture_at__day=day)
