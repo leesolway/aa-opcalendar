@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] - yyyy-mm-dd
+
+### Added
+### Changed
+### Fixed
+
+## v2.0.0b - 2021-04-29
+
+Major update for opcalendar which will add a lot of new functions, options and customization options.
+
+### Update from 1.5.1
+Update the plugin as you update normal plugins.
+
+- Pull new version `pip install -U aa-opcalendar`
+- Run migrations `python manage.py migrate`
+- Collect statics `python manage.py collectstatic`
+
+After you have migrated the new models you will need to add a visibility filter. This filter will replace the old hard coded public and member event filters.
+
+- Admin menu -> Event Visibilities Filters -> Add Event Visibility filter. You can determine who is able to see the events labeled with this filter by assigning groups or member states to the filter. Fill in the rest of the settings to this filter based on your needs.
+
+Major changes done in the calendar are listed bellow.
+
+### Added
+- Added the ability for members to sign up on events
+- Added support for aa-discordbot and command to call for upcoming operations on discord
+- Ability to generate ICAL feeds
+- Added button to add event on personal calendar from opcalendar
+- Added the ability to have an pre-filled descriptions for event categories
+- Added ability to display aa-moonmining extractions on calendar
+- Added ability to display aa-structuretimers on calendar view
+- Added new NPSI feed options
+- Ability to filter events by multiple filters at the same time
+
+### Changed
+- Event categories hardcoded colors to custom colors
+- Event visibility types to customizable
+- Minor styling fixes
+- Field help text changes
+
+### Removed
+- Removed ingame moon event options, replaced with aa-moonmining
+
+### Fixed
+- Stripped HTML tags from NPSI imported fleets
+- Form default values
+
 ## v2.0.0a4
 
 ### Fixed
