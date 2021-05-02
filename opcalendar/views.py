@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django_ical.views import ICalFeed
 from django.http import JsonResponse
-from .app_settings import get_site_url
+from .app_settings import get_site_url, structuretimers_active, moonmining_active
 from django.views.generic import ListView
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
@@ -145,6 +145,8 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         d = get_date(self.request.GET.get("month", None))
         cal = Calendar(d.year, d.month, user)
         html_cal = cal.formatmonth(withyear=True)
+        context["moonmining_active"] = moonmining_active()
+        context["structuretimers_active"] = structuretimers_active()
         context["category"] = EventCategory.objects.all()
         context["visibility"] = EventVisibility.objects.all()
         context["calendar"] = mark_safe(html_cal)

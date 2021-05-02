@@ -29,7 +29,13 @@
                 {% endfor %}
         	</div>
         	<div>
-        		{% for event in category %}
+        		{% if moonmining_active %}
+                    <span class="event event-moonmining">Moon Mining</span>
+                {% endif %}
+                {% if structuretimers_active %}
+                    <span class="event event-structuretimer">Timers</span>
+                {% endif %}
+                {% for event in category %}
         			<span class="event {{ event.get_category_class }}">{{ event.name }}</span>
         		{% endfor %}
         	</div>
