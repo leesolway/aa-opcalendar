@@ -107,7 +107,7 @@ class Calendar(HTMLCalendar):
                         d += (
                             f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
                             f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.chunk_arrival_at else "future-event"} event-moonmining">'
-                            f'<span>{event.chunk_arrival_at.strftime("%H:%M")} <i>Moon fracture {event.refinery.moon.eve_moon.name}</i></span>'
+                            f'<span>{event.chunk_arrival_at.strftime("%H:%M")} <i> Moon chunk arrival {event.refinery.moon.eve_moon.name}</i></span>'
                             f"<span>{structure[3:]}</span>"
                             f"</div>"
                             f"</a>"
