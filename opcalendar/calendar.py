@@ -49,7 +49,7 @@ class Calendar(HTMLCalendar):
             structuretimers_per_day = structuretimer_events.filter(start_time__day=day)
 
         if moonmining_active() and OPCALENDAR_DISPLAY_MOONMINING:
-            moonmining_per_day = moonmining_events.filter(auto_fracture_at__day=day)
+            moonmining_per_day = moonmining_events.filter(chunk_arrival_at__day=day)
 
         all_events_per_day = sorted(
             chain(
@@ -97,11 +97,18 @@ class Calendar(HTMLCalendar):
                     if self.user.has_perm(
                         "moonmining.extractions_access"
                     ) and self.user.has_perm("moonmining.extractions_access"):
+                        refinery = event.refinery.name
+                        system = (
+                            event.refinery.moon.eve_moon.eve_planet.eve_solar_system.name
+                        )
+
+                        structure = refinery.replace(system, "")
+
                         d += (
                             f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
-                            f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.auto_fracture_at else "future-event"} event-moonmining">'
-                            f'<span>{event.auto_fracture_at.strftime("%H:%M")} <i>Moon fracture</i></span>'
-                            f"<span>{event.refinery.moon}</span>"
+                            f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.chunk_arrival_at else "future-event"} event-moonmining">'
+                            f'<span>{event.chunk_arrival_at.strftime("%H:%M")} <i> Moon chunk arrival {event.refinery.moon.eve_moon.name}</i></span>'
+                            f"<span>{structure[3:]}</span>"
                             f"</div>"
                             f"</a>"
                         )
@@ -190,9 +197,9 @@ class Calendar(HTMLCalendar):
         if moonmining_active() and OPCALENDAR_DISPLAY_MOONMINING:
             moonmining_events = (
                 Extraction.objects.all()
-                .annotate(start_time=F("auto_fracture_at"))
+                .annotate(start_time=F("chunk_arrival_at"))
                 .filter(
-                    auto_fracture_at__year=self.year, auto_fracture_at__month=self.month
+                    chunk_arrival_at__year=self.year, chunk_arrival_at__month=self.month
                 )
             )
         else:

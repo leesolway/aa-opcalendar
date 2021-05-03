@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 ### Fixed
 
+## [Unreleased] - yyyy-mm-dd
+
+### Added
+- Filter for moonmining
+- Filter for structuretimers
+
+### Changed
+- Displaying chunk arrival time of moonmining instead of autofracture time
+
 ## v2.0.0b - 2021-04-29
 
 Major update for opcalendar which will add a lot of new functions, options and customization options.
