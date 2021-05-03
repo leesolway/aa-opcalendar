@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 ### Fixed
 
-## [Unreleased] - yyyy-mm-dd
+## v2.0.0b1 - 2021-05-03
 
 ### Added
 - Filter for moonmining
