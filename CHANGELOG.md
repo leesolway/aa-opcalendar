@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+### Fixed
+- Errors for NPSI event import when visibility group has no webhook selected
+
+## v2.0.0b1 - 2021-05-03
+
 ### Added
 - Filter for moonmining
 - Filter for structuretimers
