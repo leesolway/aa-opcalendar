@@ -122,10 +122,11 @@ def fleet_saved(sender, instance, created, **kwargs):
 
             old = datetime.datetime.now(timezone.utc) > eve_time
 
-            if hook.webhook.enabled:
-                if old and hook.ignore_past_fleets:
-                    logger.debug("Event is in the past, not sending webhook.")
-                hook.webhook.send_embed(embed)
+            if hook.webhook:
+                if hook.webhook.enabled:
+                    if old and hook.ignore_past_fleets:
+                        logger.debug("Event is in the past, not sending webhook.")
+                    hook.webhook.send_embed(embed)
 
         except Exception as e:
             logger.error(e)
@@ -193,10 +194,11 @@ def fleet_saved(sender, instance, created, **kwargs):
 
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
-                if hook.webhook.enabled:
-                    if old and hook.ignore_past_fleets:
-                        logger.debug("Event is in the past, not sending webhook.")
-                    hook.webhook.send_embed(embed)
+                if hook.webhook:
+                    if hook.webhook.enabled:
+                        if old and hook.ignore_past_fleets:
+                            logger.debug("Event is in the past, not sending webhook.")
+                        hook.webhook.send_embed(embed)
 
             except Exception as e:
                 logger.error(e)
@@ -262,10 +264,11 @@ def fleet_saved(sender, instance, created, **kwargs):
 
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
-                if hook.webhook.enabled:
-                    if old and hook.ignore_past_fleets:
-                        logger.debug("Event is in the past, not sending webhook.")
-                    hook.webhook.send_embed(embed)
+                if hook.webhook:
+                    if hook.webhook.enabled:
+                        if old and hook.ignore_past_fleets:
+                            logger.debug("Event is in the past, not sending webhook.")
+                        hook.webhook.send_embed(embed)
 
             except Exception as e:
                 logger.error(e)
@@ -366,10 +369,11 @@ def fleet_deleted(sender, instance, **kwargs):
 
             old = datetime.datetime.now(timezone.utc) > eve_time
 
-            if hook.webhook.enabled:
-                if old and hook.ignore_past_fleets:
-                    logger.debug("Event is in the past, not sending webhook.")
-                hook.webhook.send_embed(embed)
+            if hook.webhook:
+                if hook.webhook.enabled:
+                    if old and hook.ignore_past_fleets:
+                        logger.debug("Event is in the past, not sending webhook.")
+                    hook.webhook.send_embed(embed)
 
         except Exception as e:
             logger.error(e)
@@ -433,10 +437,11 @@ def fleet_deleted(sender, instance, **kwargs):
 
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
-                if hook.webhook.enabled:
-                    if old and hook.ignore_past_fleets:
-                        logger.debug("Event is in the past, not sending webhook.")
-                    hook.webhook.send_embed(embed)
+                if hook.webhook:
+                    if hook.webhook.enabled:
+                        if old and hook.ignore_past_fleets:
+                            logger.debug("Event is in the past, not sending webhook.")
+                        hook.webhook.send_embed(embed)
 
             except Exception as e:
                 logger.error(e)
@@ -492,10 +497,11 @@ def fleet_deleted(sender, instance, **kwargs):
 
                 old = datetime.datetime.now(timezone.utc) > eve_time
 
-                if hook.webhook.enabled:
-                    if old and hook.ignore_past_fleets:
-                        logger.debug("Event is in the past, not sending webhook.")
-                    hook.webhook.send_embed(embed)
+                if hook.webhook:
+                    if hook.webhook.enabled:
+                        if old and hook.ignore_past_fleets:
+                            logger.debug("Event is in the past, not sending webhook.")
+                        hook.webhook.send_embed(embed)
 
             except Exception as e:
                 logger.error(e)

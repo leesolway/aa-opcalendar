@@ -60,6 +60,8 @@ def import_all_npsi_fleets() -> bool:
         Event.objects.filter(external=True).values_list("id", flat=True)
     )
 
+    logger.debug("External events in database: {}".format(event_ids_to_remove))
+
     # Get all import feeds
     feeds = EventImport.objects.all()
 
