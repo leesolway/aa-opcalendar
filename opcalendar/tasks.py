@@ -56,7 +56,9 @@ def import_all_npsi_fleets() -> bool:
     """Imports all NPSI fleets from their respective APIs"""
 
     # Get all current imported fleets in database
-    event_ids_to_remove = set(Event.objects.filter(external=True))
+    event_ids_to_remove = set(
+        Event.objects.filter(external=True).values_list("id", flat=True)
+    )
 
     logger.debug("External events in database: {}".format(event_ids_to_remove))
 
@@ -155,30 +157,24 @@ def _import_spectre_fleet(feed, event_ids_to_remove):
                     date_object.strftime("%Y-%m-%dT%H:%M")
 
                     # Check if we already have the event stored
-                    original = False
+                    original = Event.objects.filter(
+                        start_time=date_object, title=entry.title
+                    ).first()
 
-                    for e in event_ids_to_remove:
-                        if e.title == entry.title and e.start_time == date_object:
-                            logger.debug(
-                                "%s: Skipping, event already in database: %s",
-                                feed,
-                                entry.title,
-                            )
-                            original = True
+                    # If we get the event from API it should not be removed
+                    if original:
 
-                            # Remove the found fleet from the to be removed list
-                            event_ids_to_remove.remove(e)
-
-                            # Break loop if we find a match
-                            break
-
-                    if not original:
-
-                        # Save new fleet to database
                         logger.debug(
-                            "%s: Creating event for database: %s", feed, entry.title
+                            "%s: Event: %s already in database, skipping",
+                            feed,
+                            entry.title,
                         )
 
+                        # Remove the found fleet from the to be removed list
+                        event_ids_to_remove.discard(original.id)
+
+                    else:
+                        # Save new fleet to database
                         Event.objects.create(
                             operation_type=feed.operation_type,
                             title=entry.title,
@@ -237,15 +233,13 @@ def _import_fun_inc(feed, event_ids_to_remove):
             # Check if we already have the event stored
             original = Event.objects.filter(start_time=start_date, title=title).first()
 
-            logger.debug("%s: Got match from database: %s", feed, original)
-
             # If we get the event from API it should not be removed
             if original:
 
-                logger.debug("%s: Event: %s already in database", feed, title)
+                logger.debug("%s: Event: %s already in database, skipping", feed, title)
 
                 # Remove the found fleet from the to be removed list
-                event_ids_to_remove.remove(original.id)
+                event_ids_to_remove.discard(original.id)
 
             else:
                 # Save new fleet to database
@@ -308,15 +302,15 @@ def _import_eve_uni(feed, event_ids_to_remove):
                     start_time=start_date, title=title
                 ).first()
 
-                logger.debug("%s: Got match from database: %s", feed, original)
-
                 # If we get the event from API it should not be removed
                 if original:
 
-                    logger.debug("%s: Event: %s already in database", feed, title)
+                    logger.debug(
+                        "%s: Event: %s already in database, skipping", feed, title
+                    )
 
                     # Remove the found fleet from the to be removed list
-                    event_ids_to_remove.remove(original.id)
+                    event_ids_to_remove.discard(original.id)
 
                 else:
                     # Save new event to database
@@ -377,15 +371,13 @@ def _import_ical(feed, event_ids_to_remove, url):
             # Check if we already have the event stored
             original = Event.objects.filter(start_time=start_date, title=title).first()
 
-            logger.debug("%s: Got match from database: %s", feed, original)
-
             # If we get the event from API it should not be removed
             if original:
 
-                logger.debug("%s: Event: %s already in database", feed, title)
+                logger.debug("%s: Event: %s already in database, skipping", feed, title)
 
                 # Remove the found fleet from the to be removed list
-                event_ids_to_remove.remove(original.id)
+                event_ids_to_remove.discard(original.id)
 
             else:
                 # Save new event to database
