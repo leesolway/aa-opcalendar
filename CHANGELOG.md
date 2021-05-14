@@ -41,6 +41,10 @@ After you have migrated the new models you will need to add a visibility filter.
 
 - Admin menu -> Event Visibilities Filters -> Add Event Visibility filter. You can determine who is able to see the events labeled with this filter by assigning groups or member states to the filter. Fill in the rest of the settings to this filter based on your needs.
 
+- Update NPSI event import settings from admin menu
+
+- Update ingame events settings from admin menu
+
 Major changes done in the calendar are listed bellow.
 
 ### Added

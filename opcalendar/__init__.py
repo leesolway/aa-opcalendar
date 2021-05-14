@@ -1,4 +1,4 @@
 default_app_config = "opcalendar.apps.OpcalendarConfig"
 
-__version__ = "2.0.0a4"
+__version__ = "v2.0.0b1"
 __title__ = "Opcalendar"
