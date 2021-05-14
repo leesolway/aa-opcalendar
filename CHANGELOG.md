@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 ### Fixed
 
-## [Unreleased] - yyyy-mm-dd
+## v2.0.1 - 2021-05-14
 
 ### Fixed
 - Errors for NPSI event import when visibility group has no webhook selected
