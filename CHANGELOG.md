@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 ### Fixed
 
+## [v2.0.2] - yyyy-mm-dd
+
+### Added
+- Different style files for light and dark themes
+### Changed
+### Fixed
+- #20 for visibility reseting to default
+
 ## v2.0.1 - 2021-05-14
 
 ### Fixed

@@ -1,0 +1,148 @@
+.allianceauth-opcalendar {
+    padding-top: 12px;
+}
+
+.allianceauth-opcalendar h5 {
+  padding-left: 14px;
+}
+
+.allianceauth-opcalendar .calendar {
+    width: 98%;
+    margin: auto;
+    font-size: 13px;
+    table-layout: fixed;
+  }
+
+.allianceauth-opcalendar .nostyling{
+  text-decoration: none !important;
+}
+
+.allianceauth-opcalendar .btn {
+    outline: none;
+    color: white;
+    /* background-color: transparent; */
+    box-shadow: 0 0 0 0;
+    margin-right:3px;
+}
+
+.allianceauth-opcalendar .event{
+  background-image: none;
+  border-radius: 0;
+  background: #eeeeee;
+  border: none;
+  color: black;
+  font-size: .75em;
+  padding: 0 .75em;
+  line-height: 2em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 1px;
+  position: relative;
+}
+
+.allianceauth-opcalendar .event span {
+    display: block;
+}
+
+.allianceauth-opcalendar .event img {
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.allianceauth-opcalendar .event-structuretimer{
+  background: #ffe1c0;
+}
+
+.allianceauth-opcalendar .event-moonmining{
+  background: #bcedff;
+}
+
+.allianceauth-opcalendar .event:before {
+    width: 0;
+    height: 0;
+    border-width: 0px 15px 15px 0;
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.allianceauth-opcalendar .event.past-event{
+    opacity: 0.4;
+}
+
+.allianceauth-opcalendar td.today {
+    color: #50a5f1;
+    font-weight: bold;
+}
+.allianceauth-opcalendar .calendar tr, .calendar td {
+  border: 1px solid #32394e;
+}
+
+.allianceauth-opcalendar .calendar th {
+  padding: 10px;
+  text-align: center;
+  font-size: 18px;
+  width: 15%;
+}
+
+.allianceauth-opcalendar .calendar td {
+  height: 110px;
+  vertical-align:top;
+  width: 15%;
+  padding: 0px 5px 0px 5px;
+}
+
+.allianceauth-opcalendar .month {
+  font-size: 25px;
+  background: #32394e;
+  color: white;
+}
+
+.allianceauth-opcalendar .date {
+  font-size: 16px;
+  padding: 5px;
+}
+
+.allianceauth-opcalendar ul {
+  height: 100%;
+  padding: 0px 5px 0px 20px;
+}
+
+.allianceauth-opcalendar a {
+  color: #17a2b8;
+}
+.allianceauth-opcalendar .left {
+  float: left;
+}
+
+.allianceauth-opcalendar .right {
+  float: right;
+}
+
+.allianceauth-opcalendar .form {
+  margin: auto;
+}
+
+.allianceauth-opcalendar .form input, .form select, .form textarea {
+  border-radius: 5px;
+  border: 1px solid #17a2b8;
+  outline: none;
+  background: none;
+  padding: 5px;
+  width: 100%;
+  }
+
+.allianceauth-opcalendar .legend {
+  margin: 15px;
+}
+.allianceauth-opcalendar .legend span {
+    padding: 3px 16px 3px 6px;
+    cursor: pointer;
+    opacity: 0.7
+}
+
+.allianceauth-opcalendar .legend span.active{
+  opacity: 1;
+}
