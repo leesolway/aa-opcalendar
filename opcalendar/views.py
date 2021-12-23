@@ -36,7 +36,7 @@ from django.core import serializers
 from . import tasks
 from .utils import messages_plus
 from .calendar import Calendar
-from .forms import EventForm
+from .forms import EventForm, EventEditForm
 
 logger = get_extension_logger(__name__)
 
@@ -244,27 +244,21 @@ def EventEdit(request, event_id):
         "edit_event called by user %s for optimer id %s" % (request.user, event_id)
     )
     event = get_object_or_404(Event, id=event_id)
+
     if request.method == "POST":
-        form = EventForm(request.POST)
+        form = EventEditForm(request.POST)
         logger.debug(
             "Received POST request containing update optimer form, is valid: %s"
             % form.is_valid()
         )
         if form.is_valid():
 
-            event.operation_type = form.cleaned_data["operation_type"]
-            event.title = form.cleaned_data["title"]
-            event.host = form.cleaned_data["host"]
-            event.doctrine = form.cleaned_data["doctrine"]
-            event.formup_system = form.cleaned_data["formup_system"]
-            event.description = form.cleaned_data["description"]
-            event.start_time = form.cleaned_data["start_time"]
-            event.end_time = form.cleaned_data["end_time"]
-            event.fc = form.cleaned_data["fc"]
-            event.event_visibility = form.cleaned_data["event_visibility"]
+            form = EventEditForm(request.POST, instance=event)
+
+            form.save()
 
             logger.info("User %s updating optimer id %s " % (request.user, event_id))
-            event.save()
+
             messages.success(
                 request,
                 _("Saved changes to event for %(event)s.") % {"event": event.title},
@@ -272,19 +266,9 @@ def EventEdit(request, event_id):
             url = reverse("opcalendar:event-detail", kwargs={"event_id": event.id})
             return HttpResponseRedirect(url)
     else:
-        data = {
-            "operation_type": event.operation_type,
-            "title": event.title,
-            "host": event.host,
-            "doctrine": event.doctrine,
-            "formup_system": event.formup_system,
-            "description": event.description,
-            "start_time": event.start_time,
-            "end_time": event.end_time,
-            "fc": event.fc,
-            "event_visibility": event.event_visibility,
-        }
-        form = EventForm(initial=data)
+
+        form = EventEditForm(instance=event)
+
     return render(request, "opcalendar/event-edit.html", context={"form": form})
 
 

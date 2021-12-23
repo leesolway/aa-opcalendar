@@ -29,7 +29,6 @@ class EventForm(ModelForm):
         self.fields["event_visibility"].queryset = EventVisibility.objects.filter(
             is_visible=True, is_active=True
         )
-
         try:
             self.initial["event_visibility"] = EventVisibility.objects.get(
                 is_default=True
@@ -41,6 +40,24 @@ class EventForm(ModelForm):
             self.initial["host"] = EventHost.objects.get(is_default=True)
         except Exception:
             logger.debug("Form defaults: No default host set")
+
+
+class EventEditForm(ModelForm):
+    class Meta:
+        model = Event
+        # datetime-local is a HTML5 input type, format to make date time show on fields
+        exclude = ["user", "eve_character", "created_date", "external"]
+
+    def __init__(self, *args, **kwargs):
+        super(EventEditForm, self).__init__(*args, **kwargs)
+
+        self.fields["start_time"].input_formats = ("%Y-%m-%dT%H:%M",)
+        self.fields["end_time"].input_formats = ("%Y-%m-%dT%H:%M",)
+        self.fields["host"].queryset = EventHost.objects.filter(external=False)
+        self.fields["event_visibility"].required = True
+        self.fields["event_visibility"].queryset = EventVisibility.objects.filter(
+            is_visible=True, is_active=True
+        )
 
 
 class SignupForm(forms.Form):
