@@ -201,6 +201,7 @@ class Calendar(HTMLCalendar):
                 .filter(
                     chunk_arrival_at__year=self.year, chunk_arrival_at__month=self.month
                 )
+                .exclude(status="CN")
             )
         else:
             moonmining_events = Event.objects.none()

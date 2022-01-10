@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 ### Fixed
 
+## [v2.0.3] - 2022-01-10
+
+### Fixed
+- #24, fixed canceled moonmining extractions showing up on calendar
+
 ## [v2.0.2] - 2021-12-22
 
 ### Added
