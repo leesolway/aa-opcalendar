@@ -1,7 +1,7 @@
 # cal/views.py
 import calendar
 from datetime import datetime, date, timedelta
-
+from dateutil.relativedelta import relativedelta
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
 from allianceauth.services.hooks import get_extension_logger
@@ -22,6 +22,7 @@ from django.utils.translation import gettext_lazy
 from django.utils.translation import ugettext_lazy as _
 from django.db import transaction
 from django.db.models import Q
+from django.db import Error
 
 from esi.decorators import token_required
 from opcalendar.models import (
@@ -160,6 +161,10 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 def create_event(request):
     form = EventForm(request.POST or None)
     if request.POST and form.is_valid():
+
+        objs = []
+        event_count = 0
+
         # Get character
         character = request.user.profile.main_character
         operation_type = form.cleaned_data["operation_type"]
@@ -170,9 +175,13 @@ def create_event(request):
         description = form.cleaned_data["description"]
         start_time = form.cleaned_data["start_time"]
         end_time = form.cleaned_data["end_time"]
+        repeat_event = form.cleaned_data["repeat_event"]
+        repeat_times = form.cleaned_data["repeat_times"]
         fc = form.cleaned_data["fc"]
         event_visibility = form.cleaned_data["event_visibility"]
-        Event.objects.get_or_create(
+
+        # Add original event to objects list
+        event = Event(
             user=request.user,
             operation_type=operation_type,
             title=title,
@@ -182,15 +191,73 @@ def create_event(request):
             description=description,
             start_time=start_time,
             end_time=end_time,
+            repeat_event=repeat_event,
+            repeat_times=repeat_times,
             eve_character=character,
             fc=fc,
             event_visibility=event_visibility,
         )
-        messages.success(
-            request,
-            _("Event %(opname)s created for %(date)s.")
-            % {"opname": title, "date": start_time.strftime("%Y-%m-%d %H:%M")},
-        )
+
+        objs.append(event)
+
+        # If we have a repeating event add event to object list multiple times
+        if repeat_event:
+            logger.debug("Event repeat %s for %s times" % (repeat_event, repeat_times))
+            for repeat in range(repeat_times):
+                if repeat_event == "DD":
+                    start_time += relativedelta(days=1)
+                    end_time += relativedelta(days=1)
+                if repeat_event == "MM":
+                    start_time += relativedelta(months=1)
+                    end_time += relativedelta(months=1)
+                if repeat_event == "YY":
+                    start_time += relativedelta(years=1)
+                    end_time += relativedelta(years=1)
+
+                event = Event(
+                    user=request.user,
+                    operation_type=operation_type,
+                    title=title,
+                    host=host,
+                    doctrine=doctrine,
+                    formup_system=formup_system,
+                    description=description,
+                    start_time=start_time,
+                    end_time=end_time,
+                    repeat_event=repeat_event,
+                    repeat_times=repeat_times,
+                    eve_character=character,
+                    fc=fc,
+                    event_visibility=event_visibility,
+                )
+
+                event_count += 1
+
+                objs.append(event)
+
+        try:
+            Event.objects.bulk_create(objs)
+
+            if event_count == 0:
+                messages.success(
+                    request,
+                    _("Event %(opname)s created for %(date)s.")
+                    % {"opname": title, "date": start_time.strftime("%Y-%m-%d %H:%M")},
+                )
+            else:
+                messages.success(
+                    request,
+                    _(
+                        "Event %(opname)s created for %(date)s. %(event_count)s duplicated events created."
+                    )
+                    % {
+                        "opname": title,
+                        "date": start_time.strftime("%Y-%m-%d %H:%M"),
+                        "event_count": event_count,
+                    },
+                )
+        except Error as e:
+            logger.error("Error creating events: %s" % e)
 
         return HttpResponseRedirect(reverse("opcalendar:calendar"))
 

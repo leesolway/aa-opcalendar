@@ -5,11 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] - yyyy-mm-dd
+## [v2.1.0] - 2022-01-15
 
 ### Added
-### Changed
-### Fixed
+- Closes #23, added ability to make diplicates when creating an event
 
 ## [v2.0.3] - 2022-01-10
 
@@ -175,3 +174,9 @@ Issue #3 in fleet signals
 
 ### Added
 - Setting to send out discord notifications for API imported fleets
+
+## [Unreleased] - yyyy-mm-dd
+
+### Added
+### Changed
+### Fixed

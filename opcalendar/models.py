@@ -323,6 +323,16 @@ class EventImport(models.Model):
 
 
 class Event(models.Model):
+    DAILY = "DD"
+    MONTHLY = "MM"
+    YEARLY = "YY"
+
+    REPEAT_INTERVAL = [
+        (DAILY, _("Daily")),
+        (MONTHLY, _("Monthly")),
+        (YEARLY, _("Yearly")),
+    ]
+
     operation_type = models.ForeignKey(
         EventCategory,
         null=True,
@@ -354,6 +364,20 @@ class Event(models.Model):
     )
     end_time = models.DateTimeField(
         help_text=_("Event end date and time"),
+    )
+    repeat_event = models.CharField(
+        max_length=32,
+        default=False,
+        null=True,
+        blank=True,
+        choices=REPEAT_INTERVAL,
+        help_text="Select if you want to repeat this event in the future",
+    )
+    repeat_times = models.IntegerField(
+        default=False,
+        null=True,
+        blank=True,
+        help_text="How many times do you want to repeat this event?",
     )
     fc = models.CharField(
         max_length=254,
