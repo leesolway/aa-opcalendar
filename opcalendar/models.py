@@ -324,11 +324,13 @@ class EventImport(models.Model):
 
 class Event(models.Model):
     DAILY = "DD"
+    WEEKLY = "WE"
     MONTHLY = "MM"
     YEARLY = "YY"
 
     REPEAT_INTERVAL = [
         (DAILY, _("Daily")),
+        (WEEKLY, _("Weekly")),
         (MONTHLY, _("Monthly")),
         (YEARLY, _("Yearly")),
     ]

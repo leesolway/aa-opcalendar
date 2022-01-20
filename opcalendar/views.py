@@ -207,6 +207,9 @@ def create_event(request):
                 if repeat_event == "DD":
                     start_time += relativedelta(days=1)
                     end_time += relativedelta(days=1)
+                if repeat_event == "WE":
+                    start_time += relativedelta(weeks=1)
+                    end_time += relativedelta(weeks=1)
                 if repeat_event == "MM":
                     start_time += relativedelta(months=1)
                     end_time += relativedelta(months=1)
