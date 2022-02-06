@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [v2.2.1] - UNRELEASED
+## [v2.2.1] - 2022-02-06
 
 ### Added
 - Fixes #26, fix webhooks not sending for new created events
