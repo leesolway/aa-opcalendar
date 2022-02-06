@@ -377,7 +377,7 @@ def EventMemberSignup(request, event_id):
 
     character = request.user.profile.main_character
 
-    EventMember.objects.create(event=event, character=character)
+    EventMember.objects.update_or_create(event=event, character=character)
 
     messages.success(
         request,
