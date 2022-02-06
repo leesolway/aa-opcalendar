@@ -128,11 +128,11 @@ class Ops(commands.Cog):
             if user_argument:
                 ingame_events = ingame_events.filter(host__community=host)
 
-            # Combine events, limit to 20 events
+            # Combine events, limit to 10 events
             all_events = sorted(
                 chain(events, ingame_events),
                 key=operator.attrgetter("start_time"),
-            )[:20]
+            )[:10]
 
             embed = Embed(title="Scheduled Opcalendar Events")
 
@@ -140,7 +140,7 @@ class Ops(commands.Cog):
 
             embed.colour = Color.blue()
 
-            embed.description = "List view of the next 20 upcoming operations for {}. A calendar view is located in [here]({}/opcalendar).\n\nFiltering: To filter events for a specific host add the name after the command ie. `!ops my coalition`\n\nAvailable hosts: *{}*".format(
+            embed.description = "List view of the next 10 upcoming operations for {}. A calendar view is located in [here]({}/opcalendar).\n\nFiltering: To filter events for a specific host add the name after the command ie. `!ops my coalition`\n\nAvailable hosts: *{}*".format(
                 host, url, hosts
             )
 
