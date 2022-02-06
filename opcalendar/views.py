@@ -162,7 +162,6 @@ def create_event(request):
     form = EventForm(request.POST or None)
     if request.POST and form.is_valid():
 
-        objs = []
         event_count = 0
 
         # Get character
@@ -198,7 +197,10 @@ def create_event(request):
             event_visibility=event_visibility,
         )
 
-        objs.append(event)
+        try:
+            event.save()
+        except Error as e:
+            logger.error("Error creating event %s: %s" % (event, e))
 
         # If we have a repeating event add event to object list multiple times
         if repeat_event:
@@ -236,31 +238,29 @@ def create_event(request):
 
                 event_count += 1
 
-                objs.append(event)
+                try:
+                    event.save()
+                except Error as e:
+                    logger.error("Error creating event %s: %s" % (event, e))
 
-        try:
-            Event.objects.bulk_create(objs)
-
-            if event_count == 0:
-                messages.success(
-                    request,
-                    _("Event %(opname)s created for %(date)s.")
-                    % {"opname": title, "date": start_time.strftime("%Y-%m-%d %H:%M")},
+        if event_count == 0:
+            messages.success(
+                request,
+                ("Event %(opname)s created for %(date)s.")
+                % {"opname": title, "date": start_time.strftime("%Y-%m-%d %H:%M")},
+            )
+        else:
+            messages.success(
+                request,
+                (
+                    "Event %(opname)s created for %(date)s. %(event_count)s duplicated events created."
                 )
-            else:
-                messages.success(
-                    request,
-                    _(
-                        "Event %(opname)s created for %(date)s. %(event_count)s duplicated events created."
-                    )
-                    % {
-                        "opname": title,
-                        "date": start_time.strftime("%Y-%m-%d %H:%M"),
-                        "event_count": event_count,
-                    },
-                )
-        except Error as e:
-            logger.error("Error creating events: %s" % e)
+                % {
+                    "opname": title,
+                    "date": start_time.strftime("%Y-%m-%d %H:%M"),
+                    "event_count": event_count,
+                },
+            )
 
         return HttpResponseRedirect(reverse("opcalendar:calendar"))
 

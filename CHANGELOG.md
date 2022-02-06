@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v2.2.1] - UNRELEASED
+
+### Added
+- Fixes #26, fix webhooks not sending for new created events
+- Fixes #25, removed unused fields from edit event view
+
 ## [v2.2.0] - 2022-01-15
 
 ### Added

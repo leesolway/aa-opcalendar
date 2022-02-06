@@ -46,7 +46,14 @@ class EventEditForm(ModelForm):
     class Meta:
         model = Event
         # datetime-local is a HTML5 input type, format to make date time show on fields
-        exclude = ["user", "eve_character", "created_date", "external"]
+        exclude = [
+            "user",
+            "eve_character",
+            "created_date",
+            "external",
+            "repeat_event",
+            "repeat_times",
+        ]
 
     def __init__(self, *args, **kwargs):
         super(EventEditForm, self).__init__(*args, **kwargs)

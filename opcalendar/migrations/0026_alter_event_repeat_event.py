@@ -6,13 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('opcalendar', '0025_auto_20220115_1101'),
+        ("opcalendar", "0025_auto_20220115_1101"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='event',
-            name='repeat_event',
-            field=models.CharField(blank=True, choices=[('DD', 'Daily'), ('WE', 'Weekly'), ('MM', 'Monthly'), ('YY', 'Yearly')], default=False, help_text='Select if you want to repeat this event in the future', max_length=32, null=True),
+            model_name="event",
+            name="repeat_event",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("DD", "Daily"),
+                    ("WE", "Weekly"),
+                    ("MM", "Monthly"),
+                    ("YY", "Yearly"),
+                ],
+                default=False,
+                help_text="Select if you want to repeat this event in the future",
+                max_length=32,
+                null=True,
+            ),
         ),
     ]

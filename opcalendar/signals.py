@@ -27,6 +27,7 @@ esi = EsiClientProvider()
 @receiver(post_save, sender=Event)
 @receiver(post_save, sender=IngameEvents)
 def fleet_saved(sender, instance, created, **kwargs):
+    logger.debug("A new operation has been scheduled: %s" % instance)
 
     # Ingame Calendar Event
     if sender == IngameEvents and OPCALENDAR_NOTIFY_IMPORTS:
