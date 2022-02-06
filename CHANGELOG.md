@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [v2.2.2] - UNRELEAASED
+## [v2.2.2] - 2022-02-06
 
 ### Changed
 - Changed bot command to return 10 fleets instead of 20 due to max character limit issues
