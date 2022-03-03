@@ -1,27 +1,22 @@
-import requests
 import json
-
+from datetime import datetime, timedelta
 from typing import Tuple
-from datetime import timedelta, datetime
 
+import requests
+from allianceauth.authentication.models import CharacterOwnership, State
+from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
+from allianceauth.services.hooks import get_extension_logger
+from django.contrib.auth.models import Group, User
 from django.db import models
 from django.urls import reverse
-from django.contrib.auth.models import User
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
 from django.utils.html import strip_tags
-from django.contrib.auth.models import Group
-
+from django.utils.translation import gettext_lazy as _
 from esi.errors import TokenExpiredError, TokenInvalidError
 from esi.models import Token
 
-from allianceauth.authentication.models import CharacterOwnership
-from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
-from allianceauth.services.hooks import get_extension_logger
-from allianceauth.authentication.models import State
-
-from .providers import esi
 from .decorators import fetch_token_for_owner
+from .providers import esi
 
 logger = get_extension_logger(__name__)
 
