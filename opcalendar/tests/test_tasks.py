@@ -1,17 +1,15 @@
 import datetime as dt
 from unittest.mock import patch
 
-from pytz import utc
 import requests
 import requests_mock
-
-
 from allianceauth.tests.auth_utils import AuthUtils
+from pytz import utc
 
-from ..models import Event, EventCategory, EventHost, EventImport
 from .. import tasks
-from .testdata import feedparser_parse, generate_ical_string
+from ..models import Event, EventCategory, EventHost, EventImport
 from ..utils import NoSocketsTestCase
+from .testdata import COLOR_PURPLE, feedparser_parse, generate_ical_string
 
 MODULE_PATH = "opcalendar.tasks"
 
@@ -28,7 +26,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
         )
         cls.host = EventHost.objects.create(community="Test Host")
         cls.category = EventCategory.objects.create(
-            name="NPSI", ticker="NPSI", color=EventCategory.COLOR_PURPLE
+            name="NPSI", ticker="NPSI", color=COLOR_PURPLE
         )
 
     ########################
@@ -59,7 +57,6 @@ class TestImportNpsiFleet(NoSocketsTestCase):
         self.assertEqual(obj.start_time, published)
         self.assertEqual(obj.end_time, published)
         self.assertEqual(obj.fc, EventImport.SPECTRE_FLEET)
-        self.assertEqual(obj.visibility, Event.VISIBILITY_EXTERNAL)
         self.assertEqual(obj.user, self.user)
         self.assertEqual(obj.eve_character, self.eve_character)
 
@@ -193,7 +190,6 @@ class TestImportNpsiFleet(NoSocketsTestCase):
         self.assertEqual(obj.start_time, utc.localize(dt.datetime(2021, 2, 5, 22, 0)))
         self.assertEqual(obj.end_time, utc.localize(dt.datetime(2021, 2, 5, 23, 0)))
         self.assertEqual(obj.fc, EventImport.FUN_INC)
-        self.assertEqual(obj.visibility, Event.VISIBILITY_EXTERNAL)
         self.assertEqual(obj.user, self.user)
         self.assertEqual(obj.eve_character, self.eve_character)
 
@@ -363,7 +359,6 @@ class TestImportNpsiFleet(NoSocketsTestCase):
         self.assertEqual(obj.start_time, utc.localize(dt.datetime(2021, 2, 4, 22, 0)))
         self.assertEqual(obj.end_time, utc.localize(dt.datetime(2021, 2, 4, 23, 0)))
         self.assertEqual(obj.fc, EventImport.EVE_UNIVERSITY)
-        self.assertEqual(obj.visibility, Event.VISIBILITY_EXTERNAL)
         self.assertEqual(obj.user, self.user)
         self.assertEqual(obj.eve_character, self.eve_character)
 

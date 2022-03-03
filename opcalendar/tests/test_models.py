@@ -1,17 +1,16 @@
 import datetime as dt
 from unittest.mock import patch
 
+from allianceauth.tests.auth_utils import AuthUtils
 from pytz import utc
 
-from allianceauth.tests.auth_utils import AuthUtils
-
-from ..models import IngameEvents, EventCategory, EventHost, Owner
+from ..models import EventCategory, EventHost, IngameEvents, Owner
+from ..utils import NoSocketsTestCase, add_character_to_user_2, add_new_token
 from .testdata import (
+    COLOR_PURPLE,
     esi_get_characters_character_id_calendar,
     esi_get_characters_character_id_calendar_event_id,
 )
-from ..utils import NoSocketsTestCase, add_character_to_user_2, add_new_token
-
 
 MODULE_PATH = "opcalendar.models"
 
@@ -33,7 +32,7 @@ class TestOwnerUpdateEventsEsi(NoSocketsTestCase):
         )
         cls.host = EventHost.objects.create(community="Test Host")
         cls.category = EventCategory.objects.create(
-            name="NPSI", ticker="NPSI", color=EventCategory.COLOR_PURPLE
+            name="NPSI", ticker="NPSI", color=COLOR_PURPLE
         )
         cls.owner = Owner.objects.create(
             character=cls.user.character_ownerships.first()

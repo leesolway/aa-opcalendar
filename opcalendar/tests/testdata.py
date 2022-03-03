@@ -1,12 +1,13 @@
 import json
 from pathlib import Path
 
-from ics import Calendar, Event
 from bravado.exception import HTTPNotFound
-
 from django.utils.dateparse import parse_datetime
+from ics import Calendar, Event
 
 from ..utils import BravadoOperationStub, BravadoResponseStub
+
+COLOR_PURPLE = "#8e44ad"
 
 
 def _load_testdata() -> dict:
