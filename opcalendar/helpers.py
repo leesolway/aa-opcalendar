@@ -21,7 +21,7 @@ class time_helpers:
 
     @staticmethod
     def get_time_until(dt):
-        """ Return D / H / M Until DateTime """
+        """Return D / H / M Until DateTime"""
         return time_helpers.format_timedelta(
             dt.replace(tzinfo=timezone.utc) - datetime.datetime.now(timezone.utc)
         )
