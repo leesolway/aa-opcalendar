@@ -1,43 +1,42 @@
 # cal/views.py
 import calendar
-from datetime import datetime, date, timedelta
-from dateutil.relativedelta import relativedelta
+from datetime import date, datetime, timedelta
+
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
 from allianceauth.services.hooks import get_extension_logger
+from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.urls import reverse
-from django_ical.views import ICalFeed
-from django.http import JsonResponse
-from .app_settings import get_site_url, structuretimers_active, moonmining_active
-from django.views.generic import ListView
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core import serializers
+from django.db import Error, transaction
+from django.db.models import Q
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy
-from django.utils.translation import ugettext_lazy as _
-from django.db import transaction
-from django.db.models import Q
-from django.db import Error
-
+from django.utils.translation import gettext_lazy as _
+from django.views.generic import ListView
+from django_ical.views import ICalFeed
 from esi.decorators import token_required
+
 from opcalendar.models import (
     Event,
     EventCategory,
-    EventVisibility,
     EventMember,
+    EventVisibility,
     IngameEvents,
     Owner,
 )
-from django.core import serializers
+
 from . import tasks
-from .utils import messages_plus
+from .app_settings import get_site_url, moonmining_active, structuretimers_active
 from .calendar import Calendar
-from .forms import EventForm, EventEditForm
+from .forms import EventEditForm, EventForm
+from .utils import messages_plus
 
 logger = get_extension_logger(__name__)
 
