@@ -87,6 +87,9 @@ OPCALENDAR_NOTIFY_IMPORTS | Wheter to send out discord notifications for ingame 
 OPCALENDAR_DISPLAY_STRUCTURETIMERS | whether we should inculde timers from the structuretimers plugin in the calendar. Inherits view permissions from aa-structuretimers | True
 OPCALENDAR_DISPLAY_MOONMINING | whether we should inculde extractions from the aa-moonmining plugin in the calendar. Inherits view permissions from aa-moonmining | True
 OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL | whether we display external hosts such as ingame hosts in the discord ops command filters | False
+OPCALENDAR_DISPLAY_MOONMINING_TAGS | Display the rarity tag of aa-moonmining moons if the moonmining plugin is installed | True
+OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME | Displays aa-moonmining extraction time based on arrival time. Set to False to display as auto fracture time | True
+
 
 ## Setup
 Before you are able to create new events on the front end you will need to setup the needed categories and visibility filters for your events.
