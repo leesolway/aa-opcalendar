@@ -33,6 +33,16 @@ OPCALENDAR_DISPLAY_STRUCTURETIMERS = clean_setting(
 # whether we should inculde extractions from the moonmining plugin in the calendar
 OPCALENDAR_DISPLAY_MOONMINING = clean_setting("OPCALENDAR_DISPLAY_MOONMINING", True)
 
+# If we want to display the moon mining tags in the opcalendar events
+OPCALENDAR_DISPLAY_MOONMINING_TAGS = clean_setting(
+    "OPCALENDAR_DISPLAY_MOONMINING_TAGS", True
+)
+
+# Display moon mining arrival time on opcalendar. If set to False will display auto fracture time instead
+OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME = clean_setting(
+    "OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME", True
+)
+
 # whether we display external hosts in the discord ops command filters
 OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL = clean_setting(
     "OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL", False

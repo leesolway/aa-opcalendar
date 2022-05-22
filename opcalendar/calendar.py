@@ -11,6 +11,8 @@ from .models import Event, IngameEvents
 from .app_settings import (
     OPCALENDAR_DISPLAY_STRUCTURETIMERS,
     OPCALENDAR_DISPLAY_MOONMINING,
+    OPCALENDAR_DISPLAY_MOONMINING_TAGS,
+    OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME,
 )
 
 from .app_settings import structuretimers_active, moonmining_active
@@ -104,14 +106,45 @@ class Calendar(HTMLCalendar):
 
                         structure = refinery.replace(system, "")
 
+                        # Should we display the moon tags
+                        if OPCALENDAR_DISPLAY_MOONMINING_TAGS:
+                            display_name = (
+                                event.refinery.moon.rarity_tag_html
+                                + '<span class="event-moon-name">'
+                                + structure[3:]
+                                + "</span>"
+                            )
+                        else:
+                            display_name = "<span>" + structure[3:] + "</span>"
+
+                        if OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME:
+                            display_details = (
+                                "<span>"
+                                + event.chunk_arrival_at.strftime("%H:%M")
+                                + "<i> Moon chunk arrival "
+                                + event.refinery.moon.eve_moon.name
+                                + "</i></span>"
+                            )
+                        else:
+                            display_details = (
+                                "<span>"
+                                + event.auto_fracture_at.strftime("%H:%M")
+                                + "<i> Moon chunk fracture "
+                                + event.refinery.moon.eve_moon.name
+                                + "</i></span>"
+                            )
+
                         d += (
                             f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
                             f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.chunk_arrival_at else "future-event"} event-moonmining">'
-                            f'<span>{event.chunk_arrival_at.strftime("%H:%M")} <i> Moon chunk arrival {event.refinery.moon.eve_moon.name}</i></span>'
-                            f"<span>{structure[3:]}</span>"
+                            f"{display_details}"
+                            f'<div class="event-moon-details">'
+                            f"{display_name}"
+                            f"</div>"
                             f"</div>"
                             f"</a>"
                         )
+
                 if (
                     type(event).__name__ == "Event"
                     or type(event).__name__ == "IngameEvents"

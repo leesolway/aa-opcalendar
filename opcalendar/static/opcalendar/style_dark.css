@@ -145,3 +145,17 @@
 .allianceauth-opcalendar .legend span.active{
   opacity: 1;
 }
+
+.allianceauth-opcalendar .calendar .event-moon-details{
+  display:table;
+  margin-bottom: 5px;
+}
+
+.allianceauth-opcalendar .calendar .label{
+  display:table-cell;
+  vertical-align:middle;
+}
+
+.allianceauth-opcalendar .calendar .event-moon-name{
+  margin-left: 5px;
+}
