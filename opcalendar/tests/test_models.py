@@ -1,10 +1,12 @@
 import datetime as dt
 from unittest.mock import patch
 
+from django.db.models import signals
 from allianceauth.tests.auth_utils import AuthUtils
 from pytz import utc
 
-from ..models import EventCategory, EventHost, IngameEvents, Owner
+from ..models import EventCategory, EventHost, IngameEvents, Owner, Event
+from ..signals import fleet_deleted, fleet_saved
 from ..utils import NoSocketsTestCase, add_character_to_user_2, add_new_token
 from .testdata import (
     COLOR_PURPLE,
@@ -37,6 +39,18 @@ class TestOwnerUpdateEventsEsi(NoSocketsTestCase):
         cls.owner = Owner.objects.create(
             character=cls.user.character_ownerships.first()
         )
+
+    def setUp(self) -> None:
+        signals.post_save.disconnect(fleet_saved, sender=Event)
+        signals.post_save.disconnect(fleet_saved, sender=IngameEvents)
+        signals.pre_delete.disconnect(fleet_deleted, sender=Event)
+        signals.pre_delete.disconnect(fleet_deleted, sender=IngameEvents)
+
+    def tearDown(self) -> None:
+        signals.pre_delete.connect(fleet_deleted, sender=Event)
+        signals.pre_delete.connect(fleet_deleted, sender=IngameEvents)
+        signals.post_save.connect(fleet_saved, sender=Event)
+        signals.post_save.connect(fleet_saved, sender=IngameEvents)
 
     def test_should_add_new_events(self, mock_esi):
         # given
