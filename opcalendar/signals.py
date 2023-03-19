@@ -127,7 +127,7 @@ def fleet_saved(sender, instance, created, **kwargs):
                     hook.webhook.send_embed(embed)
 
         except Exception as e:
-            logger.error(e)
+            logger.exception(e)
             pass  # shits fucked... Don't worry about it...
 
     # For Normal Events
@@ -199,7 +199,7 @@ def fleet_saved(sender, instance, created, **kwargs):
                         hook.webhook.send_embed(embed)
 
             except Exception as e:
-                logger.error(e)
+                logger.exception(e)
                 pass  # shits fucked... Don't worry about it...
 
         # For automated fleets like NPSI imported fleets. Only post if OPCALENDAR_NOTIFY_IMPORTS set to True
@@ -269,7 +269,7 @@ def fleet_saved(sender, instance, created, **kwargs):
                         hook.webhook.send_embed(embed)
 
             except Exception as e:
-                logger.error(e)
+                logger.exception(e)
                 pass  # shits fucked... Don't worry about it...
 
 
@@ -370,7 +370,7 @@ def fleet_deleted(sender, instance, **kwargs):
                     hook.webhook.send_embed(embed)
 
         except Exception as e:
-            logger.error(e)
+            logger.exception(e)
             pass  # shits fucked... Don't worry about it...
 
     # For Normal Events
@@ -438,7 +438,7 @@ def fleet_deleted(sender, instance, **kwargs):
                         hook.webhook.send_embed(embed)
 
             except Exception as e:
-                logger.error(e)
+                logger.exception(e)
                 pass  # shits fucked... Don't worry about it...
 
         # For automated fleets like NPSI imported fleets. Only post if OPCALENDAR_NOTIFY_IMPORTS set to True
@@ -498,5 +498,5 @@ def fleet_deleted(sender, instance, **kwargs):
                         hook.webhook.send_embed(embed)
 
             except Exception as e:
-                logger.error(e)
+                logger.exception(e)
                 pass  # shits fucked... Don't worry about it...
