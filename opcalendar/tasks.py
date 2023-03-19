@@ -102,7 +102,11 @@ def import_all_npsi_fleets() -> bool:
 
     successful_imports = feed_errors.count(False)
     if successful_imports:
-        logger.info("Successfully imported %d NPSI feeds.", successful_imports)
+        logger.info(
+            "Successfully imported %d / %d NPSI feeds.",
+            successful_imports,
+            len(feed_errors),
+        )
 
     if any(feed_errors):
         logger.error("Errors in feeds, not cleaning up operations on this run")
