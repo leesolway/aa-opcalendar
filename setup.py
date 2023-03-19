@@ -39,7 +39,7 @@ setup(
     install_requires=[
         "allianceauth>=2.8.0",
         "feedparser",
-        "ics",
+        "ics>=0.7.2",
         "pytz",
         "django-ical",
     ],

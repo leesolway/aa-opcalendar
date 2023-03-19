@@ -213,10 +213,10 @@ def _import_fun_inc(feed, event_ids_to_remove):
         # Parse each entry we got
         for entry in c.events:
             # Format datetime
-            start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(
+            start_date = datetime.utcfromtimestamp(entry.begin.float_timestamp).replace(
                 tzinfo=pytz.utc
             )
-            end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(
+            end_date = datetime.utcfromtimestamp(entry.end.float_timestamp).replace(
                 tzinfo=pytz.utc
             )
             title = entry.name
@@ -277,10 +277,10 @@ def _import_eve_uni(feed, event_ids_to_remove):
             # Filter only class events as they are the only public events in eveuni
             if "class" in entry.name.lower():
                 # Format datetime
-                start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(
-                    tzinfo=pytz.utc
-                )
-                end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(
+                start_date = datetime.utcfromtimestamp(
+                    entry.begin.float_timestamp
+                ).replace(tzinfo=pytz.utc)
+                end_date = datetime.utcfromtimestamp(entry.end.float_timestamp).replace(
                     tzinfo=pytz.utc
                 )
                 title = re.sub(r"[\(\[].*?[\)\]]", "", entry.name)
@@ -346,10 +346,10 @@ def _import_ical(feed, event_ids_to_remove, url):
         c = Calendar(r.text)
         for entry in c.events:
             # Format datetime
-            start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(
+            start_date = datetime.utcfromtimestamp(entry.begin.float_timestamp).replace(
                 tzinfo=pytz.utc
             )
-            end_date = datetime.utcfromtimestamp(entry.end.timestamp).replace(
+            end_date = datetime.utcfromtimestamp(entry.end.float_timestamp).replace(
                 tzinfo=pytz.utc
             )
             title = re.sub(r"[\(\[].*?[\)\]]", "", entry.name)

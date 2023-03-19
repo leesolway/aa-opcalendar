@@ -31,7 +31,7 @@ def generate_ical_string(key: str) -> str:
                 description=row["description"],
             )
         )
-    return str(c)
+    return c.serialize()
 
 
 class FeedsStub:
