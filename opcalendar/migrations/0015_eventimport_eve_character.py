@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("eveonline", "0012_index_additions"),
         ("opcalendar", "0014_auto_20210113_0836"),

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("opcalendar", "0020_auto_20210125_1007"),
     ]

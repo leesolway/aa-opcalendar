@@ -63,7 +63,6 @@ def fleet_saved(sender, instance, created, **kwargs):
 
             # Setup portrait URL based on owner type
             if instance.owner_type == "alliance":
-
                 portrait = "https://images.evetech.net/alliances/%s/logo" % entity_id
 
                 ticker = "[{}]".format(
@@ -73,7 +72,6 @@ def fleet_saved(sender, instance, created, **kwargs):
                 )
 
             if instance.owner_type == "corporation":
-
                 portrait = "https://images.evetech.net/corporations/%s/logo" % entity_id
 
                 ticker = "[{}]".format(
@@ -83,7 +81,6 @@ def fleet_saved(sender, instance, created, **kwargs):
                 )
 
             if instance.owner_type == "character":
-
                 portrait = (
                     "https://images.evetech.net/characters/%s/portrait" % entity_id
                 )
@@ -279,7 +276,6 @@ def fleet_saved(sender, instance, created, **kwargs):
 @receiver(pre_delete, sender=Event)
 @receiver(pre_delete, sender=IngameEvents)
 def fleet_deleted(sender, instance, **kwargs):
-
     # Ingame Calendar Event
     if sender == IngameEvents and OPCALENDAR_NOTIFY_IMPORTS:
         try:
@@ -317,7 +313,6 @@ def fleet_deleted(sender, instance, **kwargs):
 
             # Setup portrait URL based on owner type
             if instance.owner_type == "alliance":
-
                 portrait = "https://images.evetech.net/alliances/%s/logo" % entity_id
 
                 ticker = "[{}]".format(
@@ -327,7 +322,6 @@ def fleet_deleted(sender, instance, **kwargs):
                 )
 
             if instance.owner_type == "corporation":
-
                 portrait = "https://images.evetech.net/corporations/%s/logo" % entity_id
 
                 ticker = "[{}]".format(
@@ -337,7 +331,6 @@ def fleet_deleted(sender, instance, **kwargs):
                 )
 
             if instance.owner_type == "character":
-
                 portrait = (
                     "https://images.evetech.net/characters/%s/portrait" % entity_id
                 )

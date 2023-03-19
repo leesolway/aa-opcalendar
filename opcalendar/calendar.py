@@ -38,7 +38,6 @@ class Calendar(HTMLCalendar):
     def formatday(
         self, day, events, ingame_events, structuretimer_events, moonmining_events
     ):
-
         structuretimers_per_day = []
 
         moonmining_per_day = []
@@ -69,7 +68,6 @@ class Calendar(HTMLCalendar):
         if day != 0:
             # Parse events
             for event in all_events_per_day:
-
                 if type(event).__name__ == "Timer":
                     OBJECTIVE_UNDEFINED = "UN"
                     OBJECTIVE_HOSTILE = "HO"

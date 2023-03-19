@@ -434,7 +434,6 @@ class Event(models.Model):
 
     @property
     def get_date_status(self):
-
         if datetime.now(timezone.utc) > self.start_time:
             return "past-event"
         else:
@@ -528,7 +527,6 @@ class Owner(models.Model):
     @fetch_token_for_owner(["esi-calendar.read_calendar_events.v1"])
     def update_events_esi(self, token):
         if self.is_active:
-
             # Get all current imported fleets in database
             event_ids_to_remove = list(
                 IngameEvents.objects.filter(owner=self).values_list(
@@ -541,7 +539,6 @@ class Owner(models.Model):
 
             events = self._fetch_events()
             for event in events:
-
                 character_id = self.character.character.character_id
 
                 details = (
@@ -562,12 +559,10 @@ class Owner(models.Model):
 
                 try:
                     if original is not None:
-
                         logger.debug("Event: %s already in database" % event["title"])
                         event_ids_to_remove.remove(original.event_id)
 
                     else:
-
                         # Check if we already have the host
                         original_host = EventHost.objects.filter(
                             community=details["owner_name"]
@@ -610,7 +605,6 @@ class Owner(models.Model):
 
     @fetch_token_for_owner(["esi-calendar.read_calendar_events.v1"])
     def _fetch_events(self, token) -> list:
-
         character_id = self.character.character.character_id
 
         events = esi.client.Calendar.get_characters_character_id_calendar(
@@ -675,7 +669,6 @@ class Owner(models.Model):
 
 
 class IngameEvents(models.Model):
-
     event_id = models.PositiveBigIntegerField(
         primary_key=True, help_text="The EVE ID of the event"
     )
@@ -712,7 +705,6 @@ class IngameEvents(models.Model):
 
     @property
     def get_date_status(self):
-
         if datetime.now(timezone.utc) > self.event_start_date:
             return "past-event"
         else:

@@ -56,7 +56,6 @@ def add_ingame_calendar(request, token):
             user=request.user, character=token_char
         )
     except CharacterOwnership.DoesNotExist:
-
         success = False
         owned_char = None
 
@@ -73,7 +72,6 @@ def add_ingame_calendar(request, token):
         )
 
     if success:
-
         try:
             corporation = EveCorporationInfo.objects.get(
                 corporation_id=token_char.corporation_id
@@ -160,7 +158,6 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 def create_event(request):
     form = EventForm(request.POST or None)
     if request.POST and form.is_valid():
-
         event_count = 0
 
         # Get character
@@ -280,7 +277,6 @@ def get_category(request):
 @login_required
 @permission_required("opcalendar.basic_access")
 def event_details(request, event_id):
-
     try:
         event = (
             Event.objects.filter(
@@ -321,7 +317,6 @@ def EventEdit(request, event_id):
             % form.is_valid()
         )
         if form.is_valid():
-
             form = EventEditForm(request.POST, instance=event)
 
             form.save()
@@ -335,7 +330,6 @@ def EventEdit(request, event_id):
             url = reverse("opcalendar:event-detail", kwargs={"event_id": event.id})
             return HttpResponseRedirect(url)
     else:
-
         form = EventEditForm(instance=event)
 
     return render(request, "opcalendar/event-edit.html", context={"form": form})
@@ -371,7 +365,6 @@ def EventDeleteView(request, event_id):
 @login_required
 @permission_required("opcalendar.basic_access")
 def EventMemberSignup(request, event_id):
-
     event = Event.objects.get(id=event_id)
 
     character = request.user.profile.main_character
@@ -390,7 +383,6 @@ def EventMemberSignup(request, event_id):
 @login_required
 @permission_required("opcalendar.basic_access")
 def EventMemberRemove(request, event_id):
-
     event = Event.objects.get(id=event_id)
 
     character = request.user.profile.main_character
@@ -428,7 +420,6 @@ class EventFeed(ICalFeed):
         return "{}{}".format(item.id, "global_name")
 
     def item_title(self, item):
-
         return "{}".format(item.title)
 
     def item_description(self, item):
@@ -484,7 +475,6 @@ class EventIcalView(ICalFeed):
         return "{}{}".format(item.id, "global_name")
 
     def item_title(self, item):
-
         return "{}".format(item.title)
 
     def item_description(self, item):

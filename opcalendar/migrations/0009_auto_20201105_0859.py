@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("opcalendar", "0008_auto_20201105_0846"),
     ]

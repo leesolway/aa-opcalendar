@@ -69,7 +69,6 @@ def import_all_npsi_fleets() -> bool:
 
     # Check for active NPSI feeds
     for feed in feeds:
-
         # If Spectre Fleet is active
         if feed.source == EventImport.SPECTRE_FLEET:
             feed_errors |= _import_spectre_fleet(feed, event_ids_to_remove)
@@ -135,19 +134,15 @@ def _import_spectre_fleet(feed, event_ids_to_remove):
     )
 
     try:
-
         # Get spectre fleets from their RSS feed
         d = feedparser.parse(OPCALENDAR_SPECTRE_URL)
 
         # Process each fleet entry
         for entry in d.entries:
-
             # Look for SF fleets only
             if entry.author_detail.name == "Spectre Fleet":
-
                 # Only active fleets
                 if "[RESERVED]" not in entry.title:
-
                     logger.debug("%s: Import even found: %s", feed, entry.title)
 
                     # Format datetimes
@@ -163,7 +158,6 @@ def _import_spectre_fleet(feed, event_ids_to_remove):
 
                     # If we get the event from API it should not be removed
                     if original:
-
                         logger.debug(
                             "%s: Event: %s already in database, skipping",
                             feed,
@@ -218,7 +212,6 @@ def _import_fun_inc(feed, event_ids_to_remove):
 
         # Parse each entry we got
         for entry in c.events:
-
             # Format datetime
             start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(
                 tzinfo=pytz.utc
@@ -235,7 +228,6 @@ def _import_fun_inc(feed, event_ids_to_remove):
 
             # If we get the event from API it should not be removed
             if original:
-
                 logger.debug("%s: Event: %s already in database, skipping", feed, title)
 
                 # Remove the found fleet from the to be removed list
@@ -282,10 +274,8 @@ def _import_eve_uni(feed, event_ids_to_remove):
         r = requests.get(OPCALENDAR_EVE_UNI_URL)
         c = Calendar(r.text)
         for entry in c.events:
-
             # Filter only class events as they are the only public events in eveuni
             if "class" in entry.name.lower():
-
                 # Format datetime
                 start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(
                     tzinfo=pytz.utc
@@ -304,7 +294,6 @@ def _import_eve_uni(feed, event_ids_to_remove):
 
                 # If we get the event from API it should not be removed
                 if original:
-
                     logger.debug(
                         "%s: Event: %s already in database, skipping", feed, title
                     )
@@ -356,7 +345,6 @@ def _import_ical(feed, event_ids_to_remove, url):
         r = requests.get(url)
         c = Calendar(r.text)
         for entry in c.events:
-
             # Format datetime
             start_date = datetime.utcfromtimestamp(entry.begin.timestamp).replace(
                 tzinfo=pytz.utc
@@ -373,7 +361,6 @@ def _import_ical(feed, event_ids_to_remove, url):
 
             # If we get the event from API it should not be removed
             if original:
-
                 logger.debug("%s: Event: %s already in database, skipping", feed, title)
 
                 # Remove the found fleet from the to be removed list

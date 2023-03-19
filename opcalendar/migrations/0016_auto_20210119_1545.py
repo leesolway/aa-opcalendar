@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("eveonline", "0012_index_additions"),
         ("authentication", "0017_remove_fleetup_permission"),
