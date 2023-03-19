@@ -65,65 +65,56 @@ def import_all_npsi_fleets() -> bool:
     # Get all import feeds
     feeds = EventImport.objects.all()
 
-    feed_errors = False
+    feed_errors = []
+    map_ical_imports = {
+        EventImport.FRIDAY_YARRRR: OPCALENDAR_FRIDAY_YARRRR_URL,
+        EventImport.REDEMPTION_ROAD: OPCALENDAR_REDEMPTION_ROAD_URL,
+        EventImport.CAS: OPCALENDAR_CAS_URL,
+        EventImport.FREE_RANGE_CHIKUNS: OPCALENDAR_FREE_RANGE_CHIKUNS_URL,
+        EventImport.EVE_LINKNET: OPCALENDAR_EVE_LINKNET_URL,
+        EventImport.FWAMING_DWAGONS: OPCALENDAR_FWAMING_DWAGONS_URL,
+    }
 
     # Check for active NPSI feeds
     for feed in feeds:
         # If Spectre Fleet is active
         if feed.source == EventImport.SPECTRE_FLEET:
-            feed_errors |= _import_spectre_fleet(feed, event_ids_to_remove)
+            has_error = _import_spectre_fleet(feed, event_ids_to_remove)
+            feed_errors.append(has_error)
 
         # Check for FUN Inc fleets
         if feed.source == EventImport.FUN_INC:
-            feed_errors |= _import_fun_inc(feed, event_ids_to_remove)
+            has_error = _import_fun_inc(feed, event_ids_to_remove)
+            feed_errors.append(has_error)
 
         # Check for EVE Uni events
         if feed.source == EventImport.EVE_UNIVERSITY:
-            feed_errors |= _import_eve_uni(feed, event_ids_to_remove)
+            has_error = _import_eve_uni(feed, event_ids_to_remove)
+            feed_errors.append(has_error)
 
-        # Check for events via SPECTRE ical feed
-        if feed.source == EventImport.FRIDAY_YARRRR:
-            feed_errors |= _import_ical(
-                feed, event_ids_to_remove, OPCALENDAR_FRIDAY_YARRRR_URL
-            )
-
-        if feed.source == EventImport.REDEMPTION_ROAD:
-            feed_errors |= _import_ical(
-                feed, event_ids_to_remove, OPCALENDAR_REDEMPTION_ROAD_URL
-            )
-
-        if feed.source == EventImport.CAS:
-            feed_errors |= _import_ical(feed, event_ids_to_remove, OPCALENDAR_CAS_URL)
-
-        if feed.source == EventImport.FWAMING_DWAGONS:
-            feed_errors |= _import_ical(
-                feed, event_ids_to_remove, OPCALENDAR_FWAMING_DWAGONS_URL
-            )
-
-        if feed.source == EventImport.FREE_RANGE_CHIKUNS:
-            feed_errors |= _import_ical(
-                feed, event_ids_to_remove, OPCALENDAR_FREE_RANGE_CHIKUNS_URL
-            )
-
-        if feed.source == EventImport.EVE_LINKNET:
-            feed_errors |= _import_ical(
-                feed, event_ids_to_remove, OPCALENDAR_EVE_LINKNET_URL
-            )
+        # Check for events from ical feeds
+        for source, url in map_ical_imports.items():
+            if feed.source == source:
+                has_error = _import_ical(feed, event_ids_to_remove, url)
+                feed_errors.append(has_error)
 
     logger.debug("Checking for NPSI fleets to be removed.")
 
-    if feed_errors:
+    successful_imports = feed_errors.count(False)
+    if successful_imports:
+        logger.info("Successfully imported %d NPSI feeds.", successful_imports)
+
+    if any(feed_errors):
         logger.error("Errors in feeds, not cleaning up operations on this run")
         return False
 
+    if not event_ids_to_remove:
+        logger.debug("No NPSI fleets to be removed.")
     else:
-        if not event_ids_to_remove:
-            logger.debug("No NPSI fleets to be removed.")
-        else:
-            logger.debug("Removed unseen NPSI fleets")
-            # Remove all events we did not see from API
-            Event.objects.filter(pk__in=event_ids_to_remove).delete()
-        return True
+        logger.debug("Removed unseen NPSI fleets")
+        # Remove all events we did not see from API
+        Event.objects.filter(pk__in=event_ids_to_remove).delete()
+    return True
 
 
 def _import_spectre_fleet(feed, event_ids_to_remove):
