@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] - yyyy-mm-dd
+## [2.3.1] - 2023-03-22
 
 ### Fixed
 
-- Error in fetching fleets (#30)
+- Error in fetching fleets (#30) thx [Erik Kalkoken](https://gitlab.com/ErikKalkoken)
 
 ## [2.3.0] - 2022-05-22
 
