@@ -5,15 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] - yyyy-mm-dd
+## [2.4.0] - 2023-03-16
 
 ### Added
-- Added slash command for
-
-### Changed
-
-### Fixed
-
+- Added slash command for !ops
 
 ## [2.3.1] - 2023-03-22
 
