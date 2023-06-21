@@ -4,14 +4,13 @@ from datetime import datetime
 import feedparser
 import pytz
 import requests
-from bravado.exception import HTTPBadGateway, HTTPGatewayTimeout, HTTPServiceUnavailable
-from celery import shared_task
-from ics import Calendar
-
-from django.utils.html import strip_tags
-
 from allianceauth.services.hooks import get_extension_logger
 from allianceauth.services.tasks import QueueOnce
+from bravado.exception import HTTPBadGateway, HTTPGatewayTimeout, HTTPServiceUnavailable
+from celery import shared_task
+from django.utils.html import strip_tags
+from ics import Calendar
+from requests.exceptions import RequestException
 
 from .app_settings import (
     OPCALENDAR_CAS_URL,
@@ -187,7 +186,7 @@ def _import_spectre_fleet(feed, event_ids_to_remove):
                             entry.title,
                         )
 
-    except Exception:
+    except (NotImplementedError, RequestException):
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
         return True
 
@@ -204,6 +203,8 @@ def _import_fun_inc(feed, event_ids_to_remove):
     try:
         # Get FUN Inc fleets from google ical
         r = requests.get(OPCALENDAR_FUNINC_URL)
+        r.raise_for_status()
+
         c = Calendar(r.text)
 
         # Parse each entry we got
@@ -251,7 +252,7 @@ def _import_fun_inc(feed, event_ids_to_remove):
 
                 event.save()
 
-    except Exception:
+    except (NotImplementedError, RequestException):
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
         return True
 
@@ -268,6 +269,8 @@ def _import_eve_uni(feed, event_ids_to_remove):
     try:
         # Get EVE Uni events from their API feed (ical)
         r = requests.get(OPCALENDAR_EVE_UNI_URL)
+        r.raise_for_status()
+
         c = Calendar(r.text)
         for entry in c.events:
             # Filter only class events as they are the only public events in eveuni
@@ -322,7 +325,7 @@ def _import_eve_uni(feed, event_ids_to_remove):
                     )
                     event.save()
 
-    except Exception:
+    except (NotImplementedError, RequestException):
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
         return True
 
@@ -339,6 +342,8 @@ def _import_ical(feed, event_ids_to_remove, url):
     try:
         # Get EVE Uni events from their API feed (ical)
         r = requests.get(url)
+        r.raise_for_status()
+
         c = Calendar(r.text)
         for entry in c.events:
             logger.debug("Processing new entry: %r", entry)
@@ -387,7 +392,7 @@ def _import_ical(feed, event_ids_to_remove, url):
                 )
                 event.save()
 
-    except Exception:
+    except (NotImplementedError, RequestException):
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
         return True
 

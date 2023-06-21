@@ -5,6 +5,7 @@ import requests
 import requests_mock
 from allianceauth.tests.auth_utils import AuthUtils
 from pytz import utc
+from requests.exceptions import HTTPError
 
 from .. import tasks
 from ..models import Event, EventCategory, EventHost, EventImport
@@ -145,7 +146,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
         self, mock_feedparser, requests_mocker
     ):
         # given
-        mock_feedparser.parse.side_effect = RuntimeError
+        mock_feedparser.parse.side_effect = HTTPError
         EventImport.objects.create(
             source=EventImport.SPECTRE_FLEET,
             host=self.host,
