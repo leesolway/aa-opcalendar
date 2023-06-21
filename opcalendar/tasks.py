@@ -1,30 +1,31 @@
-from datetime import datetime
 import re
+from datetime import datetime
 
+import feedparser
+import pytz
+import requests
 from bravado.exception import HTTPBadGateway, HTTPGatewayTimeout, HTTPServiceUnavailable
 from celery import shared_task
-import feedparser
 from ics import Calendar
-import requests
-import pytz
+
 from django.utils.html import strip_tags
+
 from allianceauth.services.hooks import get_extension_logger
 from allianceauth.services.tasks import QueueOnce
 
 from .app_settings import (
-    OPCALENDAR_EVE_UNI_URL,
-    OPCALENDAR_SPECTRE_URL,
-    OPCALENDAR_FUNINC_URL,
-    OPCALENDAR_FRIDAY_YARRRR_URL,
-    OPCALENDAR_REDEMPTION_ROAD_URL,
     OPCALENDAR_CAS_URL,
-    OPCALENDAR_FWAMING_DWAGONS_URL,
-    OPCALENDAR_FREE_RANGE_CHIKUNS_URL,
     OPCALENDAR_EVE_LINKNET_URL,
+    OPCALENDAR_EVE_UNI_URL,
+    OPCALENDAR_FREE_RANGE_CHIKUNS_URL,
+    OPCALENDAR_FRIDAY_YARRRR_URL,
+    OPCALENDAR_FUNINC_URL,
+    OPCALENDAR_FWAMING_DWAGONS_URL,
+    OPCALENDAR_REDEMPTION_ROAD_URL,
+    OPCALENDAR_SPECTRE_URL,
+    OPCALENDAR_TASKS_TIME_LIMIT,
 )
-from .app_settings import OPCALENDAR_TASKS_TIME_LIMIT
 from .models import Event, EventImport, Owner
-
 
 DEFAULT_TASK_PRIORITY = 6
 
@@ -340,6 +341,7 @@ def _import_ical(feed, event_ids_to_remove, url):
         r = requests.get(url)
         c = Calendar(r.text)
         for entry in c.events:
+            logger.debug("Processing new entry: %r", entry)
             # Format datetime
             start_date = datetime.utcfromtimestamp(entry.begin.float_timestamp).replace(
                 tzinfo=pytz.utc
@@ -347,6 +349,7 @@ def _import_ical(feed, event_ids_to_remove, url):
             end_date = datetime.utcfromtimestamp(entry.end.float_timestamp).replace(
                 tzinfo=pytz.utc
             )
+            logger.debug("Entry %r: name is: %r", entry, entry.name)
             title = re.sub(r"[\(\[].*?[\)\]]", "", entry.name)
 
             logger.debug("%s: Import even found: %s", feed, title)
