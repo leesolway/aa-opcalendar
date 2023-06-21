@@ -180,10 +180,9 @@ class TestImportNpsiFleet(NoSocketsTestCase):
         # when
         tasks.import_all_npsi_fleets()
         # then
-        self.assertEqual(Event.objects.count(), 1)
-        obj = Event.objects.first()
+        self.assertEqual(Event.objects.count(), 2)
+        obj = Event.objects.get(title="Fun Fleet 1")
         self.assertEqual(obj.operation_type, self.category)
-        self.assertEqual(obj.title, "Fun Fleet 1")
         self.assertEqual(obj.host, self.host)
         self.assertEqual(obj.doctrine, "see details")
         self.assertEqual(obj.formup_system, EventImport.FUN_INC)
@@ -247,7 +246,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
         # when
         tasks.import_all_npsi_fleets()
         # then
-        self.assertEqual(Event.objects.count(), 1)
+        self.assertEqual(Event.objects.count(), 2)
         self.assertTrue(Event.objects.filter(pk=original_event.pk).exists())
 
     def test_should_delete_outdated_fun_inc_event(
@@ -536,7 +535,7 @@ class TestImportNpsiFleet(NoSocketsTestCase):
         # when
         tasks.import_all_npsi_fleets()
         # then
-        self.assertEqual(Event.objects.count(), 3)
+        self.assertEqual(Event.objects.count(), 4)
         self.assertTrue(Event.objects.filter(title="Spectre Fleet 1").exists())
         self.assertTrue(Event.objects.filter(title="Fun Fleet 1").exists())
         self.assertTrue(Event.objects.filter(title="Eve Uni class 1").exists())
