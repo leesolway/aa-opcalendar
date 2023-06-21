@@ -1,30 +1,30 @@
-from datetime import datetime
 import re
+from datetime import datetime
 
-from bravado.exception import HTTPBadGateway, HTTPGatewayTimeout, HTTPServiceUnavailable
-from celery import shared_task
 import feedparser
-from ics import Calendar
-import requests
 import pytz
-from django.utils.html import strip_tags
+import requests
 from allianceauth.services.hooks import get_extension_logger
 from allianceauth.services.tasks import QueueOnce
+from bravado.exception import HTTPBadGateway, HTTPGatewayTimeout, HTTPServiceUnavailable
+from celery import shared_task
+from django.utils.html import strip_tags
+from ics import Calendar
+from requests.exceptions import RequestException
 
 from .app_settings import (
-    OPCALENDAR_EVE_UNI_URL,
-    OPCALENDAR_SPECTRE_URL,
-    OPCALENDAR_FUNINC_URL,
-    OPCALENDAR_FRIDAY_YARRRR_URL,
-    OPCALENDAR_REDEMPTION_ROAD_URL,
     OPCALENDAR_CAS_URL,
-    OPCALENDAR_FWAMING_DWAGONS_URL,
-    OPCALENDAR_FREE_RANGE_CHIKUNS_URL,
     OPCALENDAR_EVE_LINKNET_URL,
+    OPCALENDAR_EVE_UNI_URL,
+    OPCALENDAR_FREE_RANGE_CHIKUNS_URL,
+    OPCALENDAR_FRIDAY_YARRRR_URL,
+    OPCALENDAR_FUNINC_URL,
+    OPCALENDAR_FWAMING_DWAGONS_URL,
+    OPCALENDAR_REDEMPTION_ROAD_URL,
+    OPCALENDAR_SPECTRE_URL,
+    OPCALENDAR_TASKS_TIME_LIMIT,
 )
-from .app_settings import OPCALENDAR_TASKS_TIME_LIMIT
 from .models import Event, EventImport, Owner
-
 
 DEFAULT_TASK_PRIORITY = 6
 
@@ -186,7 +186,7 @@ def _import_spectre_fleet(feed, event_ids_to_remove):
                             entry.title,
                         )
 
-    except Exception:
+    except (NotImplementedError, RequestException):
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
         return True
 
@@ -203,6 +203,8 @@ def _import_fun_inc(feed, event_ids_to_remove):
     try:
         # Get FUN Inc fleets from google ical
         r = requests.get(OPCALENDAR_FUNINC_URL)
+        r.raise_for_status()
+
         c = Calendar(r.text)
 
         # Parse each entry we got
@@ -214,7 +216,7 @@ def _import_fun_inc(feed, event_ids_to_remove):
             end_date = datetime.utcfromtimestamp(entry.end.float_timestamp).replace(
                 tzinfo=pytz.utc
             )
-            title = entry.name
+            title = entry.name if entry.name else ""
 
             logger.debug("%s: Import even found: %s", feed, title)
 
@@ -250,7 +252,7 @@ def _import_fun_inc(feed, event_ids_to_remove):
 
                 event.save()
 
-    except Exception:
+    except (NotImplementedError, RequestException):
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
         return True
 
@@ -267,10 +269,12 @@ def _import_eve_uni(feed, event_ids_to_remove):
     try:
         # Get EVE Uni events from their API feed (ical)
         r = requests.get(OPCALENDAR_EVE_UNI_URL)
+        r.raise_for_status()
+
         c = Calendar(r.text)
         for entry in c.events:
             # Filter only class events as they are the only public events in eveuni
-            if "class" in entry.name.lower():
+            if entry.name and "class" in entry.name.lower():
                 # Format datetime
                 start_date = datetime.utcfromtimestamp(
                     entry.begin.float_timestamp
@@ -321,7 +325,7 @@ def _import_eve_uni(feed, event_ids_to_remove):
                     )
                     event.save()
 
-    except Exception:
+    except (NotImplementedError, RequestException):
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
         return True
 
@@ -338,6 +342,8 @@ def _import_ical(feed, event_ids_to_remove, url):
     try:
         # Get EVE Uni events from their API feed (ical)
         r = requests.get(url)
+        r.raise_for_status()
+
         c = Calendar(r.text)
         for entry in c.events:
             # Format datetime
@@ -347,7 +353,7 @@ def _import_ical(feed, event_ids_to_remove, url):
             end_date = datetime.utcfromtimestamp(entry.end.float_timestamp).replace(
                 tzinfo=pytz.utc
             )
-            title = re.sub(r"[\(\[].*?[\)\]]", "", entry.name)
+            title = re.sub(r"[\(\[].*?[\)\]]", "", entry.name) if entry.name else ""
 
             logger.debug("%s: Import even found: %s", feed, title)
 
@@ -384,7 +390,7 @@ def _import_ical(feed, event_ids_to_remove, url):
                 )
                 event.save()
 
-    except Exception:
+    except (NotImplementedError, RequestException):
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
         return True
 
