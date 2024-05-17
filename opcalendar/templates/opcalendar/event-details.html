@@ -7,150 +7,38 @@ Event Details
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <div class="allianceauth-opcalendar">
-            <div class="clearfix">
-                <a class="btn btn-primary left" href="{% url 'opcalendar:calendar' %}"><i class="far fa-calendar-alt"></i> Calendar </a>
-                <a class="btn btn-success left" href="{% url 'opcalendar:event-ical-view' event.pk %}"><i class="fas fa-bookmark"></i> Add to my calendar </a>
-                {% if perms.opcalendar.create_event %}
-                    {% if not event.external %}
-                        <a class="btn btn-primary left mr-2" href="{% url 'opcalendar:event_edit' event.pk %}"><i class="fas fa-edit"></i> Edit Event </a>
-                        <a class="btn btn-danger" href="{% url 'opcalendar:remove_event' event.id %}"><i class="fas fa-trash"></i> Remove</a>
-                    {% endif %}
-                {% endif %}
-            </div>
-
-            <div class="clearfix">
-                <div class="col-lg-12 text-center row">
-                <div class="label label-info text-left">
-                    <b>{% trans "Current Eve Time:" %} </b>
-                </div>
-                <strong class="label label-info text-left" id="current-time"></strong>
-                <br  />
-            </div>
-                <h2>{{ event.title }}</h2>
-                <p>Created by: <span style="color: gray;">{{ event.eve_character }}</span> Starts in: <span id="countdown{{ event.id }}" style="color: gray;">{{ event.eve_character }}</span></p>
-                <hr>
-                <h4>Event details</h4>
-                <style>.{{event.get_visibility_class}}:before{border-color: transparent {{event.event_visibility.color}} transparent transparent;border-style: solid;} .{{event.get_category_class}} {border-left: 6px solid {{event.operation_type.color}} !important;}
-                </style>
-                <table>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Type:</b></td>
-                        <td><span class="event {{ event.get_category_class }}">{{ event.operation_type }}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Availability:</b></td>
-                        <td><span class="event {{ event.get_visibility_class }}">{{ event.event_visibility }}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Start time:</b></td>
-                        <td>{{ event.start_time|date:"D Y-m-d H:i" }} (EVE) / <span id="localtime{{ event.id }}"></span> (Local)</td>
-                    </tr>
-
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Est. end time:</b></td>
-                        <td>{{ event.end_time|date:"D Y-m-d H:i" }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Duration:</b></td>
-                        <td>{{ event.duration }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Formup location:</b></td>
-                        <td>{{ event.formup_system }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Doctrine:</b></td>
-                        <td>{{ event.doctrine }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Fleet Commander:</b></td>
-                        <td>{{ event.fc }}</td>
-                    </tr>
-                </table>
-                <p style="padding-top:40px">{{ event.description|striptags|urlize|linebreaks}}</p>
-                <hr>
-                <h4>Host details</h4>
-                <table>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Community:</b></td>
-                        <td><span>{{ event.host.community|urlize }}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Ingame channel:</b></td>
-                        <td><span>{{ event.host.ingame_channel|urlize }}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Ingame mailing list:</b></td>
-                        <td><span>{{ event.host.ingame_mailing_list|urlize }}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Fleet comms:</b></td>
-                        <td><span>{{ event.host.fleet_comms|urlize }}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Fleet doctrines:</b></td>
-                        <td><span>{{ event.host.fleet_doctrines|urlize }}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Website:</b></td>
-                        <td><span>{{ event.host.website|urlize }}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Discord:</b></td>
-                        <td><span>{{ event.host.discord|urlize }}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Twitch:</b></td>
-                        <td><span>{{ event.host.twitch|urlize }}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Twitter:</b></td>
-                        <td><span>{{ event.host.twitter|urlize }}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Youtube:</b></td>
-                        <td><span>{{ event.host.youtube|urlize }}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-right: 10px;"><b>Facebook:</b></td>
-                        <td><span>{{ event.host.facebook|urlize }}</span></td>
-                    </tr>
-                </table>
-                <p style="padding-top:40px">{{ event.host.details }}</p>
-            </div>
-        </div>
-            <div>
-                <div>
-                    {% if not request.user.profile.main_character.character_name in memberlist %}
-                        <a class="btn btn-success right" href="{% url 'opcalendar:event_member_signup' event.id %}">Sign me up for the event</a>
-                    {% else %}
-                        <a class="btn btn-danger" href="{% url 'opcalendar:event_member_remove' event.id %}">Remove my event signup</a>
-                    {% endif %}
-                </div>
-
-                {% if perms.opcalendar.see_signups %}
-                    <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                          <th style="width: 10px">#</th>
-                          <th>Main Character</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for member in eventmember %}
-                        <tr role="row">
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ member.character }}</td>
-                        </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                {% endif %}
-        </div>
+<div class="card">
+    <div class="card-header">
+        {% include "opcalendar/partials/event_details/navigation.html" %}
     </div>
+    <div class="card-body">
+        <h5 class="card-title">{{ event.title }}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">
+            Created by: {{ event.eve_character }}<br>
+            {% trans "Current Eve Time:" %} <strong class="label label-info text-left" id="current-time"></strong>
+        </h6>
+        {% include "opcalendar/partials/event_details/details.html" %}
     </div>
+</div>
+
+<div class="card" style="margin-top:10px;">
+    <div class="card-header">
+        {% include "opcalendar/partials/event_details/signups_navigation.html" %}
+    </div>
+    <div class="card-body">
+        {% include "opcalendar/partials/event_details/signups.html" %}
+    </div>
+</div>
+
+<div class="card" style="margin-top:10px;">
+    <div class="card-header">
+        Host Details
+    </div>
+    <div class="card-body">
+        {% include "opcalendar/partials/event_details/host.html" %}
+    </div>
+</div>
+
 {% include 'bundles/moment-js.html' with locale=True %}
     <script src="{% static 'js/timers.js' %}"></script>
     <script type="application/javascript">

@@ -1,0 +1,13 @@
+{% load i18n %}
+
+<ul class="nav nav-pills card-header-pills w-100 d-flex align-items-center">
+    {% if not request.user.profile.main_character.character_name in memberlist %}
+        <li class="nav-item">
+            <a class="btn btn-success right" href="{% url 'opcalendar:event_member_signup' event.id %}">Sign me up for the event</a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+            <a class="btn btn-danger" href="{% url 'opcalendar:event_member_remove' event.id %}">Remove my event signup</a>
+        </li>
+    {% endif %}
+</ul>

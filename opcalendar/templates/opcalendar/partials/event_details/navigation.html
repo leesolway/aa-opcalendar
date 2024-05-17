@@ -1,0 +1,21 @@
+{% load i18n %}
+
+<ul class="nav nav-pills card-header-pills w-100 d-flex align-items-center">
+    <li class="nav-item me-auto">
+        <a class="btn btn-primary" href="{% url 'opcalendar:calendar' %}"><i class="far fa-calendar-alt"></i> Back to Calendar </a>
+    </li>
+    <li class="nav-item">
+        <a class="btn btn-success" href="{% url 'opcalendar:event-ical-view' event.pk %}"><i class="fas fa-bookmark"></i> Add to my calendar </a>
+    </li>
+    {% if perms.opcalendar.create_event %}
+        {% if not event.external %}
+            <li class="nav-item">
+                <a class="btn btn-primary mr-2" href="{% url 'opcalendar:event_edit' event.pk %}"><i class="fas fa-edit"></i> Edit Event </a>
+            </li>
+            <li class="nav-item">
+                <a class="btn btn-danger" href="{% url 'opcalendar:remove_event' event.id %}"><i class="fas fa-trash"></i> Remove</a>
+            </li>
+        {% endif %}
+    {% endif %}
+</ul>
+

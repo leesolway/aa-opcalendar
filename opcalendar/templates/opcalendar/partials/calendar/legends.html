@@ -1,0 +1,27 @@
+{% load i18n %}
+
+<div class="card">
+    <div class="card-header">{% trans "Legend & Filters:" %}</div>
+    <div class="card-body">
+        <div class="legend">
+            <span class="event show-all">{% trans "Show all" %}</span>
+            <span class="event ingame-event">{% trans "Ingame" %}</span>
+            {% for event in visibility %}
+                    <style>.{{ event.get_visibility_class }}:before {border-color: transparent {{ event.color }} transparent transparent;border-style: solid;}</style>
+                    <span class="event {{ event.get_visibility_class }}">{{ event.name }}</span>
+            {% endfor %}
+            {% if moonmining_active %}
+                <span class="event event-moonmining">{% trans "Moon Mining" %}</span>
+            {% endif %}
+            {% if structuretimers_active %}
+                <span class="event event-structuretimer">{% trans "Timers" %}</span>
+            {% endif %}
+            {% for event in category %}
+                <span class="event {{ event.get_category_class }}">{{ event.name }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+

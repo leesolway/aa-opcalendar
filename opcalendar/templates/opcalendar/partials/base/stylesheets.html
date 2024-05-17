@@ -1,0 +1,7 @@
+{% load static %}
+
+{% if NIGHT_MODE %}
+    <link rel="stylesheet" type="text/css" href="{% static 'opcalendar/style_dark.css' %}">
+{% else %}
+    <link rel="stylesheet" type="text/css" href="{% static 'opcalendar/style_light.css' %}">
+{% endif %}

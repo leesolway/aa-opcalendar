@@ -8,43 +8,17 @@
 {% block content %}
 <div class="allianceauth-opcalendar">
     <div class="clearfix">
-    	<a class="btn btn-info right mr-2" href="{% url 'opcalendar:calendar' %}?{{ next_month }} "> Next Month <i class="fas fa-forward"></i></a>
-        <a class="btn btn-info right mr-2" href="{% url 'opcalendar:calendar' %}?{{ prev_month }}"><i class="fas fa-backward"></i> Previous Month </a>
-            {% if perms.opcalendar.create_event %}
-        	<a class="btn btn-info right mr-2" href="{% url 'opcalendar:event_new' %}"><i class="fas fa-calendar-plus"></i> New Event </a>
-        {% endif %}
-        {% if perms.opcalendar.add_ingame_calendar_owner %}
-            <a class="btn btn-success right mr-2" href="{% url 'opcalendar:add_ingame_calendar' %}"><i class="fas fa-sync"></i>
-            {% translate "Add Ingame Calendar Feed" %}
-            </a>
-        {% endif %}
-        <h5>Legend & Filters:</h5>
-        <div class="legend">
-            <div>
-                <span class="event show-all">Show all</span>
-                <span class="event ingame-event">Ingame</span>
-                {% for event in visibility %}
-                     <style>.{{ event.get_visibility_class }}:before {border-color: transparent {{ event.color }} transparent transparent;border-style: solid;}</style>
-                     <span class="event {{ event.get_visibility_class }}">{{ event.name }}</span>
-                {% endfor %}
-        	</div>
-        	<div>
-        		{% if moonmining_active %}
-                    <span class="event event-moonmining">Moon Mining</span>
-                {% endif %}
-                {% if structuretimers_active %}
-                    <span class="event event-structuretimer">Timers</span>
-                {% endif %}
-                {% for event in category %}
-        			<span class="event {{ event.get_category_class }}">{{ event.name }}</span>
-        		{% endfor %}
-        	</div>
-        </div>
+        {% include "opcalendar/partials/calendar/legends.html" %}
     </div>
 </div>
-<div>
-    <div class="allianceauth-opcalendar">
-        {{ calendar }}
+<div class="allianceauth-opcalendar">
+    <div class="card">
+        <div class="card-header">
+            {% include "opcalendar/partials/calendar/navigation.html" %}
+            </div>
+        <div class="card-body">
+            {{ calendar }}
+        </div>
     </div>
 </div>
 {% endblock content %}
