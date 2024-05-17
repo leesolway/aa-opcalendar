@@ -1,18 +1,20 @@
+{% load i18n %}
+
 {% if perms.opcalendar.see_signups %}
-                    <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                          <th style="width: 10px">#</th>
-                          <th>Main Character</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for member in eventmember %}
-                        <tr role="row">
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ member.character }}</td>
-                        </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                {% endif %}
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th style="width: 10px">{% trans "#" %}</th>
+        <th>{% trans "Main Character" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for member in eventmember %}
+      <tr role="row">
+          <td>{{ forloop.counter }}</td>
+          <td>{{ member.character }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
