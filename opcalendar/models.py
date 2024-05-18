@@ -440,6 +440,13 @@ class Event(models.Model):
             return "future-event"
 
     @property
+    def external_tag(self):
+        if self.external:
+            return "external"
+        else:
+            return False
+
+    @property
     def get_html_url(self):
         url = reverse("opcalendar:event-detail", args=(self.id,))
         return f"{url}"

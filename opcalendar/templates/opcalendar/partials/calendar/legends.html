@@ -5,6 +5,7 @@
     <div class="card-body">
         <div class="legend">
             <span class="event show-all">{% trans "Show all" %}</span>
+            <span class="event external">External NPSI</span>
             <span class="event ingame-event">{% trans "Ingame" %}</span>
             {% for event in visibility %}
                     <style>.{{ event.get_visibility_class }}:before {border-color: transparent {{ event.color }} transparent transparent;border-style: solid;}</style>

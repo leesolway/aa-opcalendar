@@ -150,7 +150,7 @@ class Calendar(HTMLCalendar):
                     d += (
                         f"<style>{event.get_event_styling}</style>"
                         f'<a class="nostyling" href="{event.get_html_url}">'
-                        f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class}">'
+                        f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class} {event.external_tag}">'
                         f"{event.get_html_title}"
                         f"</div>"
                         f"</a>"

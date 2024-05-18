@@ -55,6 +55,7 @@ Section Order:
     - Bootstrap 5
 - Translation tags
 - Added OPCALENDAR_NOTIFY_REPEAT_EVENTS setting allowing to disable discord notifications for repeating events. Closes #33
+- Added filter to NPSI fleets. Closes #29
 ### Changed
 
 ### Fixed
