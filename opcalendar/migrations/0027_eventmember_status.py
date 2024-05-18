@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('opcalendar', '0026_alter_event_repeat_event'),
+        ("opcalendar", "0026_alter_event_repeat_event"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventmember',
-            name='status',
-            field=models.CharField(choices=[('A', 'Attending'), ('M', 'Maybe'), ('D', 'Declined')], default='A', max_length=1),
+            model_name="eventmember",
+            name="status",
+            field=models.CharField(
+                choices=[("A", "Attending"), ("M", "Maybe"), ("D", "Declined")],
+                default="A",
+                max_length=1,
+            ),
         ),
     ]

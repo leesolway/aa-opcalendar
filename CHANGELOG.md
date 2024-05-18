@@ -54,7 +54,7 @@ Section Order:
 - Compatibility to Alliance Auth v4
     - Bootstrap 5
 - Translation tags
-
+- Added OPCALENDAR_NOTIFY_REPEAT_EVENTS setting allowing to disable discord notifications for repeating events. Closes #33
 ### Changed
 
 ### Fixed

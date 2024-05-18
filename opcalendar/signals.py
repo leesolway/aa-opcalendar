@@ -11,7 +11,7 @@ from django.utils import timezone
 
 from esi.clients import EsiClientProvider
 
-from .app_settings import get_site_url
+from .app_settings import get_site_url, OPCALENDAR_NOTIFY_REPEAT_EVENTS
 
 from allianceauth.services.hooks import get_extension_logger
 
@@ -130,11 +130,94 @@ def fleet_saved(sender, instance, created, **kwargs):
             pass  # shits fucked... Don't worry about it...
 
     # For Normal Events
-    if sender == Event:
+    if sender == Event and not instance.repeat_event:
         # For normal events only
         if not instance.external:
             try:
-                logger.debug("New signal fleet created for %s" % instance.title)
+                logger.debug(
+                    "New signal fleet created for standard non repeat event %s"
+                    % instance.title
+                )
+
+                url = get_site_url() + "/opcalendar/event/%s/details/" % instance.pk
+
+                title = instance.title
+
+                message = "New event: %s" % title
+
+                formup_system = instance.formup_system
+
+                eve_time = instance.start_time
+
+                fc = instance.fc
+
+                main_char = instance.eve_character
+                if main_char:
+                    portrait = main_char.portrait_url_64
+                    character_name = main_char.character_name
+                    ticker = "[{}]".format(main_char.corporation_ticker)
+                else:
+                    portrait = ""
+                    character_name = ""
+                    ticker = ""
+
+                # If we update instead of delete
+                if not created:
+                    message = "Updated Event: {}".format(title)
+                    col = BLUE
+                else:
+                    col = GREEN
+
+                embed = {
+                    "title": message,
+                    "description": ("%s" % instance.description),
+                    "url": url,
+                    "color": col,
+                    "fields": [
+                        {"name": "FC", "value": fc, "inline": True},
+                        {
+                            "name": "Type",
+                            "value": instance.operation_type.name,
+                            "inline": True,
+                        },
+                        {"name": "Formup", "value": formup_system, "inline": True},
+                        {
+                            "name": "Eve Time",
+                            "value": eve_time.strftime("%Y-%m-%d %H:%M:%S"),
+                            "inline": False,
+                        },
+                    ],
+                    "footer": {
+                        "icon_url": portrait,
+                        "text": " %s %s, %s" % (character_name, ticker, instance.host),
+                    },
+                }
+                hook = instance.event_visibility
+
+                old = datetime.datetime.now(timezone.utc) > eve_time
+
+                if hook and hook.webhook and hook.webhook.enabled:
+                    if old and hook.ignore_past_fleets:
+                        logger.debug("Event is in the past, not sending webhook.")
+                    hook.webhook.send_embed(embed)
+
+            except Exception as e:
+                logger.exception(e)
+                pass  # shits fucked... Don't worry about it...
+
+    # For Normal Events
+    if sender == Event and instance.repeat_event and OPCALENDAR_NOTIFY_REPEAT_EVENTS:
+        # For normal repeat events only
+        if not instance.external:
+            try:
+                logger.debug(
+                    "New signal fleet created for standard repeat event %s. repeat_event is %s notification set to %s"
+                    % (
+                        instance.title,
+                        instance.repeat_event,
+                        OPCALENDAR_NOTIFY_REPEAT_EVENTS,
+                    )
+                )
 
                 url = get_site_url() + "/opcalendar/event/%s/details/" % instance.pk
 

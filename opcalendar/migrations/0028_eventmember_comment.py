@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('opcalendar', '0027_eventmember_status'),
+        ("opcalendar", "0027_eventmember_status"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='eventmember',
-            name='comment',
-            field=models.CharField(blank=True, help_text='Optional comment about the event', max_length=100),
+            model_name="eventmember",
+            name="comment",
+            field=models.CharField(
+                blank=True, help_text="Optional comment about the event", max_length=100
+            ),
         ),
     ]
