@@ -9,8 +9,6 @@
 
 .allianceauth-opcalendar .calendar th,
 .allianceauth-opcalendar .calendar td {
-    border: 1px solid #ddd;
-    text-align: center;
     vertical-align: top;
     padding: 8px;
     position: relative;
@@ -29,7 +27,7 @@
 }
 
 .allianceauth-opcalendar .calendar td {
-    background-color: #fff;
+    border: 1px solid #ddd; /* Add grey borders */
     height: 110px;
     cursor: pointer;
     padding: 0px 5px;
@@ -115,7 +113,6 @@
 }
 
 /* Old CSS that is not replaced by the new CSS */
-
 .allianceauth-opcalendar .nostyling {
     text-decoration: none !important;
 }
@@ -173,11 +170,6 @@
 
 .allianceauth-opcalendar .event.past-event {
     opacity: 0.4;
-}
-
-.allianceauth-opcalendar .calendar tr,
-.allianceauth-opcalendar .calendar td {
-    border: 1px solid #32394e;
 }
 
 .allianceauth-opcalendar .month {
@@ -240,4 +232,89 @@
 
 .allianceauth-opcalendar .calendar .event-moon-name {
     margin-left: 5px;
+}
+
+/* Label classes to fallback for Bootstrap 3 */
+.allianceauth-opcalendar .label {
+    display: inline;
+    padding: .2em .6em .3em;
+    font-size: 75%;
+    color: #fff;
+    vertical-align: baseline;
+    border-radius: .25em;
+}
+
+.allianceauth-opcalendar .label:empty {
+    display: none;
+}
+
+.allianceauth-opcalendar .label-default {
+    background-color: #95a5a6;
+}
+
+.allianceauth-opcalendar .label-default[href]:focus,
+.allianceauth-opcalendar .label-default[href]:hover {
+    background-color: #798d8f;
+}
+
+.allianceauth-opcalendar .label-primary {
+    background-color: #2C3E50;
+}
+
+.allianceauth-opcalendar .label-primary[href]:focus,
+.allianceauth-opcalendar .label-primary[href]:hover {
+    background-color: #1a242f;
+}
+
+.allianceauth-opcalendar .label-success {
+    background-color: #5cb85c;
+}
+
+.allianceauth-opcalendar .label-success[href]:focus,
+.allianceauth-opcalendar .label-success[href]:hover {
+    background-color: #449d44;
+}
+
+.allianceauth-opcalendar .label-info {
+    background-color: #5bc0de;
+}
+
+.allianceauth-opcalendar .label-info[href]:focus,
+.allianceauth-opcalendar .label-info[href]:hover {
+    background-color: #31b0d5;
+}
+
+.allianceauth-opcalendar .label-warning {
+    background-color: #f0ad4e;
+}
+
+.allianceauth-opcalendar .label-warning[href]:focus,
+.allianceauth-opcalendar .label-warning[href]:hover {
+    background-color: #ec971f;
+}
+
+.allianceauth-opcalendar .label-danger {
+    background-color: #d9534f;
+}
+
+.allianceauth-opcalendar .label-danger[href]:focus,
+.allianceauth-opcalendar .label-danger[href]:hover {
+    background-color: #c9302c;
+}
+
+.allianceauth-opcalendar .btn-margin-right {
+    margin-right: 10px;
+}
+
+.comment-input {
+    width: 200px;
+    height: calc(1.5em + .75rem + 2px); /* Matches the button height */
+    padding: .375rem .75rem; /* Matches the button padding */
+    font-size: 1rem; /* Matches the button font size */
+    line-height: 1.5; /* Matches the button line height */
+    color: #495057; /* Matches the button text color */
+    background-color: #e9ecef; /* Matches the button background color */
+    border: 1px solid #ced4da; /* Matches the button border */
+    border-radius: .25rem; /* Matches the button border radius */
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out; /* Matches the button transition */
 }

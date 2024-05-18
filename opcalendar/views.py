@@ -130,6 +130,41 @@ def next_month(d):
     return month
 
 
+def event_member_signup_attending(request, event_id):
+    return handle_event_member_signup(request, event_id, EventMember.Status.ATTENDING)
+
+
+def event_member_signup_maybe(request, event_id):
+    return handle_event_member_signup(request, event_id, EventMember.Status.MAYBE)
+
+
+def event_member_signup_declined(request, event_id):
+    return handle_event_member_signup(request, event_id, EventMember.Status.DECLINED)
+
+
+def handle_event_member_signup(request, event_id, status):
+    event = get_object_or_404(Event, id=event_id)
+    character = request.user.profile.main_character
+
+    if request.method == "POST":
+        comment = request.POST.get("comment", "")
+        EventMember.objects.update_or_create(
+            event=event,
+            character=character,
+            defaults={"status": status, "comment": comment},
+        )
+        return redirect("opcalendar:event-detail", event_id=event.id)
+
+    return redirect("opcalendar:event-detail", event_id=event.id)
+
+
+def event_member_remove(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    character = request.user.profile.main_character
+    EventMember.objects.filter(event=event, character=character).delete()
+    return redirect("opcalendar:event-detail", event_id=event.id)
+
+
 class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     permission_required = "opcalendar.basic_access"
     login_url = "signup"

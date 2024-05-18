@@ -83,7 +83,16 @@ class SignupForm(forms.Form):
 class AddMemberForm(forms.ModelForm):
     class Meta:
         model = EventMember
-        fields = ["character"]
+        fields = ["character", "status", "comment"]
+        widgets = {
+            "comment": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "maxlength": 100,
+                    "placeholder": "Optional comment",
+                }
+            ),
+        }
 
 
 class AddCategoryForm(forms.ModelForm):

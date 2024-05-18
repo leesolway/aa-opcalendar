@@ -33,4 +33,24 @@ urlpatterns = [
         name="event-ical-view",
     ),
     path("event/new/ajax/get_category/", views.get_category, name="get_category"),
+    path(
+        "event/<int:event_id>/signup/attending/",
+        views.event_member_signup_attending,
+        name="event_member_signup_attending",
+    ),
+    path(
+        "event/<int:event_id>/signup/maybe/",
+        views.event_member_signup_maybe,
+        name="event_member_signup_maybe",
+    ),
+    path(
+        "event/<int:event_id>/signup/declined/",
+        views.event_member_signup_declined,
+        name="event_member_signup_declined",
+    ),
+    path(
+        "event/<int:event_id>/remove/",
+        views.event_member_remove,
+        name="event_member_remove",
+    ),
 ]

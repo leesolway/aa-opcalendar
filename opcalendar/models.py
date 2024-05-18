@@ -742,6 +742,11 @@ class IngameEvents(models.Model):
 
 
 class EventMember(models.Model):
+    class Status(models.TextChoices):
+        ATTENDING = "A", _("Attending")
+        MAYBE = "M", _("Maybe")
+        DECLINED = "D", _("Declined")
+
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     character = models.ForeignKey(
         EveCharacter,
@@ -749,6 +754,17 @@ class EventMember(models.Model):
         on_delete=models.SET_NULL,
         help_text="Event creator main character",
     )
+    status = models.CharField(
+        max_length=1,
+        choices=Status.choices,
+        default=Status.ATTENDING,
+    )
+    comment = models.CharField(
+        max_length=100, blank=True, help_text="Optional comment about the event"
+    )
 
     class Meta:
         unique_together = ["event", "character"]
+
+    def __str__(self):
+        return f"{self.character} - {self.get_status_display()}"

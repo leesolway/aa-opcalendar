@@ -9,6 +9,7 @@ from opcalendar.models import (
     Owner,
     IngameEvents,
     EventVisibility,
+    EventMember,
 )
 from .forms import EventVisibilityAdminForm, EventCategoryAdminForm
 
@@ -175,3 +176,10 @@ class EventAdmin(admin.ModelAdmin):
         "event_visibility",
         "external",
     )
+
+
+@admin.register(EventMember)
+class EventMemberAdmin(admin.ModelAdmin):
+    list_display = ("event", "character", "status")
+    list_filter = ("status",)
+    search_fields = ("character__name", "event__name")

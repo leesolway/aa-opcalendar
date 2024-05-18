@@ -1,20 +1,21 @@
 {% load i18n %}
 
-<ul class="nav nav-pills card-header-pills w-100 d-flex align-items-center">
-    <li class="nav-item me-auto">
-        <a class="btn btn-primary" href="{% url 'opcalendar:calendar' %}"><i class="far fa-calendar-alt"></i> {% trans "Back to Calendar" %} </a>
-    </li>
-    <li class="nav-item">
-        <a class="btn btn-success" href="{% url 'opcalendar:event-ical-view' event.pk %}"><i class="fas fa-bookmark"></i> {% trans "Add to my calendar" %} </a>
-    </li>
+<div class="d-grid gap-2 d-md-flex justify-content-md-start w-100">
+    <form method="get" action="{% url 'opcalendar:calendar' %}" class="d-inline">
+        <button class="btn btn-primary me-md-2" type="submit"><i class="far fa-calendar-alt"></i> {% trans "Back to Calendar" %}</button>
+    </form>
+    <form method="get" action="{% url 'opcalendar:event-ical-view' event.pk %}" class="d-inline">
+        <button class="btn btn-success me-md-2" type="submit"><i class="fas fa-bookmark"></i> {% trans "Add to my calendar" %}</button>
+    </form>
     {% if perms.opcalendar.create_event %}
         {% if not event.external %}
-            <li class="nav-item">
-                <a class="btn btn-primary mr-2" href="{% url 'opcalendar:event_edit' event.pk %}"><i class="fas fa-edit"></i> {% trans "Edit Event" %} </a>
-            </li>
-            <li class="nav-item">
-                <a class="btn btn-danger" href="{% url 'opcalendar:remove_event' event.id %}"><i class="fas fa-trash"></i> {% trans "Remove" %} </a>
-            </li>
+            <form method="get" action="{% url 'opcalendar:event_edit' event.pk %}" class="d-inline">
+                <button class="btn btn-primary me-md-2" type="submit"><i class="fas fa-edit"></i> {% trans "Edit Event" %}</button>
+            </form>
+            <form method="post" action="{% url 'opcalendar:remove_event' event.id %}" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit"><i class="fas fa-trash"></i> {% trans "Remove" %}</button>
+            </form>
         {% endif %}
     {% endif %}
-</ul>
+</div>
