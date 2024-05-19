@@ -33,17 +33,12 @@ class Calendar(HTMLCalendar):
         self.user = user
         super(Calendar, self).__init__()
 
-    # formats a day as a td
-    # filter events by day
     def formatday(
         self, day, events, ingame_events, structuretimer_events, moonmining_events
     ):
         structuretimers_per_day = []
-
         moonmining_per_day = []
-
         events_per_day = events.filter(start_time__day=day)
-
         ingame_events_per_day = ingame_events.filter(event_start_date__day=day)
 
         if structuretimers_active() and OPCALENDAR_DISPLAY_STRUCTURETIMERS:
@@ -63,11 +58,21 @@ class Calendar(HTMLCalendar):
         )
 
         d = ""
-
-        # Only events for current month
+        standardized_events_per_day = []
         if day != 0:
-            # Parse events
             for event in all_events_per_day:
+                standardized_event = {
+                    "id": event.id if hasattr(event, "id") else event.event_id,
+                    "start_time": event.start_time
+                    if hasattr(event, "start_time")
+                    else event.chunk_arrival_at,
+                    "end_time": getattr(event, "end_time", None),
+                    "title": getattr(event, "title", "Unnamed Event"),
+                    "description": getattr(event, "description", ""),
+                    "type": type(event).__name__,
+                }
+                standardized_events_per_day.append(standardized_event)
+
                 if type(event).__name__ == "Timer":
                     OBJECTIVE_UNDEFINED = "UN"
                     OBJECTIVE_HOSTILE = "HO"
@@ -90,21 +95,14 @@ class Calendar(HTMLCalendar):
                         f"</div>"
                     )
 
-                    logger.debug("Typer type is: %s " % event.get_objective_display())
-
                 if type(event).__name__ == "Extraction":
-                    # WIP currently only required view permission
-                    if self.user.has_perm(
-                        "moonmining.extractions_access"
-                    ) and self.user.has_perm("moonmining.extractions_access"):
+                    if self.user.has_perm("moonmining.extractions_access"):
                         refinery = event.refinery.name
                         system = (
                             event.refinery.moon.eve_moon.eve_planet.eve_solar_system.name
                         )
-
                         structure = refinery.replace(system, "")
 
-                        # Should we display the moon tags
                         if OPCALENDAR_DISPLAY_MOONMINING_TAGS:
                             display_name = (
                                 event.refinery.moon.rarity_tag_html
@@ -143,10 +141,7 @@ class Calendar(HTMLCalendar):
                             f"</a>"
                         )
 
-                if (
-                    type(event).__name__ == "Event"
-                    or type(event).__name__ == "IngameEvents"
-                ):
+                if type(event).__name__ in ["Event", "IngameEvents"]:
                     d += (
                         f"<style>{event.get_event_styling}</style>"
                         f'<a class="nostyling" href="{event.get_html_url}">'
@@ -155,28 +150,32 @@ class Calendar(HTMLCalendar):
                         f"</div>"
                         f"</a>"
                     )
-            if date.today() == date(self.year, self.month, day):
-                return f"<td class='today'><div class='date'>{day}</div> {d}</td>"
-            return f"<td><div class='date'>{day}</div> {d}</td>"
-        return "<td></td>"
 
-    # formats a week as a tr
+            if date.today() == date(self.year, self.month, day):
+                return (
+                    f"<td class='today'><div class='date'>{day}</div> {d}</td>",
+                    standardized_events_per_day,
+                )
+            return (
+                f"<td><div class='date'>{day}</div> {d}</td>",
+                standardized_events_per_day,
+            )
+        return "<td></td>", standardized_events_per_day
+
     def formatweek(
         self, theweek, events, ingame_events, structuretimer_events, moonmining_events
     ):
         week = ""
+        all_events = []
         for d, weekday in theweek:
-            week += self.formatday(
+            day_html, day_events = self.formatday(
                 d, events, ingame_events, structuretimer_events, moonmining_events
             )
-        return f"<tr> {week} </tr>"
-
-    # formats a month as a table
-    # filter events by year and month
+            week += day_html
+            all_events.extend(day_events)
+        return f"<tr> {week} </tr>", all_events
 
     def formatmonth(self, withyear=True):
-        # Get normal events
-        # Filter by groups and states
         events = (
             Event.objects.filter(
                 start_time__year=self.year,
@@ -191,8 +190,7 @@ class Calendar(HTMLCalendar):
                 | Q(event_visibility__restricted_to_state__isnull=True),
             )
         )
-        # Get ingame events
-        # Filter by groups and states
+
         ingame_events = (
             IngameEvents.objects.filter(
                 event_start_date__year=self.year, event_start_date__month=self.month
@@ -210,9 +208,6 @@ class Calendar(HTMLCalendar):
             )
         )
 
-        # Check if structuretimers is active
-        # Should we fetch timers
-
         if structuretimers_active() and OPCALENDAR_DISPLAY_STRUCTURETIMERS:
             structuretimer_events = (
                 Timer.objects.all()
@@ -223,8 +218,6 @@ class Calendar(HTMLCalendar):
         else:
             structuretimer_events = Event.objects.none()
 
-        # Check if moonmining is active
-        # Should we fetch extractions
         if moonmining_active() and OPCALENDAR_DISPLAY_MOONMINING:
             moonmining_events = (
                 Extraction.objects.all()
@@ -252,9 +245,15 @@ class Calendar(HTMLCalendar):
         cal += f"{self.formatmonthname(self.year, self.month, withyear=withyear)}\n"
         cal += f"{self.formatweekheader()}\n"
 
+        all_events_per_month = []
+
         for week in self.monthdays2calendar(self.year, self.month):
-            cal += f"{self.formatweek(week, events, ingame_events, structuretimer_events, moonmining_events)}\n"
+            week_html, week_events = self.formatweek(
+                week, events, ingame_events, structuretimer_events, moonmining_events
+            )
+            cal += f"{week_html}\n"
+            all_events_per_month.extend(week_events)
 
         cal += "</table>"
 
-        return cal
+        return cal, all_events_per_month

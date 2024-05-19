@@ -16,8 +16,16 @@
     {% if perms.opcalendar.add_ingame_calendar_owner %}
         <a class="nav-link py-0" href="{% url 'opcalendar:add_ingame_calendar' %}">
             <span class="btn btn-success">
-                <i class="fas fa-sync"></i>{% trans "Add Ingame Calendar Feed" %}
+                <i class="fas fa-sync"></i> {% trans "Add Ingame Calendar Feed" %}
             </span>
         </a>
     {% endif %}
+</li>
+
+<li class="nav-item">
+    <a class="nav-link py-0" href="{% url 'opcalendar:user_settings' %}">
+        <span class="btn btn-warning">
+            <i class="fas fa-cog"></i> {% trans "My Settings" %}
+        </span>
+    </a>
 </li>

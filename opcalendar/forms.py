@@ -5,6 +5,7 @@ from opcalendar.models import (
     EventCategory,
     EventHost,
     EventVisibility,
+    UserSettings,
 )
 from django.forms.widgets import TextInput
 from django import forms
@@ -116,4 +117,14 @@ class EventCategoryAdminForm(forms.ModelForm):
         fields = "__all__"
         widgets = {
             "color": TextInput(attrs={"type": "color"}),
+        }
+
+
+class UserSettingsForm(forms.ModelForm):
+    class Meta:
+        model = UserSettings
+        fields = ["disable_discord_notifications", "use_local_times"]
+        labels = {
+            "disable_discord_notifications": "Disable all direct discord notifications",
+            "use_local_times": "Show all events in local time instead of EVE time",
         }

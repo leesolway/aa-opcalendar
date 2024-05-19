@@ -10,6 +10,7 @@ from opcalendar.models import (
     IngameEvents,
     EventVisibility,
     EventMember,
+    UserSettings,
 )
 from .forms import EventVisibilityAdminForm, EventCategoryAdminForm
 
@@ -183,3 +184,9 @@ class EventMemberAdmin(admin.ModelAdmin):
     list_display = ("event", "character", "status")
     list_filter = ("status",)
     search_fields = ("character__name", "event__name")
+
+
+@admin.register(UserSettings)
+class UserSettingsAdmin(admin.ModelAdmin):
+    list_display = ("user", "disable_discord_notifications", "use_local_times")
+    search_fields = ("user__username",)

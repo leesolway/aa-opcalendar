@@ -30,12 +30,13 @@ from opcalendar.models import (
     EventVisibility,
     IngameEvents,
     Owner,
+    UserSettings,
 )
 
 from . import tasks
 from .app_settings import get_site_url, moonmining_active, structuretimers_active
 from .calendar import Calendar
-from .forms import EventEditForm, EventForm
+from .forms import EventEditForm, EventForm, UserSettingsForm
 from .utils import messages_plus
 
 logger = get_extension_logger(__name__)
@@ -173,11 +174,16 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         user = self.request.user
-        # user_permissions = self.request.user.has_perm('app.get_main_view')
         context = super().get_context_data(**kwargs)
         d = get_date(self.request.GET.get("month", None))
         cal = Calendar(d.year, d.month, user)
-        html_cal = cal.formatmonth(withyear=True)
+
+        user_settings, created = UserSettings.objects.get_or_create(
+            user=user,
+            defaults={"discord_notifications": False, "use_local_times": False},
+        )
+
+        html_cal, all_events_per_month = cal.formatmonth(withyear=True)
         context["moonmining_active"] = moonmining_active()
         context["structuretimers_active"] = structuretimers_active()
         context["category"] = EventCategory.objects.all()
@@ -185,6 +191,9 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context["calendar"] = mark_safe(html_cal)
         context["prev_month"] = prev_month(d)
         context["next_month"] = next_month(d)
+        context["all_events_per_month"] = all_events_per_month
+        context["user_settings"] = user_settings
+
         return context
 
 
@@ -532,3 +541,26 @@ class EventIcalView(ICalFeed):
 
     def item_link(self, item):
         return "{0}/opcalendar/event/{1}/details/".format(get_site_url(), item.id)
+
+
+@login_required
+def user_settings_view(request):
+    try:
+        user_settings = UserSettings.objects.get(user=request.user)
+    except UserSettings.DoesNotExist:
+        user_settings = UserSettings(user=request.user)
+
+    if request.method == "POST":
+        form = UserSettingsForm(request.POST, instance=user_settings)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your settings have been updated successfully.")
+            return redirect("opcalendar:calendar")  # Redirect to the calendar page
+        else:
+            messages.error(
+                request, "There was an error updating your settings. Please try again."
+            )
+    else:
+        form = UserSettingsForm(instance=user_settings)
+
+    return render(request, "opcalendar/user_settings.html", {"form": form})

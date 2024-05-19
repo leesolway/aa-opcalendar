@@ -53,4 +53,5 @@ urlpatterns = [
         views.event_member_remove,
         name="event_member_remove",
     ),
+    path("user/settings/", views.user_settings_view, name="user_settings"),
 ]

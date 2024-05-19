@@ -52,31 +52,6 @@ Event Details
                 },
         ];
 
-        /**
-         * Update a timer
-         * @param timer Timer information
-         */
-        const updateTimer = (timer) => {
-            if (timer.targetDate.isAfter(Date.now())) {
-                const duration = moment.duration(event.event.start_time - moment(), 'milliseconds');
-
-                document.getElementById("localtime" + timer.id).innerHTML = getDurationString(duration);
-            } else {
-                timer.expired = true;
-
-                document.getElementById("localtime" + timer.id).innerHTML = "";
-            }
-        };
-
-        const updateAllTimers = () => {
-            const l = timers.length;
-
-            for (let i=0; i < l; ++i) {
-                if (timers[i].expired) continue;
-
-                updateTimer(timers[i]);
-            }
-        };
 
         /**
          * Set the local time info for the timer
@@ -101,16 +76,9 @@ Event Details
             document.getElementById("current-time").innerHTML = getCurrentEveTimeString();
         };
 
-        const timedUpdate = () => {
-            updateClock();
-            updateAllTimers();
-        }
 
         // Set initial values
         setAllLocalTimes();
-        timedUpdate();
 
-        // Start timed updates
-        setInterval(timedUpdate, 1000);
     </script>
 {% endblock extra_javascript %}

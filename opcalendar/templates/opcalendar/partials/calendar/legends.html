@@ -8,8 +8,8 @@
             <span class="event external">External NPSI</span>
             <span class="event ingame-event">{% trans "Ingame" %}</span>
             {% for event in visibility %}
-                    <style>.{{ event.get_visibility_class }}:before {border-color: transparent {{ event.color }} transparent transparent;border-style: solid;}</style>
-                    <span class="event {{ event.get_visibility_class }}">{{ event.name }}</span>
+                <style>.{{ event.get_visibility_class }}:before {border-color: transparent {{ event.color }} transparent transparent;border-style: solid;}</style>
+                <span class="event {{ event.get_visibility_class }}">{{ event.name }}</span>
             {% endfor %}
             {% if moonmining_active %}
                 <span class="event event-moonmining">{% trans "Moon Mining" %}</span>
@@ -21,5 +21,12 @@
                 <span class="event {{ event.get_category_class }}">{{ event.name }}</span>
             {% endfor %}
         </div>
+        {% trans "Current Eve Time:" %} <strong class="label label-info text-left" id="current-time"></strong>
+        <br>
+        {% if user_settings.use_local_times %}
+            {% trans "Displaying times in:" %} <strong class="label label-info text-left">{% trans "Local Time" %}</strong>
+        {% else %}
+            {% trans "Displaying times in:" %} <strong class="label label-info text-left">{% trans "EVE Time" %}</strong>
+        {% endif %}
     </div>
 </div>
