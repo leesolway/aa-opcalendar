@@ -60,13 +60,11 @@ Event Details
 
     <script>
         const timers = [
-            {% for timer in timers %}
                 {
                     'id': {{ event.event_id }},
                     'targetDate': moment("{{ event.event_start_date | date:"c" }}"),
                     'expired': false
                 },
-            {% endfor %}
         ];
 
         /**
@@ -77,11 +75,11 @@ Event Details
             if (timer.targetDate.isAfter(Date.now())) {
                 const duration = moment.duration(event.event_start_date - moment(), 'milliseconds');
 
-                document.getElementById("countdown" + timer.id).innerHTML = getDurationString(duration);
+                document.getElementById("localtime" + timer.id).innerHTML = getDurationString(duration);
             } else {
                 timer.expired = true;
 
-                document.getElementById("countdown" + timer.id).innerHTML = "";
+                document.getElementById("localtime" + timer.id).innerHTML = "";
             }
         };
 

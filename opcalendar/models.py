@@ -747,6 +747,10 @@ class IngameEvents(models.Model):
     def get_html_title(self):
         return f'<span>{self.event_start_date.strftime("%H:%M")} - {self.event_end_date.strftime("%H:%M")}<i> {self.owner_name}</i></span><span><b>{self.title}</b></span>'
 
+    @property
+    def external_tag(self):
+        return False
+
 
 class EventMember(models.Model):
     class Status(models.TextChoices):

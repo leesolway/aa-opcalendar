@@ -59,6 +59,7 @@ Section Order:
 ### Changed
 
 ### Fixed
+- Fixed local times on event details, Closes !7
 
 ### Removed
 - Dropped support for alliance Auth 3
