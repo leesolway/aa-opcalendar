@@ -1,4 +1,3 @@
-import operator
 from calendar import HTMLCalendar
 from datetime import date
 from itertools import chain
@@ -48,20 +47,25 @@ class Calendar(HTMLCalendar):
 
         all_events_per_day = sorted(
             chain(
-                events_per_day,
-                ingame_events_per_day,
-                structuretimers_per_day,
-                moonmining_per_day,
+                ((event, f"event-{event.id}") for event in events_per_day),
+                (
+                    (event, f"ingame-{event.event_id}")
+                    for event in ingame_events_per_day
+                ),
+                ((event, f"struct-{event.id}") for event in structuretimers_per_day),
+                ((event, f"moon-{event.id}") for event in moonmining_per_day),
             ),
-            key=operator.attrgetter("start_time"),
+            key=lambda item: item[0].start_time
+            if hasattr(item[0], "start_time")
+            else item[0].chunk_arrival_at,
         )
 
         d = ""
         standardized_events_per_day = []
         if day != 0:
-            for event in all_events_per_day:
+            for event, unique_id in all_events_per_day:
                 standardized_event = {
-                    "id": event.id if hasattr(event, "id") else event.event_id,
+                    "id": unique_id,
                     "start_time": event.start_time
                     if hasattr(event, "start_time")
                     else event.chunk_arrival_at,
@@ -73,51 +77,50 @@ class Calendar(HTMLCalendar):
                 standardized_events_per_day.append(standardized_event)
 
                 if type(event).__name__ == "Timer":
-                    OBJECTIVE_UNDEFINED = "UN"
-                    OBJECTIVE_HOSTILE = "HO"
-                    OBJECTIVE_FRIENDLY = "FR"
-                    OBJECTIVE_NEUTRAL = "NE"
+                    # Determine the objective type for the timer
+                    objective_map = {
+                        "HO": "Hostile",
+                        "FR": "Friendly",
+                        "NE": "Neutral",
+                        "UN": "Undefined",
+                    }
+                    objective_verbosed = objective_map.get(event.objective, "Undefined")
 
-                    if event.objective == OBJECTIVE_HOSTILE:
-                        objective_verbosed = "Hostile"
-                    if event.objective == OBJECTIVE_FRIENDLY:
-                        objective_verbosed = "Friendly"
-                    if event.objective == OBJECTIVE_NEUTRAL:
-                        objective_verbosed = "Neutral"
-                    if event.objective == OBJECTIVE_UNDEFINED:
-                        objective_verbosed = "Undefined"
-
+                    # Generate the HTML for the Timer event
                     d += (
                         f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.date else "future-event"} event-structuretimer">'
-                        f'<span id="event-time-{event.id}">{event.date.strftime("%H:%M")}</span>'
+                        f'<span id="event-time-{unique_id}">{event.date.strftime("%H:%M")}</span>'
                         f"<span>{event.eve_solar_system.name} - {event.structure_type.name}</span>"
                         f"<span><i> {objective_verbosed} structure timer</i></span>"
                         f"</div>"
                     )
 
-                if type(event).__name__ == "Extraction":
+                elif type(event).__name__ == "Extraction":
                     if self.user.has_perm("moonmining.extractions_access"):
+                        # Extract relevant details for the extraction event
                         refinery = event.refinery.name
                         system = (
                             event.refinery.moon.eve_moon.eve_planet.eve_solar_system.name
                         )
                         structure = refinery.replace(system, "")
 
-                        if OPCALENDAR_DISPLAY_MOONMINING_TAGS:
-                            display_name = (
+                        # Generate the display name with or without moon tags
+                        display_name = (
+                            (
                                 event.refinery.moon.rarity_tag_html
                                 + '<span class="event-moon-name">'
                                 + structure[3:]
                                 + "</span>"
                             )
-                        else:
-                            display_name = "<span>" + structure[3:] + "</span>"
+                            if OPCALENDAR_DISPLAY_MOONMINING_TAGS
+                            else "<span>" + structure[3:] + "</span>"
+                        )
 
+                        # Generate the HTML for the Extraction event
                         d += (
-                            f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
+                            f'<a class="nostyling" href="/moonmining/extraction/{unique_id}?new_page=yes">'
                             f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.chunk_arrival_at else "future-event"} event-moonmining">'
-                            f'<span id="event-time-{event.id}">'
-                            f'{event.chunk_arrival_at.strftime("%H:%M")}</span>'
+                            f'<span id="event-time-{unique_id}">{event.chunk_arrival_at.strftime("%H:%M")}</span>'
                             f"<span>{event.refinery.moon.eve_moon.name}</span>"
                             f'<div class="event-moon-details">'
                             f"{display_name}"
@@ -126,12 +129,32 @@ class Calendar(HTMLCalendar):
                             f"</a>"
                         )
 
-                if type(event).__name__ in ["Event", "IngameEvents"]:
+                elif type(event).__name__ in ["Event", "IngameEvents"]:
+                    # Determine start time, title, and owner for the event
+                    start_time = (
+                        event.start_time.strftime("%H:%M")
+                        if hasattr(event, "start_time")
+                        else event.event_start_date.strftime("%H:%M")
+                    )
+                    title = (
+                        f"{event.operation_type.ticker} {event.title}"
+                        if hasattr(event, "operation_type")
+                        else event.title
+                    )
+                    owner = (
+                        event.host.community
+                        if hasattr(event, "host")
+                        else event.owner_name
+                    )
+
+                    # Generate the HTML for the Event or IngameEvents
                     d += (
                         f"<style>{event.get_event_styling}</style>"
                         f'<a class="nostyling" href="{event.get_html_url}">'
                         f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class} {event.external_tag}">'
-                        f"{event.get_html_title}"
+                        f'<span id="event-time-{unique_id}">{start_time}</span>'
+                        f"<span><b>{title}</b></span>"
+                        f"<span><i>{owner}</i></span>"
                         f"</div>"
                         f"</a>"
                     )

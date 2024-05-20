@@ -41,8 +41,9 @@
         const updateAllTimers = () => {
             const l = timers.length;
 
-            for (let i=0; i < l; ++i) {
+            for (let i = 0; i < l; ++i) {
                 if (timers[i].expired) continue;
+                // Additional logic if needed
             }
         };
 
@@ -67,7 +68,10 @@
          * @param timer Timer information
          */
         const setLocalTime = (timer) => {
-            document.getElementById("event-time-" + timer.id).innerHTML = timer.targetDate.format("HH:mm") + " (Local time)";
+            const element = document.getElementById("event-time-" + timer.id);
+            if (element) {
+                element.innerHTML = timer.targetDate.format("HH:mm");
+            }
         };
 
         /**
@@ -76,7 +80,7 @@
         const setAllLocalTimes = () => {
             const l = timers.length;
 
-            for (let i=0; i < l; ++i) {
+            for (let i = 0; i < l; ++i) {
                 setLocalTime(timers[i]);
             }
         };

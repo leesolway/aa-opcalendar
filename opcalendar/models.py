@@ -745,7 +745,7 @@ class IngameEvents(models.Model):
 
     @property
     def get_html_title(self):
-        return f'<span id="event-time-{self.event_id}">{self.event_start_date.strftime("%H:%M")}</span><span><b>{self.title}</b></span><span><i>{self.owner_name}</i></span>'
+        return f'<span id="event-time-{self.unique_id}">{self.event_start_date.strftime("%H:%M")}</span><span><b>{self.title}</b></span><span><i>{self.owner_name}</i></span>'
 
     @property
     def external_tag(self):
