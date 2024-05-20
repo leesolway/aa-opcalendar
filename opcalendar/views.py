@@ -34,7 +34,12 @@ from opcalendar.models import (
 )
 
 from . import tasks
-from .app_settings import get_site_url, moonmining_active, structuretimers_active
+from .app_settings import (
+    get_site_url,
+    moonmining_active,
+    structuretimers_active,
+    OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME,
+)
 from .calendar import Calendar
 from .forms import EventEditForm, EventForm, UserSettingsForm
 from .utils import messages_plus
@@ -193,6 +198,9 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context["next_month"] = next_month(d)
         context["all_events_per_month"] = all_events_per_month
         context["user_settings"] = user_settings
+        context[
+            "OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME"
+        ] = OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME
 
         return context
 

@@ -6,25 +6,50 @@ import opcalendar.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('opcalendar', '0028_eventmember_comment'),
+        ("opcalendar", "0028_eventmember_comment"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='UserSettings',
+            name="UserSettings",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('disable_discord_notifications', models.BooleanField(default=True, verbose_name='Discord Notifications')),
-                ('use_local_times', models.BooleanField(default=True, verbose_name='Use Local Times')),
-                ('user', models.ForeignKey(blank=True, default=None, null=True, on_delete=models.SET(opcalendar.models.get_sentinel_user), related_name='+', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "disable_discord_notifications",
+                    models.BooleanField(
+                        default=True, verbose_name="Discord Notifications"
+                    ),
+                ),
+                (
+                    "use_local_times",
+                    models.BooleanField(default=True, verbose_name="Use Local Times"),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        default=None,
+                        null=True,
+                        on_delete=models.SET(opcalendar.models.get_sentinel_user),
+                        related_name="+",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'User Settings',
-                'verbose_name_plural': 'User Settings',
-                'default_permissions': (),
+                "verbose_name": "User Settings",
+                "verbose_name_plural": "User Settings",
+                "default_permissions": (),
             },
         ),
     ]

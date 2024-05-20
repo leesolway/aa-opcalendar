@@ -12,7 +12,6 @@ from .app_settings import (
     OPCALENDAR_DISPLAY_STRUCTURETIMERS,
     OPCALENDAR_DISPLAY_MOONMINING,
     OPCALENDAR_DISPLAY_MOONMINING_TAGS,
-    OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME,
 )
 
 from .app_settings import structuretimers_active, moonmining_active
@@ -90,8 +89,9 @@ class Calendar(HTMLCalendar):
 
                     d += (
                         f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.date else "future-event"} event-structuretimer">'
-                        f'<span>{event.date.strftime("%H:%M")}<i> {objective_verbosed} structure timer</i></span>'
+                        f'<span id="event-time-{event.id}">{event.date.strftime("%H:%M")}</span>'
                         f"<span>{event.eve_solar_system.name} - {event.structure_type.name}</span>"
+                        f"<span><i> {objective_verbosed} structure timer</i></span>"
                         f"</div>"
                     )
 
@@ -113,27 +113,12 @@ class Calendar(HTMLCalendar):
                         else:
                             display_name = "<span>" + structure[3:] + "</span>"
 
-                        if OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME:
-                            display_details = (
-                                "<span>"
-                                + event.chunk_arrival_at.strftime("%H:%M")
-                                + "<i> Moon chunk arrival "
-                                + event.refinery.moon.eve_moon.name
-                                + "</i></span>"
-                            )
-                        else:
-                            display_details = (
-                                "<span>"
-                                + event.auto_fracture_at.strftime("%H:%M")
-                                + "<i> Moon chunk fracture "
-                                + event.refinery.moon.eve_moon.name
-                                + "</i></span>"
-                            )
-
                         d += (
                             f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
                             f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.chunk_arrival_at else "future-event"} event-moonmining">'
-                            f"{display_details}"
+                            f'<span id="event-time-{event.id}">'
+                            f'{event.chunk_arrival_at.strftime("%H:%M")}</span>'
+                            f"<span>{event.refinery.moon.eve_moon.name}</span>"
                             f'<div class="event-moon-details">'
                             f"{display_name}"
                             f"</div>"

@@ -67,7 +67,7 @@
          * @param timer Timer information
          */
         const setLocalTime = (timer) => {
-            document.getElementById("event-time-" + timer.id).innerHTML = timer.targetDate.format("HH:mm");
+            document.getElementById("event-time-" + timer.id).innerHTML = timer.targetDate.format("HH:mm") + " (Local time)";
         };
 
         /**

@@ -56,7 +56,10 @@ Section Order:
 - Translation tags
 - Added OPCALENDAR_NOTIFY_REPEAT_EVENTS setting allowing to disable discord notifications for repeating events. Closes #33
 - Added filter to NPSI fleets. Closes #29
+- Added setting to use localtimes in calendar view
 ### Changed
+- Calendar view template
+- Moved information about local time and moon mining timers to the legend section
 
 ### Fixed
 - Fixed local times on event details, Closes !7

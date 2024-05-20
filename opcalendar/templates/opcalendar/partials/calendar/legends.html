@@ -28,5 +28,11 @@
         {% else %}
             {% trans "Displaying times in:" %} <strong class="label label-info text-left">{% trans "EVE Time" %}</strong>
         {% endif %}
+        <br>
+        {% if OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME %}
+            {% trans "Moon times shown:" %} <strong class="label label-info text-left">{% trans "Arrival Time" %}</strong>
+        {% else %}
+            {% trans "Moon times shown:" %} <strong class="label label-info text-left">{% trans "Fracture Time" %}</strong>
+        {% endif %}
     </div>
 </div>
