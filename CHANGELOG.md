@@ -35,7 +35,7 @@ Section Order:
 ### Security
 -->
 
-## [3.0.0b1] - yyyy-mm-dd
+## [3.0.0b1] - 2024-05-29
 
 > **IMPORTANT**
 >
