@@ -185,7 +185,7 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
         user_settings, created = UserSettings.objects.get_or_create(
             user=user,
-            defaults={"discord_notifications": False, "use_local_times": False},
+            defaults={"disable_discord_notifications": False, "use_local_times": False},
         )
 
         html_cal, all_events_per_month = cal.formatmonth(withyear=True)
