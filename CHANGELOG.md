@@ -49,6 +49,8 @@ Section Order:
 > you install this version, otherwise, an update to Alliance Auth will
 > be pulled in unsupervised.
 
+If you are using the ical feed for publishing your ops as public you will need to add APPS_WITH_PUBLIC_VIEWS setting to your settings file. See readme for guide.
+
 ### Added
 - Ability to sign up with different states and add comments to signups, Closes #31
 - Compatibility to Alliance Auth v4
