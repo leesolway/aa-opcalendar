@@ -60,6 +60,7 @@ Section Order:
 ### Changed
 - Calendar view template
 - Moved information about local time and moon mining timers to the legend section
+- Changed how the ical feed is set up using the APPS_WITH_PUBLIC_VIEWS, Closes #36
 
 ### Fixed
 - Fixed local times on event details, Closes !7

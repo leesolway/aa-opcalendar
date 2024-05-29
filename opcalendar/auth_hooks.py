@@ -31,7 +31,12 @@ def register_menu():
 
 @hooks.register("url_hook")
 def register_urls():
-    return UrlHook(urls, "opcalendar", r"^opcalendar/")
+    return UrlHook(
+        urls,
+        "opcalendar",
+        r"^opcalendar/",
+        excluded_views=["opcalendar.views.EventFeed"],
+    )
 
 
 @hooks.register("discord_cogs_hook")
