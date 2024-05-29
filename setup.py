@@ -37,7 +37,7 @@ setup(
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     ],
     install_requires=[
-        "allianceauth>=3.0.0",
+        "allianceauth<5.0.0,>=4",
         "feedparser",
         "ics>=0.7.2",
         "pytz",
