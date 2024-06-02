@@ -1,3 +1,5 @@
+@import "bootstrap/scss/bootstrap"; // Ensure Bootstrap SCSS is imported
+
 .allianceauth-opcalendar {
     padding-top: 12px;
 }

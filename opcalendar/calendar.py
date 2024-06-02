@@ -122,7 +122,7 @@ class Calendar(HTMLCalendar):
 
                         # Generate the HTML for the Extraction event
                         d += (
-                            f'<a class="nostyling" href="/moonmining/extraction/{unique_id}?new_page=yes">'
+                            f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
                             f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.chunk_arrival_at else "future-event"} event-moonmining">'
                             f'<span id="event-time-{unique_id}">{event.chunk_arrival_at.strftime("%H:%M")}</span>'
                             f"<span>{event.refinery.moon.eve_moon.name}</span>"
