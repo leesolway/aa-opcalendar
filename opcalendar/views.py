@@ -198,9 +198,9 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context["next_month"] = next_month(d)
         context["all_events_per_month"] = all_events_per_month
         context["user_settings"] = user_settings
-        context[
-            "OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME"
-        ] = OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME
+        context["OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME"] = (
+            OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME
+        )
 
         return context
 
