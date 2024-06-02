@@ -1,21 +1,21 @@
-import socket
-from datetime import datetime, timedelta
 import random
+import socket
 import string
+from datetime import datetime, timedelta
 from typing import Any
-from django.contrib import messages
-from django.contrib.auth.models import User
-from django.conf import settings
-from django.contrib.messages.constants import DEBUG, ERROR, INFO, SUCCESS, WARNING
-from django.test import TestCase
-from django.utils.html import format_html
-
-from esi.models import Scope, Token
 
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCharacter
 from allianceauth.services.hooks import get_extension_logger
 from allianceauth.tests.auth_utils import AuthUtils
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.contrib.messages.constants import (DEBUG, ERROR, INFO, SUCCESS,
+                                               WARNING)
+from django.test import TestCase
+from django.utils.html import format_html
+from esi.models import Scope, Token
 
 logger = get_extension_logger(__name__)
 

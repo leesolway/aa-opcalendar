@@ -6,24 +6,20 @@ import pytz
 import requests
 from allianceauth.services.hooks import get_extension_logger
 from allianceauth.services.tasks import QueueOnce
-from bravado.exception import HTTPBadGateway, HTTPGatewayTimeout, HTTPServiceUnavailable
+from bravado.exception import (HTTPBadGateway, HTTPGatewayTimeout,
+                               HTTPServiceUnavailable)
 from celery import shared_task
 from django.utils.html import strip_tags
 from ics import Calendar
 from requests.exceptions import RequestException
 
-from .app_settings import (
-    OPCALENDAR_CAS_URL,
-    OPCALENDAR_EVE_LINKNET_URL,
-    OPCALENDAR_EVE_UNI_URL,
-    OPCALENDAR_FREE_RANGE_CHIKUNS_URL,
-    OPCALENDAR_FRIDAY_YARRRR_URL,
-    OPCALENDAR_FUNINC_URL,
-    OPCALENDAR_FWAMING_DWAGONS_URL,
-    OPCALENDAR_REDEMPTION_ROAD_URL,
-    OPCALENDAR_SPECTRE_URL,
-    OPCALENDAR_TASKS_TIME_LIMIT,
-)
+from .app_settings import (OPCALENDAR_CAS_URL, OPCALENDAR_EVE_LINKNET_URL,
+                           OPCALENDAR_EVE_UNI_URL,
+                           OPCALENDAR_FREE_RANGE_CHIKUNS_URL,
+                           OPCALENDAR_FRIDAY_YARRRR_URL, OPCALENDAR_FUNINC_URL,
+                           OPCALENDAR_FWAMING_DWAGONS_URL,
+                           OPCALENDAR_REDEMPTION_ROAD_URL,
+                           OPCALENDAR_SPECTRE_URL, OPCALENDAR_TASKS_TIME_LIMIT)
 from .models import Event, EventImport, Owner
 
 DEFAULT_TASK_PRIORITY = 6

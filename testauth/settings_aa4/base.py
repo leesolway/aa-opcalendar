@@ -9,7 +9,6 @@ If you wish to make changes, overload the setting in your project's settings fil
 import os
 
 from celery.schedules import crontab
-
 from django.contrib import messages
 
 INSTALLED_APPS = [

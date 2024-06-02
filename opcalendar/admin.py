@@ -1,18 +1,11 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-from opcalendar.models import (
-    Event,
-    EventCategory,
-    WebHook,
-    EventHost,
-    EventImport,
-    Owner,
-    IngameEvents,
-    EventVisibility,
-    EventMember,
-    UserSettings,
-)
-from .forms import EventVisibilityAdminForm, EventCategoryAdminForm
+
+from opcalendar.models import (Event, EventCategory, EventHost, EventImport,
+                               EventMember, EventVisibility, IngameEvents,
+                               Owner, UserSettings, WebHook)
+
+from .forms import EventCategoryAdminForm, EventVisibilityAdminForm
 
 
 def custom_filter(title):

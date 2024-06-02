@@ -8,7 +8,8 @@ from allianceauth.services.hooks import get_extension_logger
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import (LoginRequiredMixin,
+                                        PermissionRequiredMixin)
 from django.core import serializers
 from django.db import Error, transaction
 from django.db.models import Q
@@ -23,23 +24,14 @@ from django.views.generic import ListView
 from django_ical.views import ICalFeed
 from esi.decorators import token_required
 
-from opcalendar.models import (
-    Event,
-    EventCategory,
-    EventMember,
-    EventVisibility,
-    IngameEvents,
-    Owner,
-    UserSettings,
-)
+from opcalendar.models import (Event, EventCategory, EventMember,
+                               EventVisibility, IngameEvents, Owner,
+                               UserSettings)
 
 from . import tasks
-from .app_settings import (
-    get_site_url,
-    moonmining_active,
-    structuretimers_active,
-    OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME,
-)
+from .app_settings import (OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME,
+                           get_site_url, moonmining_active,
+                           structuretimers_active)
 from .calendar import Calendar
 from .forms import EventEditForm, EventForm, UserSettingsForm
 from .utils import messages_plus
@@ -198,9 +190,9 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context["next_month"] = next_month(d)
         context["all_events_per_month"] = all_events_per_month
         context["user_settings"] = user_settings
-        context[
-            "OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME"
-        ] = OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME
+        context["OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME"] = (
+            OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME
+        )
 
         return context
 

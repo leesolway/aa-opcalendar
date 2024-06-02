@@ -1,5 +1,7 @@
-from esi.clients import EsiClientProvider
 import os
+
+from esi.clients import EsiClientProvider
+
 from . import __version__
 
 

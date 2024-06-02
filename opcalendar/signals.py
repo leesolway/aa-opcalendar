@@ -1,15 +1,14 @@
-from django.dispatch import receiver
-from django.db.models.signals import post_save, pre_delete
-from .models import Event, IngameEvents
-from django.utils import timezone
 import datetime
-from esi.clients import EsiClientProvider
-from .app_settings import (
-    OPCALENDAR_NOTIFY_IMPORTS,
-    OPCALENDAR_NOTIFY_REPEAT_EVENTS,
-    get_site_url,
-)
+
 from allianceauth.services.hooks import get_extension_logger
+from django.db.models.signals import post_save, pre_delete
+from django.dispatch import receiver
+from django.utils import timezone
+from esi.clients import EsiClientProvider
+
+from .app_settings import (OPCALENDAR_NOTIFY_IMPORTS,
+                           OPCALENDAR_NOTIFY_REPEAT_EVENTS, get_site_url)
+from .models import Event, IngameEvents
 
 logger = get_extension_logger(__name__)
 

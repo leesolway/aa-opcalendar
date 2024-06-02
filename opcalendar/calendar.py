@@ -1,19 +1,16 @@
 from calendar import HTMLCalendar
-from datetime import date
+from datetime import date, datetime
 from itertools import chain
-from datetime import datetime
-from django.db.models import Q, F
-from django.utils import timezone
+
 from allianceauth.services.hooks import get_extension_logger
+from django.db.models import F, Q
+from django.utils import timezone
 
+from .app_settings import (OPCALENDAR_DISPLAY_MOONMINING,
+                           OPCALENDAR_DISPLAY_MOONMINING_TAGS,
+                           OPCALENDAR_DISPLAY_STRUCTURETIMERS,
+                           moonmining_active, structuretimers_active)
 from .models import Event, IngameEvents
-from .app_settings import (
-    OPCALENDAR_DISPLAY_STRUCTURETIMERS,
-    OPCALENDAR_DISPLAY_MOONMINING,
-    OPCALENDAR_DISPLAY_MOONMINING_TAGS,
-)
-
-from .app_settings import structuretimers_active, moonmining_active
 
 if structuretimers_active():
     from structuretimers.models import Timer
@@ -55,9 +52,11 @@ class Calendar(HTMLCalendar):
                 ((event, f"struct-{event.id}") for event in structuretimers_per_day),
                 ((event, f"moon-{event.id}") for event in moonmining_per_day),
             ),
-            key=lambda item: item[0].start_time
-            if hasattr(item[0], "start_time")
-            else item[0].chunk_arrival_at,
+            key=lambda item: (
+                item[0].start_time
+                if hasattr(item[0], "start_time")
+                else item[0].chunk_arrival_at
+            ),
         )
 
         d = ""
@@ -66,9 +65,11 @@ class Calendar(HTMLCalendar):
             for event, unique_id in all_events_per_day:
                 standardized_event = {
                     "id": unique_id,
-                    "start_time": event.start_time
-                    if hasattr(event, "start_time")
-                    else event.chunk_arrival_at,
+                    "start_time": (
+                        event.start_time
+                        if hasattr(event, "start_time")
+                        else event.chunk_arrival_at
+                    ),
                     "end_time": getattr(event, "end_time", None),
                     "title": getattr(event, "title", "Unnamed Event"),
                     "description": getattr(event, "description", ""),

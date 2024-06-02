@@ -1,15 +1,10 @@
-from django.forms import ModelForm
-from opcalendar.models import (
-    Event,
-    EventMember,
-    EventCategory,
-    EventHost,
-    EventVisibility,
-    UserSettings,
-)
-from django.forms.widgets import TextInput
-from django import forms
 from allianceauth.services.hooks import get_extension_logger
+from django import forms
+from django.forms import ModelForm
+from django.forms.widgets import TextInput
+
+from opcalendar.models import (Event, EventCategory, EventHost, EventMember,
+                               EventVisibility, UserSettings)
 
 logger = get_extension_logger(__name__)
 

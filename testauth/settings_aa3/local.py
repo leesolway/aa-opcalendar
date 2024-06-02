@@ -24,7 +24,7 @@ SITE_URL = "http://127.0.0.1:8000"
 DEBUG = False
 
 # Add any additional apps to this list.
-INSTALLED_APPS += ["example"]
+INSTALLED_APPS += ["opcalendar"]
 
 # Enter credentials to use MySQL/MariaDB. Comment out to use sqlite3
 """

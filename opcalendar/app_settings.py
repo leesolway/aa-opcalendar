@@ -1,6 +1,8 @@
-from django.conf import settings
-from .utils import clean_setting
 import re
+
+from django.conf import settings
+
+from .utils import clean_setting
 
 
 def get_site_url():  # regex sso url
