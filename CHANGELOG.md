@@ -63,6 +63,7 @@ If you are using the ical feed for publishing your ops as public you will need t
 - Calendar view template
 - Moved information about local time and moon mining timers to the legend section
 - Changed how the ical feed is set up using the APPS_WITH_PUBLIC_VIEWS, Closes #36
+- Merged light and dark stylesheets in one file
 
 ### Fixed
 - Fixed local times on event details, Closes !7

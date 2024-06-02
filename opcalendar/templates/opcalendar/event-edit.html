@@ -25,5 +25,23 @@
 {% endblock content %}
 
 {% block extra_javascript %}
-    {% include 'bundles/jquery-datetimepicker-js.html' %}
+  {% include 'bundles/jquery-datetimepicker-js.html' %}
+  <script>
+    $(document).ready(() => {
+      $('#id_start_time').datetimepicker({
+        setlocale: '{{ LANGUAGE_CODE }}',
+        mask: true,
+        format: 'Y-m-d H:i',
+        minDate: 0
+      });
+    });
+    $(document).ready(() => {
+      $('#id_end_time').datetimepicker({
+        setlocale: '{{ LANGUAGE_CODE }}',
+        mask: true,
+        format: 'Y-m-d H:i',
+        minDate: 0
+      });
+    });
+  </script>
 {% endblock %}

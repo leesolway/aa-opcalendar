@@ -1,10 +1,8 @@
 {% extends 'allianceauth/base-bs5.html' %}
 {% load i18n %}
 {% load static %}
-v
 
 {% block extra_css %}
-    {% include 'bundles/jquery-datetimepicker-css.html' %}
     {% include "opcalendar/partials/base/stylesheets.html" %}
 {% endblock extra_css %}
 
@@ -22,35 +20,7 @@ v
 
 
 {% block content %}
-    <h2 class="text-center">{{ title }}</h2>
-    <div class="col-lg-14 container">
         {% block details %}{% endblock %}
-    </div>
 {% endblock %}
 {% block extra_script %}
-
-    $('#id_start_time').datetimepicker({
-    setlocale: '{{ LANGUAGE_CODE }}',
-    {% if NIGHT_MODE %}
-        theme: 'dark',
-    {% else %}
-        theme: 'default',
-    {% endif %}
-    mask: true,
-    format: 'Y-m-d H:i',
-    minDate: 0
-    });
-
-    $('#id_end_time').datetimepicker({
-    setlocale: '{{ LANGUAGE_CODE }}',
-    {% if NIGHT_MODE %}
-        theme: 'dark',
-    {% else %}
-        theme: 'default',
-    {% endif %}
-    mask: true,
-    format: 'Y-m-d H:i',
-    minDate: 0
-    });
-
 {% endblock extra_script %}

@@ -25,27 +25,23 @@
 {% endblock content %}
 
 {% block extra_javascript %}
+  {% include 'bundles/jquery-datetimepicker-js.html' %}
   <script>
-    $("#id_operation_type").change(function () {
-      var id = $(this).val();
-      $.ajax({
-        url: 'ajax/get_category/',
-        data: {
-          'category': id
-        },
-        dataType: 'json',
-        success: function (data) {
-            var events = JSON.parse(data.category);
-            var obj = events[0];
-            var fields = obj.fields;
-          console.log( fields.description );
-          $('#id_description').val(fields.description);
-        }
+    $(document).ready(() => {
+      $('#id_start_time').datetimepicker({
+        setlocale: '{{ LANGUAGE_CODE }}',
+        mask: true,
+        format: 'Y-m-d H:i',
+        minDate: 0
       });
-
+    });
+    $(document).ready(() => {
+      $('#id_end_time').datetimepicker({
+        setlocale: '{{ LANGUAGE_CODE }}',
+        mask: true,
+        format: 'Y-m-d H:i',
+        minDate: 0
+      });
     });
   </script>
-
-
-    {% include 'bundles/jquery-datetimepicker-js.html' %}
 {% endblock %}

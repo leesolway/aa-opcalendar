@@ -5,7 +5,7 @@
 {% load evelinks %}
 {% block page_title %}{% trans "Create Operation" %}{% endblock page_title %}
 
-{% block content %}
+{% block details %}
 <div class="allianceauth-opcalendar">
     <div class="clearfix">
         {% include "opcalendar/partials/calendar/legends.html" %}
@@ -21,7 +21,7 @@
         </div>
     </div>
 </div>
-{% endblock content %}
+{% endblock details %}
 
 {% block extra_javascript %}
     {% include "bundles/moment-js.html" with locale=True %}
@@ -88,5 +88,46 @@
         // Set local time values
         setAllLocalTimes();
         {% endif %}
+    </script>
+    <script>
+        let selectedEvents = []
+
+        $('.legend').on('click', 'span', function(){
+            const classes = $(this).attr('class')
+            const selectors = '.' + classes.split(' ').join('.').replace('.active', '')
+
+            // clear all selections on show-all
+            if(selectors.includes('show-all')){
+                selectedEvents = []
+                $('.legend .event').removeClass('active')
+                $(this).addClass('active')
+            }
+
+            // remove current selection if it's already present in the selectedEvents array
+            else if(selectedEvents.includes(selectors)){
+                selectedEvents = selectedEvents.filter(event => event !== selectors)
+                $(this).removeClass('active')
+            }
+
+            // add the current selection to the selectedEvents array
+            else{
+                selectedEvents.push(selectors)
+                $(this).addClass('active')
+            }
+
+            applyCalendarFilters(selectedEvents)
+
+        })
+
+        function applyCalendarFilters(selectedEvents){
+            $('.calendar .event').hide()
+
+            if(selectedEvents.length){
+                selectedEvents.forEach(selectors => $('.calendar ' + selectors).show())
+            }
+            else{
+                $('.calendar .event').show()
+            }
+        }
     </script>
 {% endblock extra_javascript %}
