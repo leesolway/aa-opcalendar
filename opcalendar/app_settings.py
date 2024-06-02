@@ -53,6 +53,9 @@ OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL = clean_setting(
 # whether events with repeat should be sent over the webhook
 OPCALENDAR_NOTIFY_REPEAT_EVENTS = clean_setting("OPCALENDAR_NOTIFY_REPEAT_EVENTS", True)
 
+# whether the event counter will be shown
+OPCALENDAR_SHOW_EVENT_COUNTER = clean_setting("OPCALENDAR_SHOW_EVENT_COUNTER", True)
+
 OPCALENDAR_EVE_UNI_URL = "https://portal.eveuniversity.org/api/getcalendar"
 OPCALENDAR_SPECTRE_URL = "https://www.spectre-fleet.space/engagement/events/rss"
 OPCALENDAR_FUNINC_URL = "https://calendar.google.com/calendar/ical/og3uh76l8ul3dfgbie03fbbgs8%40group.calendar.google.com/private-f466889b44741fd7249e99e21ac171ff/basic.ics"

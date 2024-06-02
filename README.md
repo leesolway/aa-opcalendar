@@ -33,6 +33,7 @@ An operation calendar app for Alliance Auth to display fleet operations and othe
 * Discord notifications
 	* Webhook
 	* For: new, edited and deleted events
+* Counter on menu for events that the user has not signed or rejected from
 
 ![screenshot](https://i.imgur.com/92nBoO7.jpg)
 ![screenshot](https://i.imgur.com/Mbvq3So.jpg)
@@ -90,6 +91,7 @@ OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL | whether we display external hosts such
 OPCALENDAR_DISPLAY_MOONMINING_TAGS | Display the rarity tag of aa-moonmining moons if the moonmining plugin is installed | True
 OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME | Displays aa-moonmining extraction time based on arrival time. Set to False to display as auto fracture time | True
 OPCALENDAR_NOTIFY_REPEAT_EVENTS | If repeated events should also be created as webhook pings on discord. Can create spam if the event repeat is set to high | True
+OPCALENDAR_SHOW_EVENT_COUNTER | Shows a counter next to the opcalendar menu for events that the user has not responded to | True
 
 
 ## Setup

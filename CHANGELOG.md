@@ -52,6 +52,8 @@ Section Order:
 If you are using the ical feed for publishing your ops as public you will need to add APPS_WITH_PUBLIC_VIEWS setting to your settings file. See readme for guide.
 
 ### Added
+- Show a counter for events that the user has not signed up for. Only shows standard events (excluded imported NPSI events)
+- Added new setting OPCALENDAR_SHOW_EVENT_COUNTER
 - Ability to sign up with different states and add comments to signups, Closes #31
 - Compatibility to Alliance Auth v4
     - Bootstrap 5
