@@ -6,8 +6,11 @@ from django.dispatch import receiver
 from django.utils import timezone
 from esi.clients import EsiClientProvider
 
-from .app_settings import (OPCALENDAR_NOTIFY_IMPORTS,
-                           OPCALENDAR_NOTIFY_REPEAT_EVENTS, get_site_url)
+from .app_settings import (
+    OPCALENDAR_NOTIFY_IMPORTS,
+    OPCALENDAR_NOTIFY_REPEAT_EVENTS,
+    get_site_url,
+)
 from .models import Event, IngameEvents
 
 logger = get_extension_logger(__name__)

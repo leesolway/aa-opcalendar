@@ -11,8 +11,7 @@ from allianceauth.tests.auth_utils import AuthUtils
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.contrib.messages.constants import (DEBUG, ERROR, INFO, SUCCESS,
-                                               WARNING)
+from django.contrib.messages.constants import DEBUG, ERROR, INFO, SUCCESS, WARNING
 from django.test import TestCase
 from django.utils.html import format_html
 from esi.models import Scope, Token

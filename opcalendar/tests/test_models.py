@@ -8,8 +8,11 @@ from pytz import utc
 from ..models import Event, EventCategory, EventHost, IngameEvents, Owner
 from ..signals import fleet_deleted, fleet_saved
 from ..utils import NoSocketsTestCase, add_character_to_user_2, add_new_token
-from .testdata import (COLOR_PURPLE, esi_get_characters_character_id_calendar,
-                       esi_get_characters_character_id_calendar_event_id)
+from .testdata import (
+    COLOR_PURPLE,
+    esi_get_characters_character_id_calendar,
+    esi_get_characters_character_id_calendar_event_id,
+)
 
 MODULE_PATH = "opcalendar.models"
 

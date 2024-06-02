@@ -6,10 +6,13 @@ from allianceauth.services.hooks import get_extension_logger
 from django.db.models import F, Q
 from django.utils import timezone
 
-from .app_settings import (OPCALENDAR_DISPLAY_MOONMINING,
-                           OPCALENDAR_DISPLAY_MOONMINING_TAGS,
-                           OPCALENDAR_DISPLAY_STRUCTURETIMERS,
-                           moonmining_active, structuretimers_active)
+from .app_settings import (
+    OPCALENDAR_DISPLAY_MOONMINING,
+    OPCALENDAR_DISPLAY_MOONMINING_TAGS,
+    OPCALENDAR_DISPLAY_STRUCTURETIMERS,
+    moonmining_active,
+    structuretimers_active,
+)
 from .models import Event, IngameEvents
 
 if structuretimers_active():
