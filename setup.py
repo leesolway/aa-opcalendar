@@ -42,5 +42,6 @@ setup(
         "ics>=0.7.2",
         "pytz",
         "django-ical",
+        "requests-mock",
     ],
 )
