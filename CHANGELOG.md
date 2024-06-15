@@ -35,6 +35,46 @@ Section Order:
 ### Security
 -->
 
+## [3.0.0] - 2024-05-29
+
+> **IMPORTANT**
+>
+> **This is a beta release do not use in production**
+
+> **IMPORTANT**
+>
+> **This version needs at least Alliance Auth v4.0.0!**
+>
+> Please make sure to update your Alliance Auth instance **before**
+> you install this version, otherwise, an update to Alliance Auth will
+> be pulled in unsupervised.
+
+If you are using the ical feed for publishing your ops as public you will need to add APPS_WITH_PUBLIC_VIEWS setting to your settings file. See readme for guide.
+
+### Added
+- Show a counter for events that the user has not signed up for. Only shows standard events (excluded imported NPSI events)
+- Added new setting OPCALENDAR_SHOW_EVENT_COUNTER
+- Ability to sign up with different states and add comments to signups, Closes #31
+- Compatibility to Alliance Auth v4
+    - Bootstrap 5
+- Translation tags
+- Added OPCALENDAR_NOTIFY_REPEAT_EVENTS setting allowing to disable discord notifications for repeating events. Closes #33
+- Added filter to NPSI fleets. Closes #29
+- Added setting to use localtimes in calendar view
+- Added FC name to calendar feed, closes #38
+### Changed
+- Calendar view template
+- Moved information about local time and moon mining timers to the legend section
+- Changed how the ical feed is set up using the APPS_WITH_PUBLIC_VIEWS, Closes #36
+- Merged light and dark stylesheets in one file
+
+### Fixed
+- Fixed local times on event details, Closes !7
+- Respect linebreaks in event description, Closes #37
+
+### Removed
+- Dropped support for alliance Auth 3
+
 ## [3.0.0b3] - 2024-05-29
 
 > **IMPORTANT**
