@@ -61,6 +61,7 @@ If you are using the ical feed for publishing your ops as public you will need t
 - Added OPCALENDAR_NOTIFY_REPEAT_EVENTS setting allowing to disable discord notifications for repeating events. Closes #33
 - Added filter to NPSI fleets. Closes #29
 - Added setting to use localtimes in calendar view
+- Added FC name to calendar feed, closes #38
 ### Changed
 - Calendar view template
 - Moved information about local time and moon mining timers to the legend section

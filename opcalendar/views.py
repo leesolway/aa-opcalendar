@@ -489,6 +489,9 @@ class EventFeed(ICalFeed):
     def item_end_datetime(self, item):
         return item.end_time
 
+    def item_organizer(self, item):
+        return item.fc
+
     def item_link(self, item):
         return "{0}/opcalendar/event/{1}/details/".format(get_site_url(), item.id)
 
