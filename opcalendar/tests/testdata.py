@@ -2,9 +2,8 @@ import json
 from pathlib import Path
 
 from bravado.exception import HTTPNotFound
-from ics import Calendar, Event
-
 from django.utils.dateparse import parse_datetime
+from ics import Calendar, Event
 
 from ..utils import BravadoOperationStub, BravadoResponseStub
 

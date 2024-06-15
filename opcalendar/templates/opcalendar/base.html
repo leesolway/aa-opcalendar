@@ -1,47 +1,26 @@
-{% extends 'allianceauth/base.html' %}
+{% extends 'allianceauth/base-bs5.html' %}
 {% load i18n %}
 {% load static %}
 
 {% block extra_css %}
-    {% include 'bundles/jquery-datetimepicker-css.html' %}
-    {% if NIGHT_MODE %}
-    <link rel="stylesheet" type="text/css" href="{% static 'opcalendar/style_dark.css' %}">
-    {% else %}
-    <link rel="stylesheet" type="text/css" href="{% static 'opcalendar/style_light.css' %}">
-    {% endif %}
+    {% include "opcalendar/partials/base/stylesheets.html" %}
 {% endblock extra_css %}
-{% block page_title %}{% trans title %}{% endblock %}
+
+{% block page_title %}
+    {% translate "Operation Calendar" %}
+{% endblock page_title %}
+
+{% block header_nav_collapse_right %}
+    {% include "opcalendar/partials/base/menu.html" %}
+{% endblock %}
+
+{% block header_nav_brand %}
+    {% translate "Operation Calendar" %}
+{% endblock %}
+
 
 {% block content %}
-    <h2 class="text-center">{{ title }}</h2>
-    <div class="col-lg-14 container">
         {% block details %}{% endblock %}
-    </div>
 {% endblock %}
 {% block extra_script %}
-
-    $('#id_start_time').datetimepicker({
-    setlocale: '{{ LANGUAGE_CODE }}',
-    {% if NIGHT_MODE %}
-        theme: 'dark',
-    {% else %}
-        theme: 'default',
-    {% endif %}
-    mask: true,
-    format: 'Y-m-d H:i',
-    minDate: 0
-    });
-
-    $('#id_end_time').datetimepicker({
-    setlocale: '{{ LANGUAGE_CODE }}',
-    {% if NIGHT_MODE %}
-        theme: 'dark',
-    {% else %}
-        theme: 'default',
-    {% endif %}
-    mask: true,
-    format: 'Y-m-d H:i',
-    minDate: 0
-    });
-
 {% endblock extra_script %}

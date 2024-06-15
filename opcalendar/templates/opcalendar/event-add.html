@@ -10,49 +10,38 @@
 {% endblock extra_css %}
 
 {% block content %}
-    <div class="col-lg-12">
-        <h1 class="page-header text-center">{% trans "Create New Event" %}</h1>
-
-        <div class="container-fluid">
-            <div class="col-md-4 col-md-offset-4">
-                <div class="row">
-                    <div class="allianceauth-opcalendar">
-                        <form class="form-signin" role="form" action="" method="POST">
-                            {% csrf_token %}
-                            {{ form|bootstrap }}
-                            <br/>
-                            <button class="btn btn-lg btn-primary btn-block" type="submit">{% trans "Create New Event" %}</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="card">
+    <div class="card-header">{% trans "Create New Event" %}</div>
+    <div class="card-body">
+        <form class="form-signin" role="form" action="" method="POST">
+            {% csrf_token %}
+            {{ form|bootstrap }}
+            <br/>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">{% trans "Create New Event" %}</button>
+        </form>
     </div>
+</div>
 
 {% endblock content %}
 
 {% block extra_javascript %}
+  {% include 'bundles/jquery-datetimepicker-js.html' %}
   <script>
-    $("#id_operation_type").change(function () {
-      var id = $(this).val();
-      $.ajax({
-        url: 'ajax/get_category/',
-        data: {
-          'category': id
-        },
-        dataType: 'json',
-        success: function (data) {
-            var events = JSON.parse(data.category);
-            var obj = events[0];
-            var fields = obj.fields;
-          console.log( fields.description );
-          $('#id_description').val(fields.description);
-        }
+    $(document).ready(() => {
+      $('#id_start_time').datetimepicker({
+        setlocale: '{{ LANGUAGE_CODE }}',
+        mask: true,
+        format: 'Y-m-d H:i',
+        minDate: 0
       });
-
+    });
+    $(document).ready(() => {
+      $('#id_end_time').datetimepicker({
+        setlocale: '{{ LANGUAGE_CODE }}',
+        mask: true,
+        format: 'Y-m-d H:i',
+        minDate: 0
+      });
     });
   </script>
-
-
-    {% include 'bundles/jquery-datetimepicker-js.html' %}
 {% endblock %}

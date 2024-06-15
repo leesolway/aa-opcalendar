@@ -19,26 +19,27 @@
 
 .allianceauth-opcalendar .btn {
     outline: none;
-    color: black;
+    color: white;
     /* background-color: transparent; */
     box-shadow: 0 0 0 0;
     margin-right:3px;
 }
 
-.allianceauth-opcalendar .event{
-  background-image: none;
-  border-radius: 0;
-  background: #eeeeee;
-  border: none;
-  color: black;
-  font-size: .75em;
-  padding: 0 .75em;
-  line-height: 2em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 1px;
-  position: relative;
+/* Updated event styles */
+.allianceauth-opcalendar .event {
+    background-image: none;
+    border-radius: 4px;
+    background: var(--bs-light);
+    border: none;
+    color: black;
+    font-size: .75em;
+    padding: 0 .75em;
+    line-height: 2em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+    position: relative;
 }
 
 .allianceauth-opcalendar .event span {
@@ -97,6 +98,7 @@
 .allianceauth-opcalendar .month {
   font-size: 25px;
   background: #32394e;
+  color: white;
 }
 
 .allianceauth-opcalendar .date {
@@ -158,4 +160,72 @@
 
 .allianceauth-opcalendar .calendar .event-moon-name{
   margin-left: 5px;
+}
+
+/* Label classes to fallback for Bootstrap 3 */
+.allianceauth-opcalendar .label {
+    display: inline;
+    padding: .2em .6em .3em;
+    font-size: 75%;
+    color: #fff;
+    vertical-align: baseline;
+    border-radius: .25em;
+}
+
+.allianceauth-opcalendar .label:empty {
+    display: none;
+}
+
+.allianceauth-opcalendar .label-default {
+    background-color: #95a5a6;
+}
+
+.allianceauth-opcalendar .label-default[href]:focus,
+.allianceauth-opcalendar .label-default[href]:hover {
+    background-color: #798d8f;
+}
+
+.allianceauth-opcalendar .label-primary {
+    background-color: #2C3E50;
+}
+
+.allianceauth-opcalendar .label-primary[href]:focus,
+.allianceauth-opcalendar .label-primary[href]:hover {
+    background-color: #1a242f;
+}
+
+.allianceauth-opcalendar .label-success {
+    background-color: #5cb85c;
+}
+
+.allianceauth-opcalendar .label-success[href]:focus,
+.allianceauth-opcalendar .label-success[href]:hover {
+    background-color: #449d44;
+}
+
+.allianceauth-opcalendar .label-info {
+    background-color: #5bc0de;
+}
+
+.allianceauth-opcalendar .label-info[href]:focus,
+.allianceauth-opcalendar .label-info[href]:hover {
+    background-color: #31b0d5;
+}
+
+.allianceauth-opcalendar .label-warning {
+    background-color: #f0ad4e;
+}
+
+.allianceauth-opcalendar .label-warning[href]:focus,
+.allianceauth-opcalendar .label-warning[href]:hover {
+    background-color: #ec971f;
+}
+
+.allianceauth-opcalendar .label-danger {
+    background-color: #d9534f;
+}
+
+.allianceauth-opcalendar .label-danger[href]:focus,
+.allianceauth-opcalendar .label-danger[href]:hover {
+    background-color: #c9302c;
 }

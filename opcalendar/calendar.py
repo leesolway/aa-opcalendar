@@ -1,21 +1,19 @@
-import operator
 from calendar import HTMLCalendar
-from datetime import date
+from datetime import date, datetime
 from itertools import chain
-from datetime import datetime
-from django.db.models import Q, F
-from django.utils import timezone
-from allianceauth.services.hooks import get_extension_logger
 
-from .models import Event, IngameEvents
+from allianceauth.services.hooks import get_extension_logger
+from django.db.models import F, Q
+from django.utils import timezone
+
 from .app_settings import (
-    OPCALENDAR_DISPLAY_STRUCTURETIMERS,
     OPCALENDAR_DISPLAY_MOONMINING,
     OPCALENDAR_DISPLAY_MOONMINING_TAGS,
-    OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME,
+    OPCALENDAR_DISPLAY_STRUCTURETIMERS,
+    moonmining_active,
+    structuretimers_active,
 )
-
-from .app_settings import structuretimers_active, moonmining_active
+from .models import Event, IngameEvents
 
 if structuretimers_active():
     from structuretimers.models import Timer
@@ -33,17 +31,12 @@ class Calendar(HTMLCalendar):
         self.user = user
         super(Calendar, self).__init__()
 
-    # formats a day as a td
-    # filter events by day
     def formatday(
         self, day, events, ingame_events, structuretimer_events, moonmining_events
     ):
         structuretimers_per_day = []
-
         moonmining_per_day = []
-
         events_per_day = events.filter(start_time__day=day)
-
         ingame_events_per_day = ingame_events.filter(event_start_date__day=day)
 
         if structuretimers_active() and OPCALENDAR_DISPLAY_STRUCTURETIMERS:
@@ -54,88 +47,85 @@ class Calendar(HTMLCalendar):
 
         all_events_per_day = sorted(
             chain(
-                events_per_day,
-                ingame_events_per_day,
-                structuretimers_per_day,
-                moonmining_per_day,
+                ((event, f"event-{event.id}") for event in events_per_day),
+                (
+                    (event, f"ingame-{event.event_id}")
+                    for event in ingame_events_per_day
+                ),
+                ((event, f"struct-{event.id}") for event in structuretimers_per_day),
+                ((event, f"moon-{event.id}") for event in moonmining_per_day),
             ),
-            key=operator.attrgetter("start_time"),
+            key=lambda item: (
+                item[0].start_time
+                if hasattr(item[0], "start_time")
+                else item[0].chunk_arrival_at
+            ),
         )
 
         d = ""
-
-        # Only events for current month
+        standardized_events_per_day = []
         if day != 0:
-            # Parse events
-            for event in all_events_per_day:
+            for event, unique_id in all_events_per_day:
+                standardized_event = {
+                    "id": unique_id,
+                    "start_time": (
+                        event.start_time
+                        if hasattr(event, "start_time")
+                        else event.chunk_arrival_at
+                    ),
+                    "end_time": getattr(event, "end_time", None),
+                    "title": getattr(event, "title", "Unnamed Event"),
+                    "description": getattr(event, "description", ""),
+                    "type": type(event).__name__,
+                }
+                standardized_events_per_day.append(standardized_event)
+
                 if type(event).__name__ == "Timer":
-                    OBJECTIVE_UNDEFINED = "UN"
-                    OBJECTIVE_HOSTILE = "HO"
-                    OBJECTIVE_FRIENDLY = "FR"
-                    OBJECTIVE_NEUTRAL = "NE"
+                    # Determine the objective type for the timer
+                    objective_map = {
+                        "HO": "Hostile",
+                        "FR": "Friendly",
+                        "NE": "Neutral",
+                        "UN": "Undefined",
+                    }
+                    objective_verbosed = objective_map.get(event.objective, "Undefined")
 
-                    if event.objective == OBJECTIVE_HOSTILE:
-                        objective_verbosed = "Hostile"
-                    if event.objective == OBJECTIVE_FRIENDLY:
-                        objective_verbosed = "Friendly"
-                    if event.objective == OBJECTIVE_NEUTRAL:
-                        objective_verbosed = "Neutral"
-                    if event.objective == OBJECTIVE_UNDEFINED:
-                        objective_verbosed = "Undefined"
-
+                    # Generate the HTML for the Timer event
                     d += (
                         f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.date else "future-event"} event-structuretimer">'
-                        f'<span>{event.date.strftime("%H:%M")}<i> {objective_verbosed} structure timer</i></span>'
+                        f'<span id="event-time-{unique_id}">{event.date.strftime("%H:%M")}</span>'
                         f"<span>{event.eve_solar_system.name} - {event.structure_type.name}</span>"
+                        f"<span><i> {objective_verbosed} structure timer</i></span>"
                         f"</div>"
                     )
 
-                    logger.debug("Typer type is: %s " % event.get_objective_display())
-
-                if type(event).__name__ == "Extraction":
-                    # WIP currently only required view permission
-                    if self.user.has_perm(
-                        "moonmining.extractions_access"
-                    ) and self.user.has_perm("moonmining.extractions_access"):
+                elif type(event).__name__ == "Extraction":
+                    if self.user.has_perm("moonmining.extractions_access"):
+                        # Extract relevant details for the extraction event
                         refinery = event.refinery.name
                         system = (
                             event.refinery.moon.eve_moon.eve_planet.eve_solar_system.name
                         )
-
                         structure = refinery.replace(system, "")
 
-                        # Should we display the moon tags
-                        if OPCALENDAR_DISPLAY_MOONMINING_TAGS:
-                            display_name = (
+                        # Generate the display name with or without moon tags
+                        display_name = (
+                            (
                                 event.refinery.moon.rarity_tag_html
                                 + '<span class="event-moon-name">'
                                 + structure[3:]
                                 + "</span>"
                             )
-                        else:
-                            display_name = "<span>" + structure[3:] + "</span>"
+                            if OPCALENDAR_DISPLAY_MOONMINING_TAGS
+                            else "<span>" + structure[3:] + "</span>"
+                        )
 
-                        if OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME:
-                            display_details = (
-                                "<span>"
-                                + event.chunk_arrival_at.strftime("%H:%M")
-                                + "<i> Moon chunk arrival "
-                                + event.refinery.moon.eve_moon.name
-                                + "</i></span>"
-                            )
-                        else:
-                            display_details = (
-                                "<span>"
-                                + event.auto_fracture_at.strftime("%H:%M")
-                                + "<i> Moon chunk fracture "
-                                + event.refinery.moon.eve_moon.name
-                                + "</i></span>"
-                            )
-
+                        # Generate the HTML for the Extraction event
                         d += (
                             f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
                             f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.chunk_arrival_at else "future-event"} event-moonmining">'
-                            f"{display_details}"
+                            f'<span id="event-time-{unique_id}">{event.chunk_arrival_at.strftime("%H:%M")}</span>'
+                            f"<span>{event.refinery.moon.eve_moon.name}</span>"
                             f'<div class="event-moon-details">'
                             f"{display_name}"
                             f"</div>"
@@ -143,40 +133,61 @@ class Calendar(HTMLCalendar):
                             f"</a>"
                         )
 
-                if (
-                    type(event).__name__ == "Event"
-                    or type(event).__name__ == "IngameEvents"
-                ):
+                elif type(event).__name__ in ["Event", "IngameEvents"]:
+                    # Determine start time, title, and owner for the event
+                    start_time = (
+                        event.start_time.strftime("%H:%M")
+                        if hasattr(event, "start_time")
+                        else event.event_start_date.strftime("%H:%M")
+                    )
+                    title = (
+                        f"{event.operation_type.ticker} {event.title}"
+                        if hasattr(event, "operation_type")
+                        else event.title
+                    )
+                    owner = (
+                        event.host.community
+                        if hasattr(event, "host")
+                        else event.owner_name
+                    )
+
+                    # Generate the HTML for the Event or IngameEvents
                     d += (
                         f"<style>{event.get_event_styling}</style>"
                         f'<a class="nostyling" href="{event.get_html_url}">'
-                        f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class}">'
-                        f"{event.get_html_title}"
+                        f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class} {event.external_tag}">'
+                        f'<span id="event-time-{unique_id}">{start_time}</span>'
+                        f"<span><b>{title}</b></span>"
+                        f"<span><i>{owner}</i></span>"
                         f"</div>"
                         f"</a>"
                     )
-            if date.today() == date(self.year, self.month, day):
-                return f"<td class='today'><div class='date'>{day}</div> {d}</td>"
-            return f"<td><div class='date'>{day}</div> {d}</td>"
-        return "<td></td>"
 
-    # formats a week as a tr
+            if date.today() == date(self.year, self.month, day):
+                return (
+                    f"<td class='today'><div class='date'>{day}</div> {d}</td>",
+                    standardized_events_per_day,
+                )
+            return (
+                f"<td><div class='date'>{day}</div> {d}</td>",
+                standardized_events_per_day,
+            )
+        return "<td></td>", standardized_events_per_day
+
     def formatweek(
         self, theweek, events, ingame_events, structuretimer_events, moonmining_events
     ):
         week = ""
+        all_events = []
         for d, weekday in theweek:
-            week += self.formatday(
+            day_html, day_events = self.formatday(
                 d, events, ingame_events, structuretimer_events, moonmining_events
             )
-        return f"<tr> {week} </tr>"
-
-    # formats a month as a table
-    # filter events by year and month
+            week += day_html
+            all_events.extend(day_events)
+        return f"<tr> {week} </tr>", all_events
 
     def formatmonth(self, withyear=True):
-        # Get normal events
-        # Filter by groups and states
         events = (
             Event.objects.filter(
                 start_time__year=self.year,
@@ -191,8 +202,7 @@ class Calendar(HTMLCalendar):
                 | Q(event_visibility__restricted_to_state__isnull=True),
             )
         )
-        # Get ingame events
-        # Filter by groups and states
+
         ingame_events = (
             IngameEvents.objects.filter(
                 event_start_date__year=self.year, event_start_date__month=self.month
@@ -210,9 +220,6 @@ class Calendar(HTMLCalendar):
             )
         )
 
-        # Check if structuretimers is active
-        # Should we fetch timers
-
         if structuretimers_active() and OPCALENDAR_DISPLAY_STRUCTURETIMERS:
             structuretimer_events = (
                 Timer.objects.all()
@@ -223,8 +230,6 @@ class Calendar(HTMLCalendar):
         else:
             structuretimer_events = Event.objects.none()
 
-        # Check if moonmining is active
-        # Should we fetch extractions
         if moonmining_active() and OPCALENDAR_DISPLAY_MOONMINING:
             moonmining_events = (
                 Extraction.objects.all()
@@ -252,9 +257,15 @@ class Calendar(HTMLCalendar):
         cal += f"{self.formatmonthname(self.year, self.month, withyear=withyear)}\n"
         cal += f"{self.formatweekheader()}\n"
 
+        all_events_per_month = []
+
         for week in self.monthdays2calendar(self.year, self.month):
-            cal += f"{self.formatweek(week, events, ingame_events, structuretimer_events, moonmining_events)}\n"
+            week_html, week_events = self.formatweek(
+                week, events, ingame_events, structuretimer_events, moonmining_events
+            )
+            cal += f"{week_html}\n"
+            all_events_per_month.extend(week_events)
 
         cal += "</table>"
 
-        return cal
+        return cal, all_events_per_month

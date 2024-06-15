@@ -1,11 +1,11 @@
 import datetime as dt
 from unittest.mock import patch
 
-from django.db.models import signals
 from allianceauth.tests.auth_utils import AuthUtils
+from django.db.models import signals
 from pytz import utc
 
-from ..models import EventCategory, EventHost, IngameEvents, Owner, Event
+from ..models import Event, EventCategory, EventHost, IngameEvents, Owner
 from ..signals import fleet_deleted, fleet_saved
 from ..utils import NoSocketsTestCase, add_character_to_user_2, add_new_token
 from .testdata import (

@@ -440,13 +440,20 @@ class Event(models.Model):
             return "future-event"
 
     @property
+    def external_tag(self):
+        if self.external:
+            return "external"
+        else:
+            return False
+
+    @property
     def get_html_url(self):
         url = reverse("opcalendar:event-detail", args=(self.id,))
         return f"{url}"
 
     @property
     def get_html_title(self):
-        return f'<span>{self.start_time.strftime("%H:%M")} - {self.end_time.strftime("%H:%M")} <i>{self.host.community}</i></span><span><b>{self.operation_type.ticker} {self.title}</b></span>'
+        return f'<span id="event-time-{self.id}">{self.start_time.strftime("%H:%M")}</span><span><b>{self.operation_type.ticker} {self.title}</b></span><span><i>{self.host.community}</i></span>'
 
     def user_can_edit(self, user: user) -> bool:
         """Checks if the given user can edit this timer. Returns True or False"""
@@ -738,10 +745,19 @@ class IngameEvents(models.Model):
 
     @property
     def get_html_title(self):
-        return f'<span>{self.event_start_date.strftime("%H:%M")} - {self.event_end_date.strftime("%H:%M")}<i> {self.owner_name}</i></span><span><b>{self.title}</b></span>'
+        return f'<span id="event-time-{self.unique_id}">{self.event_start_date.strftime("%H:%M")}</span><span><b>{self.title}</b></span><span><i>{self.owner_name}</i></span>'
+
+    @property
+    def external_tag(self):
+        return False
 
 
 class EventMember(models.Model):
+    class Status(models.TextChoices):
+        ATTENDING = "A", _("Attending")
+        MAYBE = "M", _("Maybe")
+        DECLINED = "D", _("Declined")
+
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     character = models.ForeignKey(
         EveCharacter,
@@ -749,6 +765,60 @@ class EventMember(models.Model):
         on_delete=models.SET_NULL,
         help_text="Event creator main character",
     )
+    status = models.CharField(
+        max_length=1,
+        choices=Status.choices,
+        default=Status.ATTENDING,
+    )
+    comment = models.CharField(
+        max_length=100, blank=True, help_text="Optional comment about the event"
+    )
 
     class Meta:
         unique_together = ["event", "character"]
+
+    def __str__(self):
+        return f"{self.character} - {self.get_status_display()}"
+
+
+def get_sentinel_user():
+    """
+    get user or create one
+    :return:
+    """
+
+    return User.objects.get_or_create(username="deleted")[0]
+
+
+class UserSettings(models.Model):
+    """
+    User settings
+    """
+
+    user = models.ForeignKey(
+        User,
+        related_name="+",
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=models.SET(get_sentinel_user),
+    )
+
+    disable_discord_notifications = models.BooleanField(
+        default=True,
+        verbose_name=_("Discord Notifications"),
+    )
+
+    use_local_times = models.BooleanField(
+        default=True,
+        verbose_name=_("Use Local Times"),
+    )
+
+    class Meta:
+        """
+        Meta definitions
+        """
+
+        default_permissions = ()
+        verbose_name = _("User Settings")
+        verbose_name_plural = _("User Settings")

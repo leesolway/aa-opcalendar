@@ -1,6 +1,8 @@
-from django.conf import settings
-from .utils import clean_setting
 import re
+
+from django.conf import settings
+
+from .utils import clean_setting
 
 
 def get_site_url():  # regex sso url
@@ -47,6 +49,12 @@ OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME = clean_setting(
 OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL = clean_setting(
     "OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL", False
 )
+
+# whether events with repeat should be sent over the webhook
+OPCALENDAR_NOTIFY_REPEAT_EVENTS = clean_setting("OPCALENDAR_NOTIFY_REPEAT_EVENTS", True)
+
+# whether the event counter will be shown
+OPCALENDAR_SHOW_EVENT_COUNTER = clean_setting("OPCALENDAR_SHOW_EVENT_COUNTER", True)
 
 OPCALENDAR_EVE_UNI_URL = "https://portal.eveuniversity.org/api/getcalendar"
 OPCALENDAR_SPECTRE_URL = "https://www.spectre-fleet.space/engagement/events/rss"

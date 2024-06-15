@@ -1,16 +1,20 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
+
 from opcalendar.models import (
     Event,
     EventCategory,
-    WebHook,
     EventHost,
     EventImport,
-    Owner,
-    IngameEvents,
+    EventMember,
     EventVisibility,
+    IngameEvents,
+    Owner,
+    UserSettings,
+    WebHook,
 )
-from .forms import EventVisibilityAdminForm, EventCategoryAdminForm
+
+from .forms import EventCategoryAdminForm, EventVisibilityAdminForm
 
 
 def custom_filter(title):
@@ -175,3 +179,16 @@ class EventAdmin(admin.ModelAdmin):
         "event_visibility",
         "external",
     )
+
+
+@admin.register(EventMember)
+class EventMemberAdmin(admin.ModelAdmin):
+    list_display = ("event", "character", "status")
+    list_filter = ("status",)
+    search_fields = ("character__name", "event__name")
+
+
+@admin.register(UserSettings)
+class UserSettingsAdmin(admin.ModelAdmin):
+    list_display = ("user", "disable_discord_notifications", "use_local_times")
+    search_fields = ("user__username",)

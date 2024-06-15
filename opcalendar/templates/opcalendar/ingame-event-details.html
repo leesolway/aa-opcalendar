@@ -52,78 +52,80 @@ Event Details
             </div>
         </div>
     </div>
-{% include 'bundles/moment-js.html' with locale=True %}
-    <script src="{% static 'js/timers.js' %}"></script>
-    <script type="application/javascript">
-        // Data
-        var timers = [
-            {
-                'id': {{ event.event_id }},
-                'start': moment("{{ event.event_start_date | date:"c" }}"),
-                'expired': false
-            },
+{% endblock %}
+
+{% block extra_javascript %}
+    {% include "bundles/moment-js.html" with locale=True %}
+    {% include "bundles/timers-js.html" %}
+
+    <script>
+        const timers = [
+                {
+                    'id': {{ event.event_id }},
+                    'targetDate': moment("{{ event.event_start_date | date:"c" }}"),
+                    'expired': false
+                },
         ];
-    </script>
-    <script type="application/javascript">
-
-        timedUpdate();
-        setAllLocalTimes();
-
-        // Start timed updates
-        setInterval(timedUpdate, 1000);
-
-        function timedUpdate() {
-            updateClock();
-            updateAllTimers();
-        }
-
-        function updateAllTimers () {
-            var l = timers.length;
-            for (var i=0; i < l; ++i) {
-                if (timers[i].expired) continue;
-                updateTimer(timers[i]);
-            }
-        }
 
         /**
          * Update a timer
          * @param timer Timer information
-         * @param timer.start Date of the timer
-         * @param timer.id Id number of the timer
-         * @param timer.expired
          */
-        function updateTimer(timer) {
-            if (timer.start.isAfter(Date.now())) {
-                var duration = moment.duration(timer.start - moment(), 'milliseconds');
-                document.getElementById("countdown" + timer.id).innerHTML = getDurationString(duration);
+        const updateTimer = (timer) => {
+            if (timer.targetDate.isAfter(Date.now())) {
+                const duration = moment.duration(event.event_start_date - moment(), 'milliseconds');
+
+                document.getElementById("localtime" + timer.id).innerHTML = getDurationString(duration);
             } else {
                 timer.expired = true;
-                document.getElementById("countdown" + timer.id).innerHTML = "";
-            }
-        }
 
-        /**
-         * Set all local time fields
-         */
-        function setAllLocalTimes() {
-            var l = timers.length;
-            for (var i=0; i < l; ++i) {
-                setLocalTime(timers[i]);
+                document.getElementById("localtime" + timer.id).innerHTML = "";
             }
-        }
+        };
+
+        const updateAllTimers = () => {
+            const l = timers.length;
+
+            for (let i=0; i < l; ++i) {
+                if (timers[i].expired) continue;
+
+                updateTimer(timers[i]);
+            }
+        };
 
         /**
          * Set the local time info for the timer
          * @param timer Timer information
-         * @param timer.start Date of the timer
-         * @param timer.id Id number of the timer
          */
-        function setLocalTime(timer) {
-            document.getElementById("localtime" + timer.id).innerHTML = timer.start.format("ddd MM-DD HH:mm");
+        const setLocalTime = (timer) => {
+            document.getElementById("localtime" + timer.id).innerHTML = timer.targetDate.format("ddd @ LT");
+        };
+
+        /**
+         * Set all local time fields
+         */
+        const setAllLocalTimes = () => {
+            const l = timers.length;
+
+            for (let i=0; i < l; ++i) {
+                setLocalTime(timers[i]);
+            }
+        };
+
+        const updateClock = () => {
+            document.getElementById("current-time").innerHTML = getCurrentEveTimeString();
+        };
+
+        const timedUpdate = () => {
+            updateClock();
+            updateAllTimers();
         }
 
-        function updateClock() {
-            document.getElementById("current-time").innerHTML = getCurrentEveTimeString();
-        }
+        // Set initial values
+        setAllLocalTimes();
+        timedUpdate();
+
+        // Start timed updates
+        setInterval(timedUpdate, 1000);
     </script>
-{% endblock %}
+{% endblock extra_javascript %}

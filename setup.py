@@ -1,8 +1,8 @@
 import os
+
 from setuptools import find_packages, setup
 
 from opcalendar import __version__
-
 
 # read the contents of your README file
 this_directory = os.path.abspath(os.path.dirname(__file__))
@@ -37,10 +37,11 @@ setup(
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     ],
     install_requires=[
-        "allianceauth>=2.8.0",
+        "allianceauth<5.0.0,>=4",
         "feedparser",
         "ics>=0.7.2",
         "pytz",
         "django-ical",
+        "requests-mock",
     ],
 )

@@ -1,28 +1,25 @@
 # Cog Stuff
-from discord.ext import commands
-from discord.embeds import Embed
-from discord.colour import Color
-from discord.commands import Option
+import logging
+
+# OPCALENDAR
+import operator
+import os
+from datetime import datetime
+from itertools import chain
 
 # AA Contexts
 from aadiscordbot.app_settings import get_site_url
 from allianceauth.services.modules.discord.models import DiscordUser
-
-# OPCALENDAR
-import operator
-from opcalendar.models import Event, IngameEvents, EventHost
-from django.db.models import Q, F
-from itertools import chain
 from app_utils.urls import static_file_absolute_url
-from datetime import datetime
-import os
-
-import logging
-
+from discord.colour import Color
+from discord.commands import Option
+from discord.embeds import Embed
+from discord.ext import commands
 from django.conf import settings
-from opcalendar.app_settings import (
-    OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL,
-)
+from django.db.models import F, Q
+
+from opcalendar.app_settings import OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL
+from opcalendar.models import Event, EventHost, IngameEvents
 
 logger = logging.getLogger(__name__)
 
@@ -192,7 +189,7 @@ def _get_events(author, user_argument):
 
         # Format all events and ingame events
         for event in all_events:
-            if type(event) == Event:
+            if isinstance(event, Event):
                 embed.add_field(
                     name="Event: {0} {1}".format(
                         event.title, event.operation_type.ticker
@@ -208,7 +205,7 @@ def _get_events(author, user_argument):
                     ),
                     inline=False,
                 )
-            if type(event) == IngameEvents:
+            if isinstance(event, IngameEvents):
                 embed.add_field(
                     name="Ingame Event: {0}".format(event.title),
                     value="Host: {0}\n Time:{1}\n[Details]({2}/opcalendar/ingame/event/{3}/details/)".format(

@@ -33,6 +33,7 @@ An operation calendar app for Alliance Auth to display fleet operations and othe
 * Discord notifications
 	* Webhook
 	* For: new, edited and deleted events
+* Counter on menu for events that the user has not signed or rejected from
 
 ![screenshot](https://i.imgur.com/92nBoO7.jpg)
 ![screenshot](https://i.imgur.com/Mbvq3So.jpg)
@@ -89,6 +90,8 @@ OPCALENDAR_DISPLAY_MOONMINING | whether we should inculde extractions from the a
 OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL | whether we display external hosts such as ingame hosts in the discord ops command filters | False
 OPCALENDAR_DISPLAY_MOONMINING_TAGS | Display the rarity tag of aa-moonmining moons if the moonmining plugin is installed | True
 OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME | Displays aa-moonmining extraction time based on arrival time. Set to False to display as auto fracture time | True
+OPCALENDAR_NOTIFY_REPEAT_EVENTS | If repeated events should also be created as webhook pings on discord. Can create spam if the event repeat is set to high | True
+OPCALENDAR_SHOW_EVENT_COUNTER | Shows a counter next to the opcalendar menu for events that the user has not responded to | True
 
 
 ## Setup
@@ -178,45 +181,20 @@ If you wish to add a visibility filter or a category similar to the manual event
 After selecing a visibility filter and a category the ingame events will behave similar to the manual events and respect the group and state restrictions set for the visibility filters.
 
 ### Ical feed setup (optional)
-Opcalendar has the ability to generate a standard ical formated feed for pushing out events. To push out evets to the feed without login requirement requires editing the allianceauth url file as on default all pages are locked behind a login requirement.
+Opcalendar has the ability to generate a standard ical formated feed for pushing out events. To push out evets to the feed without login requirement requires editing auth settings file.
 
 #### Feed setup
-1. Open up the event visibility category and check the box to include it in the ical feed.
-2. Open the alliance auth `urls.py` file that is located on default in the following path `/home/allianceserver/myauth/myauth/urls.py`
-3. On default the file looks something like this:
-```
-from django.conf.urls import include, url
-from allianceauth import urls
+1. Open up the event visibility category and check the box to include it in the ical feed. Only categories tagged with this box will show up on the feed.
 
-urlpatterns = [
-    url(r'', include(urls)),
+2. Add 'opcalendar' to the local settings file settings.py in the APPS_WITH_PUBLIC_VIEWS or create the section if you do not have it:
+
+```
+APPS_WITH_PUBLIC_VIEWS = [
+    'opcalendar',
 ]
-
-handler500 = 'allianceauth.views.Generic500Redirect'
-handler404 = 'allianceauth.views.Generic404Redirect'
-handler403 = 'allianceauth.views.Generic403Redirect'
-handler400 = 'allianceauth.views.Generic400Redirect'
 ```
-4. Include the following 2 lines in the file:
-	- `from opcalendar.views import EventFeed #Added import for opcalendar ical feed` bellow the imports on top of the file
-	- `url(r'^opcalendar/feed.ics', EventFeed()), #Opcalendar feed url` in the `urlpatterns` **before** the `url(r'', include(urls)),` line
-Your file `urls.py` file should now look like this:
-```
-from django.conf.urls import include, url
-from allianceauth import urls
-from opcalendar.views import EventFeed #Added import for opcalendar ical feed
 
-urlpatterns = [
-    url(r'^opcalendar/feed.ics', EventFeed()), #Opcalendar feed url
-    url(r'', include(urls)),
-]
-
-handler500 = 'allianceauth.views.Generic500Redirect'
-handler404 = 'allianceauth.views.Generic404Redirect'
-handler403 = 'allianceauth.views.Generic403Redirect'
-handler400 = 'allianceauth.views.Generic400Redirect'
-```
-5. You can now access the ical feed at `auth.example.com/opcalendar/feed.ics`
+3. You can now access the ical feed at `auth.example.com/opcalendar/feed.ics`
 
 ## Contributing
 Make sure you have signed the [License Agreement](https://developers.eveonline.com/resource/license-agreement) by logging in at https://developers.eveonline.com before submitting any pull requests. All bug fixes or features must not include extra superfluous formatting changes.

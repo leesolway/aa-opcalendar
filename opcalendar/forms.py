@@ -1,14 +1,16 @@
+from allianceauth.services.hooks import get_extension_logger
+from django import forms
 from django.forms import ModelForm
+from django.forms.widgets import TextInput
+
 from opcalendar.models import (
     Event,
-    EventMember,
     EventCategory,
     EventHost,
+    EventMember,
     EventVisibility,
+    UserSettings,
 )
-from django.forms.widgets import TextInput
-from django import forms
-from allianceauth.services.hooks import get_extension_logger
 
 logger = get_extension_logger(__name__)
 
@@ -83,7 +85,16 @@ class SignupForm(forms.Form):
 class AddMemberForm(forms.ModelForm):
     class Meta:
         model = EventMember
-        fields = ["character"]
+        fields = ["character", "status", "comment"]
+        widgets = {
+            "comment": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "maxlength": 100,
+                    "placeholder": "Optional comment",
+                }
+            ),
+        }
 
 
 class AddCategoryForm(forms.ModelForm):
@@ -107,4 +118,14 @@ class EventCategoryAdminForm(forms.ModelForm):
         fields = "__all__"
         widgets = {
             "color": TextInput(attrs={"type": "color"}),
+        }
+
+
+class UserSettingsForm(forms.ModelForm):
+    class Meta:
+        model = UserSettings
+        fields = ["disable_discord_notifications", "use_local_times"]
+        labels = {
+            "disable_discord_notifications": "Disable all direct discord notifications",
+            "use_local_times": "Show all events in local time instead of EVE time",
         }
