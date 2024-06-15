@@ -70,6 +70,7 @@ If you are using the ical feed for publishing your ops as public you will need t
 
 ### Fixed
 - Fixed local times on event details, Closes !7
+- Respect linebreaks in event description, Closes #37
 
 ### Removed
 - Dropped support for alliance Auth 3
