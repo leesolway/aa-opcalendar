@@ -23,7 +23,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Ikarus Cesaille",
     author_email="contact@eve-linknet.com",
-    url="https://gitlab.com/paulipa/allianceauth-opcalendar",
+    url="https://gitlab.com/paulipa/aa-opcalendar",
     classifiers=[
         "Environment :: Web Environment",
         "Framework :: Django",

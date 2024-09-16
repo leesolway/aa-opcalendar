@@ -1,23 +1,23 @@
-.allianceauth-opcalendar {
+.aa-opcalendar {
     padding-top: 12px;
 }
 
-.allianceauth-opcalendar h5 {
+.aa-opcalendar h5 {
   padding-left: 14px;
 }
 
-.allianceauth-opcalendar .calendar {
+.aa-opcalendar .calendar {
     width: 98%;
     margin: auto;
     font-size: 13px;
     table-layout: fixed;
   }
 
-.allianceauth-opcalendar .nostyling{
+.aa-opcalendar .nostyling{
   text-decoration: none !important;
 }
 
-.allianceauth-opcalendar .btn {
+.aa-opcalendar .btn {
     outline: none;
     color: white;
     /* background-color: transparent; */
@@ -26,7 +26,7 @@
 }
 
 /* Updated event styles */
-.allianceauth-opcalendar .event {
+.aa-opcalendar .event {
     background-image: none;
     border-radius: 4px;
     background: var(--bs-light);
@@ -42,24 +42,24 @@
     position: relative;
 }
 
-.allianceauth-opcalendar .event span {
+.aa-opcalendar .event span {
     display: block;
 }
 
-.allianceauth-opcalendar .event img {
+.aa-opcalendar .event img {
     vertical-align: middle;
     display: inline-block;
 }
 
-.allianceauth-opcalendar .event-structuretimer{
+.aa-opcalendar .event-structuretimer{
   background: #ffe1c0;
 }
 
-.allianceauth-opcalendar .event-moonmining{
+.aa-opcalendar .event-moonmining{
   background: #bcedff;
 }
 
-.allianceauth-opcalendar .event:before {
+.aa-opcalendar .event:before {
     width: 0;
     height: 0;
     border-width: 0px 15px 15px 0;
@@ -69,64 +69,64 @@
     top: 0;
 }
 
-.allianceauth-opcalendar .event.past-event{
+.aa-opcalendar .event.past-event{
     opacity: 0.4;
 }
 
-.allianceauth-opcalendar td.today {
+.aa-opcalendar td.today {
     color: #50a5f1;
     font-weight: bold;
 }
-.allianceauth-opcalendar .calendar tr, .calendar td {
+.aa-opcalendar .calendar tr, .calendar td {
   border: 1px solid #32394e;
 }
 
-.allianceauth-opcalendar .calendar th {
+.aa-opcalendar .calendar th {
   padding: 10px;
   text-align: center;
   font-size: 18px;
   width: 15%;
 }
 
-.allianceauth-opcalendar .calendar td {
+.aa-opcalendar .calendar td {
   height: 110px;
   vertical-align:top;
   width: 15%;
   padding: 0px 5px 0px 5px;
 }
 
-.allianceauth-opcalendar .month {
+.aa-opcalendar .month {
   font-size: 25px;
   background: #32394e;
   color: white;
 }
 
-.allianceauth-opcalendar .date {
+.aa-opcalendar .date {
   font-size: 16px;
   padding: 5px;
 }
 
-.allianceauth-opcalendar ul {
+.aa-opcalendar ul {
   height: 100%;
   padding: 0px 5px 0px 20px;
 }
 
-.allianceauth-opcalendar a {
+.aa-opcalendar a {
   color: #17a2b8;
 }
-.allianceauth-opcalendar .left {
+.aa-opcalendar .left {
   float: left;
 }
 
-.allianceauth-opcalendar .right {
+.aa-opcalendar .right {
   float: right;
 }
 
-.allianceauth-opcalendar .form {
+.aa-opcalendar .form {
   margin: auto;
 }
 
-.allianceauth-opcalendar .form input, .form select, .form textarea {
+.aa-opcalendar .form input, .form select, .form textarea {
   border-radius: 5px;
   border: 1px solid #17a2b8;
   outline: none;
@@ -135,35 +135,35 @@
   width: 100%;
   }
 
-.allianceauth-opcalendar .legend {
+.aa-opcalendar .legend {
   margin: 15px;
 }
-.allianceauth-opcalendar .legend span {
+.aa-opcalendar .legend span {
     padding: 3px 16px 3px 6px;
     cursor: pointer;
     opacity: 0.7
 }
 
-.allianceauth-opcalendar .legend span.active{
+.aa-opcalendar .legend span.active{
   opacity: 1;
 }
 
-.allianceauth-opcalendar .calendar .event-moon-details{
+.aa-opcalendar .calendar .event-moon-details{
   display:table;
   margin-bottom: 5px;
 }
 
-.allianceauth-opcalendar .calendar .label{
+.aa-opcalendar .calendar .label{
   display:table-cell;
   vertical-align:middle;
 }
 
-.allianceauth-opcalendar .calendar .event-moon-name{
+.aa-opcalendar .calendar .event-moon-name{
   margin-left: 5px;
 }
 
 /* Label classes to fallback for Bootstrap 3 */
-.allianceauth-opcalendar .label {
+.aa-opcalendar .label {
     display: inline;
     padding: .2em .6em .3em;
     font-size: 75%;
@@ -172,60 +172,60 @@
     border-radius: .25em;
 }
 
-.allianceauth-opcalendar .label:empty {
+.aa-opcalendar .label:empty {
     display: none;
 }
 
-.allianceauth-opcalendar .label-default {
+.aa-opcalendar .label-default {
     background-color: #95a5a6;
 }
 
-.allianceauth-opcalendar .label-default[href]:focus,
-.allianceauth-opcalendar .label-default[href]:hover {
+.aa-opcalendar .label-default[href]:focus,
+.aa-opcalendar .label-default[href]:hover {
     background-color: #798d8f;
 }
 
-.allianceauth-opcalendar .label-primary {
+.aa-opcalendar .label-primary {
     background-color: #2C3E50;
 }
 
-.allianceauth-opcalendar .label-primary[href]:focus,
-.allianceauth-opcalendar .label-primary[href]:hover {
+.aa-opcalendar .label-primary[href]:focus,
+.aa-opcalendar .label-primary[href]:hover {
     background-color: #1a242f;
 }
 
-.allianceauth-opcalendar .label-success {
+.aa-opcalendar .label-success {
     background-color: #5cb85c;
 }
 
-.allianceauth-opcalendar .label-success[href]:focus,
-.allianceauth-opcalendar .label-success[href]:hover {
+.aa-opcalendar .label-success[href]:focus,
+.aa-opcalendar .label-success[href]:hover {
     background-color: #449d44;
 }
 
-.allianceauth-opcalendar .label-info {
+.aa-opcalendar .label-info {
     background-color: #5bc0de;
 }
 
-.allianceauth-opcalendar .label-info[href]:focus,
-.allianceauth-opcalendar .label-info[href]:hover {
+.aa-opcalendar .label-info[href]:focus,
+.aa-opcalendar .label-info[href]:hover {
     background-color: #31b0d5;
 }
 
-.allianceauth-opcalendar .label-warning {
+.aa-opcalendar .label-warning {
     background-color: #f0ad4e;
 }
 
-.allianceauth-opcalendar .label-warning[href]:focus,
-.allianceauth-opcalendar .label-warning[href]:hover {
+.aa-opcalendar .label-warning[href]:focus,
+.aa-opcalendar .label-warning[href]:hover {
     background-color: #ec971f;
 }
 
-.allianceauth-opcalendar .label-danger {
+.aa-opcalendar .label-danger {
     background-color: #d9534f;
 }
 
-.allianceauth-opcalendar .label-danger[href]:focus,
-.allianceauth-opcalendar .label-danger[href]:hover {
+.aa-opcalendar .label-danger[href]:focus,
+.aa-opcalendar .label-danger[href]:hover {
     background-color: #c9302c;
 }

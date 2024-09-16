@@ -1,4 +1,4 @@
-appname = allianceauth-opcalendar
+appname = aa-opcalendar
 package = opcalendar
 
 help:
