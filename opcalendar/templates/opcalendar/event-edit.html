@@ -1,5 +1,5 @@
 {% extends 'opcalendar/base.html' %}
-{% load bootstrap %}
+{% load django_bootstrap5 %}
 {% load static %}
 {% load i18n %}
 {% get_current_language as LANGUAGE_CODE %}
@@ -15,7 +15,7 @@
       <div class="card-body">
             <form class="form-signin" role="form" action="" method="POST">
                 {% csrf_token %}
-                {{ form|bootstrap }}
+                {% bootstrap_form form %}
                 <br/>
                 <button class="btn btn-lg btn-primary btn-block" type="submit">{% trans "Edit Event" %}</button>
             </form>
@@ -32,10 +32,20 @@
         setlocale: '{{ LANGUAGE_CODE }}',
         mask: true,
         format: 'Y-m-d H:i',
-        minDate: 0
+        minDate: 0,
+        onChangeDateTime: function(currentDateTime) {
+          if (currentDateTime) {
+            // Add 1 hour (60 minutes * 60 seconds * 1000 milliseconds)
+            let endDateTime = new Date(currentDateTime.getTime() + (60 * 60 * 1000)); 
+
+            // Ensure end time can't be before start time
+            $('#id_end_time').datetimepicker('setOptions', { minDate: currentDateTime });
+            $('#id_end_time').val(formatDateTime(endDateTime));
+          }
+        }
       });
-    });
-    $(document).ready(() => {
+  
+      // Initialize the datetimepicker for end_time
       $('#id_end_time').datetimepicker({
         setlocale: '{{ LANGUAGE_CODE }}',
         mask: true,
@@ -43,5 +53,16 @@
         minDate: 0
       });
     });
+  
+    // Helper function to format the Date object as 'Y-m-d H:i'
+    function formatDateTime(date) {
+      let year = date.getFullYear();
+      let month = ('0' + (date.getMonth() + 1)).slice(-2); // Months are 0-based, so add 1
+      let day = ('0' + date.getDate()).slice(-2);
+      let hours = ('0' + date.getHours()).slice(-2);
+      let minutes = ('0' + date.getMinutes()).slice(-2);
+      
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
+    }
   </script>
 {% endblock %}
