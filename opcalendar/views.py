@@ -330,6 +330,7 @@ def get_category(request):
 @permission_required("opcalendar.basic_access")
 def event_details(request, event_id):
     try:
+        # Get the event considering group and state visibility restrictions
         event = (
             Event.objects.filter(
                 Q(event_visibility__restricted_to_group__in=request.user.groups.all())
@@ -341,10 +342,14 @@ def event_details(request, event_id):
             )
             .get(id=event_id)
         )
-        eventmember = EventMember.objects.filter(event=event)
-        memberlist = []
-        for member in eventmember:
-            memberlist.append(member.character.character_name)
+
+        # Filter and order the event members by status and character name
+        eventmember = EventMember.objects.filter(event=event).order_by(
+            "status", "character__character_name"
+        )
+
+        # Create a list of character names (sorted by status and name)
+        memberlist = [member.character.character_name for member in eventmember]
 
         context = {"event": event, "eventmember": eventmember, "memberlist": memberlist}
 

@@ -40,45 +40,44 @@ Event Details
 </div>
 {% endblock %}
 {% block extra_javascript %}
-    {% include "bundles/moment-js.html" with locale=True %}
-    {% include "bundles/timers-js.html" %}
+{% include "bundles/moment-js.html" with locale=True %}
+{% include "bundles/timers-js.html" %}
 
-    <script>
-        const timers = [
-                {
-                    'id': {{ event.id }},
-                    'targetDate': moment("{{ event.start_time | date:"c" }}"),
-                    'expired': false
-                },
-        ];
+<script>
+    const timers = [
+        {
+            'id': {{ event.id }},
+            'targetDate': moment("{{ event.start_time | date:"c" }}"),
+            'expired': false
+        }
+    ];
+
+    /**
+     * Set the local time info for the timer
+     * @param timer Timer information
+     */
+    const setLocalTime = (timer) => {
+        document.getElementById("localtime" + timer.id).innerHTML = timer.targetDate.format("ddd @ LT");
+    };
+
+    /**
+     * Set all local time fields
+     */
+    const setAllLocalTimes = () => {
+        const l = timers.length;
+
+        for (let i = 0; i < l; ++i) {
+            setLocalTime(timers[i]);
+        }
+    };
+
+    const updateClock = () => {
+        document.getElementById("current-time").innerHTML = getCurrentEveTimeString();
+    };
 
 
-        /**
-         * Set the local time info for the timer
-         * @param timer Timer information
-         */
-        const setLocalTime = (timer) => {
-            document.getElementById("localtime" + timer.id).innerHTML = timer.targetDate.format("ddd @ LT");
-        };
+    // Set initial values
+    setAllLocalTimes();
 
-        /**
-         * Set all local time fields
-         */
-        const setAllLocalTimes = () => {
-            const l = timers.length;
-
-            for (let i=0; i < l; ++i) {
-                setLocalTime(timers[i]);
-            }
-        };
-
-        const updateClock = () => {
-            document.getElementById("current-time").innerHTML = getCurrentEveTimeString();
-        };
-
-
-        // Set initial values
-        setAllLocalTimes();
-
-    </script>
+</script>
 {% endblock extra_javascript %}
