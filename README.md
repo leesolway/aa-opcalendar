@@ -198,3 +198,5 @@ APPS_WITH_PUBLIC_VIEWS = [
 
 ## Contributing
 Make sure you have signed the [License Agreement](https://developers.eveonline.com/resource/license-agreement) by logging in at https://developers.eveonline.com before submitting any pull requests. All bug fixes or features must not include extra superfluous formatting changes.
+
+Forked from the awesome project located at [Allianceauth Opcalenda](https://gitlab.com/paulipa/allianceauth-opcalendar)
