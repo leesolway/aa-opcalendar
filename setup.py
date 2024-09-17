@@ -21,9 +21,9 @@ setup(
     description="Event calendar plugin app for Alliance Auth",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Ikarus Cesaille",
-    author_email="contact@eve-linknet.com",
-    url="https://gitlab.com/paulipa/aa-opcalendar",
+    author="Lee Solway",
+    author_email="",
+    url="https://github.com/leesolway/aa-opcalendar",
     classifiers=[
         "Environment :: Web Environment",
         "Framework :: Django",
