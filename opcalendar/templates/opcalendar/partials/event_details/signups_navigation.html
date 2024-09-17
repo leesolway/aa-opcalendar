@@ -1,30 +1,44 @@
 {% load i18n %}
 
 <div class="d-grid gap-2 d-md-flex justify-content-md-start align-items-center w-100">
-    <form method="post" action="{% url 'opcalendar:event_member_signup_attending' event.id %}" class="d-inline" id="attendingForm">
+    <form method="post" id="responseForm" class="d-inline d-md-flex w-100 justify-content-md-start align-items-center">
         {% csrf_token %}
-        <input type="hidden" name="status" value="A">
-        <button class="btn btn-success me-md-2" type="submit"><i class="fa-solid fa-check"></i> {% trans "Attending" %}</button>
+        <input type="hidden" name="status" id="statusField">
+
+        <div>
+            <!-- Attending Button -->
+            <button type="submit" onclick="submitForm('A', '{% url 'opcalendar:event_member_signup_attending' event.id %}');" class="btn btn-success me-md-2">
+                <i class="fa-solid fa-check"></i> {% trans "Attending" %}
+            </button>
+            
+            <!-- Maybe Button -->
+            <button type="submit" onclick="submitForm('M', '{% url 'opcalendar:event_member_signup_maybe' event.id %}');" class="btn btn-warning me-md-2">
+                <i class="fa-solid fa-question"></i> {% trans "Maybe" %}
+            </button>
+            
+            <!-- Declined Button -->
+            <button type="submit" onclick="submitForm('D', '{% url 'opcalendar:event_member_signup_declined' event.id %}');" class="btn btn-danger me-md-2">
+                <i class="fa-solid fa-hand"></i> {% trans "Declined" %}
+            </button>
+        </div>
+
+        <input type="text" name="comment" class="comment-input" placeholder="{% trans 'Comment' %}" maxlength="100" style="width: 300px;">
+
+        <!-- Remove Signup Button (Conditional and floated to the right) -->
+        {% if request.user.profile.main_character.character_name in memberlist %}
+            <div class="ms-auto">
+                <button type="submit" onclick="submitForm('Remove', '{% url 'opcalendar:event_member_remove' event.id %}');" class="btn btn-danger">
+                    <i class="fa-solid fa-trash"></i> {% trans "Remove my event signup" %}
+                </button>
+            </div>
+        {% endif %}
     </form>
-
-    <form method="post" action="{% url 'opcalendar:event_member_signup_maybe' event.id %}" class="d-inline" id="maybeForm">
-        {% csrf_token %}
-        <input type="hidden" name="status" value="M">
-        <button class="btn btn-warning me-md-2" type="submit"><i class="fa-solid fa-question"></i> {% trans "Maybe" %}</button>
-    </form>
-
-    <form method="post" action="{% url 'opcalendar:event_member_signup_declined' event.id %}" class="d-inline" id="declinedForm">
-        {% csrf_token %}
-        <input type="hidden" name="status" value="D">
-        <button class="btn btn-secondary me-md-2" type="submit"><i class="fa-solid fa-hand"></i> {% trans "Declined" %}</button>
-    </form>
-
-    {% if request.user.profile.main_character.character_name in memberlist %}
-        <form method="post" action="{% url 'opcalendar:event_member_remove' event.id %}" class="d-inline" id="removeForm">
-            {% csrf_token %}
-            <button class="btn btn-danger me-md-2" type="submit"><i class="fa-solid fa-trash"></i> {% trans "Remove my event signup" %}</button>
-        </form>
-    {% endif %}
-
-    <input type="text" name="comment" class="ml-auto comment-input" placeholder="{% trans 'Optional comment' %}" maxlength="100" form="attendingForm">
 </div>
+
+<script>
+function submitForm(status, action) {
+    var form = document.getElementById('responseForm');
+    form.action = action;
+    document.getElementById('statusField').value = status;
+}
+</script>
