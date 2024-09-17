@@ -28,7 +28,7 @@
         {% if request.user.profile.main_character.character_name in memberlist %}
             <div class="ms-auto">
                 <button type="submit" onclick="submitForm('Remove', '{% url 'opcalendar:event_member_remove' event.id %}');" class="btn btn-danger">
-                    <i class="fa-solid fa-trash"></i> {% trans "Remove my event signup" %}
+                    <i class="fa-solid fa-trash"></i> {% trans "Remove signup" %}
                 </button>
             </div>
         {% endif %}
