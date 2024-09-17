@@ -18,36 +18,44 @@ logger = get_extension_logger(__name__)
 class EventForm(ModelForm):
     class Meta:
         model = Event
-        # datetime-local is a HTML5 input type, format to make date time show on fields
         exclude = ["user", "eve_character", "created_date", "external"]
 
     def __init__(self, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
 
-        self.fields["start_time"].input_formats = ("%Y-%m-%dT%H:%M",)
-        self.fields["end_time"].input_formats = ("%Y-%m-%dT%H:%M",)
+        # Define the date format
+        date_format = "%Y-%m-%dT%H:%M"
+        self.fields["start_time"].input_formats = (date_format,)
+        self.fields["end_time"].input_formats = (date_format,)
+
+        # Set autocomplete attribute to "off" for date fields
+        self.fields["start_time"].widget.attrs.update({"autocomplete": "off"})
+        self.fields["end_time"].widget.attrs.update({"autocomplete": "off"})
+
+        # Setup querysets and requirements for other fields
         self.fields["host"].queryset = EventHost.objects.filter(external=False)
         self.fields["event_visibility"].required = True
         self.fields["event_visibility"].queryset = EventVisibility.objects.filter(
             is_visible=True, is_active=True
         )
+
+        # Setting default values for event_visibility and host
         try:
             self.initial["event_visibility"] = EventVisibility.objects.get(
                 is_default=True
             )
-        except Exception:
+        except EventVisibility.DoesNotExist:
             logger.debug("Form defaults: No default visibility set")
 
         try:
             self.initial["host"] = EventHost.objects.get(is_default=True)
-        except Exception:
+        except EventHost.DoesNotExist:
             logger.debug("Form defaults: No default host set")
 
 
 class EventEditForm(ModelForm):
     class Meta:
         model = Event
-        # datetime-local is a HTML5 input type, format to make date time show on fields
         exclude = [
             "user",
             "eve_character",
@@ -60,8 +68,16 @@ class EventEditForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(EventEditForm, self).__init__(*args, **kwargs)
 
-        self.fields["start_time"].input_formats = ("%Y-%m-%dT%H:%M",)
-        self.fields["end_time"].input_formats = ("%Y-%m-%dT%H:%M",)
+        # Define the date format
+        date_format = "%Y-%m-%dT%H:%M"
+        self.fields["start_time"].input_formats = (date_format,)
+        self.fields["end_time"].input_formats = (date_format,)
+
+        # Set autocomplete attribute to "off" for date fields
+        self.fields["start_time"].widget.attrs.update({"autocomplete": "off"})
+        self.fields["end_time"].widget.attrs.update({"autocomplete": "off"})
+
+        # Setup querysets and requirements for other fields
         self.fields["host"].queryset = EventHost.objects.filter(external=False)
         self.fields["event_visibility"].required = True
         self.fields["event_visibility"].queryset = EventVisibility.objects.filter(
