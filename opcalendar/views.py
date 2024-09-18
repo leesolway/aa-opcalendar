@@ -121,21 +121,6 @@ def get_date(req_day):
     return datetime.today()
 
 
-def prev_month(d):
-    first = d.replace(day=1)
-    prev_month = first - timedelta(days=1)
-    month = "month=" + str(prev_month.year) + "-" + str(prev_month.month)
-    return month
-
-
-def next_month(d):
-    days_in_month = calendar.monthrange(d.year, d.month)[1]
-    last = d.replace(day=days_in_month)
-    next_month = last + timedelta(days=1)
-    month = "month=" + str(next_month.year) + "-" + str(next_month.month)
-    return month
-
-
 def event_member_signup_attending(request, event_id):
     return handle_event_member_signup(request, event_id, EventMember.Status.ATTENDING)
 
@@ -194,8 +179,6 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context["category"] = EventCategory.objects.all()
         context["visibility"] = EventVisibility.objects.all()
         context["calendar"] = mark_safe(html_cal)
-        context["prev_month"] = prev_month(d)
-        context["next_month"] = next_month(d)
         context["all_events_per_month"] = all_events_per_month
         context["user_settings"] = user_settings
         context["OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME"] = (

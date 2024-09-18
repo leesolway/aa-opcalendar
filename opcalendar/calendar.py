@@ -1,10 +1,11 @@
-from calendar import HTMLCalendar
+from calendar import HTMLCalendar, month_name
 from datetime import date, datetime
 from itertools import chain
 
 from allianceauth.services.hooks import get_extension_logger
 from django.db.models import F, Q
 from django.utils import timezone
+from django.urls import reverse
 
 from .app_settings import (
     OPCALENDAR_DISPLAY_MOONMINING,
@@ -25,10 +26,14 @@ logger = get_extension_logger(__name__)
 
 
 class Calendar(HTMLCalendar):
-    def __init__(self, year=None, month=None, user=None):
+    def __init__(
+        self, year=None, month=None, user=None, prev_month=None, next_month=None
+    ):
         self.year = year
         self.month = month
         self.user = user
+        self.prev_month = prev_month
+        self.next_month = next_month
         super(Calendar, self).__init__()
 
     def formatday(
@@ -186,6 +191,47 @@ class Calendar(HTMLCalendar):
             week += day_html
             all_events.extend(day_events)
         return f"<tr> {week} </tr>", all_events
+
+    def formatmonthname(self, theyear, themonth, withyear=True):
+        """
+        Return a month name as a table row with Previous and Next buttons.
+        """
+        # Calculate previous and next months and years
+        prev_month = themonth - 1 if themonth > 1 else 12
+        prev_year = theyear if themonth > 1 else theyear - 1
+        next_month = themonth + 1 if themonth < 12 else 1
+        next_year = theyear if themonth < 12 else theyear + 1
+
+        # Format the month parameter as YYYY-M
+        prev_month_param = f"{prev_year}-{prev_month}"
+        next_month_param = f"{next_year}-{next_month}"
+
+        # Generate the URLs for previous and next months using Django's reverse function
+        prev_url = f"{reverse('opcalendar:calendar')}?month={prev_month_param}"
+        next_url = f"{reverse('opcalendar:calendar')}?month={next_month_param}"
+
+        # Format the month name with or without the year
+        if withyear:
+            s = f"{month_name[themonth]} {theyear}"
+        else:
+            s = f"{month_name[themonth]}"
+
+        # Return the HTML with Bootstrap 5 aligned buttons and month name
+        return f"""
+        <tr>
+            <th colspan="7" class="{self.cssclass_month_head}">
+                <div class="d-flex justify-content-start align-items-center">
+                    <a class="btn btn-info me-2" href="{prev_url}">
+                        <i class="fas fa-backward"></i> Previous
+                    </a>
+                    <a class="btn btn-info me-2" href="{next_url}">
+                        Next <i class="fas fa-forward"></i>
+                    </a>
+                    <span class="ms-3"><h5 class="mb-0">{s}</h5></span>
+                </div>
+            </th>
+        </tr>
+        """
 
     def formatmonth(self, withyear=True):
         events = (

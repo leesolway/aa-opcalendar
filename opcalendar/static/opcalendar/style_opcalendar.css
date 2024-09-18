@@ -7,7 +7,7 @@
 }
 
 .aa-opcalendar .calendar {
-    width: 98%;
+    width: 100%;
     margin: auto;
     font-size: 13px;
     table-layout: fixed;
@@ -78,7 +78,7 @@
     font-weight: bold;
 }
 .aa-opcalendar .calendar tr, .calendar td {
-  border: 1px solid #32394e;
+  border: 1px solid var(--bs-card-border-color);
 }
 
 .aa-opcalendar .calendar th {
@@ -97,7 +97,7 @@
 
 .aa-opcalendar .month {
   font-size: 25px;
-  background: #32394e;
+  background: var(--bs-card-cap-bg);
   color: white;
 }
 
