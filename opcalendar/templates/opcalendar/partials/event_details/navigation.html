@@ -14,7 +14,7 @@
             </form>
             <form method="post" action="{% url 'opcalendar:remove_event' event.id %}" class="d-inline">
                 {% csrf_token %}
-                <button class="btn btn-danger" type="submit"><i class="fas fa-trash"></i> {% trans "Remove" %}</button>
+                <button class="btn btn-danger" type="submit"><i class="fas fa-trash"></i> {% trans "Delete Event" %}</button>
             </form>
         {% endif %}
     {% endif %}
