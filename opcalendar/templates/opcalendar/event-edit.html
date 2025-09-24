@@ -6,20 +6,26 @@
 
 {% block page_title %}{% trans "Create Operation" %}{% endblock page_title %}
 {% block extra_css %}
+    {{ block.super }}
     {% include 'bundles/jquery-datetimepicker-css.html' %}
 {% endblock extra_css %}
 
 {% block content %}
-<div class="card">
-      <div class="card-header">{% trans "Edit Event" %}</div>
-      <div class="card-body">
-            <form class="form-signin" role="form" action="" method="POST">
-                {% csrf_token %}
-                {% bootstrap_form form %}
-                <br/>
-                <button class="btn btn-lg btn-primary btn-block" type="submit">{% trans "Edit Event" %}</button>
-            </form>
-      </div>
+<div class="aa-opcalendar">
+    <div class="card">
+          <div class="card-header">{% trans "Edit Event" %}</div>
+          <div class="card-body">
+                <div class="mb-2">
+                    {% trans "Current Timezone:" %} <strong class="label label-info text-left">{{ active_tz|default:"UTC" }}</strong>
+                </div>
+                <form class="form-signin" role="form" action="" method="POST">
+                    {% csrf_token %}
+                    {% bootstrap_form form %}
+                    <br/>
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">{% trans "Edit Event" %}</button>
+                </form>
+          </div>
+    </div>
 </div>
 
 {% endblock content %}

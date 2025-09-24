@@ -22,6 +22,8 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView
 from django_ical.views import ICalFeed
 from esi.decorators import token_required
+from zoneinfo import ZoneInfo
+from django.utils import timezone
 
 from opcalendar.models import (
     Event,
@@ -200,7 +202,23 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context["calendar"] = mark_safe(html_cal)
         context["all_events_per_month"] = all_events_per_month
         context["user_settings"] = user_settings
+        # Add active tz banner data
+        try:
+            now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
+            offset = now_utc.astimezone(ZoneInfo(active_tz)).utcoffset()
+            if offset is not None:
+                total_minutes = int(offset.total_seconds() // 60)
+                sign = "+" if total_minutes >= 0 else "-"
+                total_minutes = abs(total_minutes)
+                hours = total_minutes // 60
+                minutes = total_minutes % 60
+                active_tz_offset = f"UTC{sign}{hours:02d}:{minutes:02d}"
+            else:
+                active_tz_offset = "UTC±00:00"
+        except Exception:
+            active_tz_offset = "UTC±00:00"
         context["active_tz"] = active_tz
+        context["active_tz_offset"] = active_tz_offset
         context["OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME"] = (
             OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME
         )
@@ -212,6 +230,14 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 @permission_required("opcalendar.create_event")
 def create_event(request):
     form = EventForm(request.POST or None)
+    # Determine user's active timezone (defaults to UTC)
+    try:
+        user_settings = UserSettings.objects.get(user=request.user)
+        active_tz_name = user_settings.timezone or "UTC"
+    except UserSettings.DoesNotExist:
+        active_tz_name = "UTC"
+    active_tz = ZoneInfo(active_tz_name)
+
     if request.POST and form.is_valid():
         event_count = 0
 
@@ -223,12 +249,16 @@ def create_event(request):
         doctrine = form.cleaned_data["doctrine"]
         formup_system = form.cleaned_data["formup_system"]
         description = form.cleaned_data["description"]
-        start_time = form.cleaned_data["start_time"]
-        end_time = form.cleaned_data["end_time"]
+        start_time_local = form.cleaned_data["start_time"]  # naive, interpret as user's tz
+        end_time_local = form.cleaned_data["end_time"]      # naive, interpret as user's tz
         repeat_event = form.cleaned_data["repeat_event"]
         repeat_times = form.cleaned_data["repeat_times"]
         fc = form.cleaned_data["fc"]
         event_visibility = form.cleaned_data["event_visibility"]
+
+        # Convert local naive to aware UTC
+        start_time_utc = start_time_local.replace(tzinfo=active_tz).astimezone(timezone.utc)
+        end_time_utc = end_time_local.replace(tzinfo=active_tz).astimezone(timezone.utc)
 
         # Add original event to objects list
         event = Event(
@@ -239,8 +269,8 @@ def create_event(request):
             doctrine=doctrine,
             formup_system=formup_system,
             description=description,
-            start_time=start_time,
-            end_time=end_time,
+            start_time=start_time_utc,
+            end_time=end_time_utc,
             repeat_event=repeat_event,
             repeat_times=repeat_times,
             eve_character=character,
@@ -256,20 +286,23 @@ def create_event(request):
         # If we have a repeating event add event to object list multiple times
         if repeat_event:
             logger.debug("Event repeat %s for %s times" % (repeat_event, repeat_times))
+            start_local = start_time_local
+            end_local = end_time_local
             for repeat in range(repeat_times):
                 if repeat_event == "DD":
-                    start_time += relativedelta(days=1)
-                    end_time += relativedelta(days=1)
+                    start_local += relativedelta(days=1)
+                    end_local += relativedelta(days=1)
                 if repeat_event == "WE":
-                    start_time += relativedelta(weeks=1)
-                    end_time += relativedelta(weeks=1)
+                    start_local += relativedelta(weeks=1)
+                    end_local += relativedelta(weeks=1)
                 if repeat_event == "MM":
-                    start_time += relativedelta(months=1)
-                    end_time += relativedelta(months=1)
+                    start_local += relativedelta(months=1)
+                    end_local += relativedelta(months=1)
                 if repeat_event == "YY":
-                    start_time += relativedelta(years=1)
-                    end_time += relativedelta(years=1)
+                    start_local += relativedelta(years=1)
+                    end_local += relativedelta(years=1)
 
+                # Convert each occurrence from local tz to UTC when saving
                 event = Event(
                     user=request.user,
                     operation_type=operation_type,
@@ -278,8 +311,8 @@ def create_event(request):
                     doctrine=doctrine,
                     formup_system=formup_system,
                     description=description,
-                    start_time=start_time,
-                    end_time=end_time,
+                    start_time=start_local.replace(tzinfo=active_tz).astimezone(timezone.utc),
+                    end_time=end_local.replace(tzinfo=active_tz).astimezone(timezone.utc),
                     repeat_event=repeat_event,
                     repeat_times=repeat_times,
                     eve_character=character,
@@ -297,25 +330,51 @@ def create_event(request):
         if event_count == 0:
             messages.success(
                 request,
-                ("Event %(opname)s created for %(date)s.")
-                % {"opname": title, "date": start_time.strftime("%Y-%m-%d %H:%M")},
+                ("Event %(opname)s created for %(date)s (%(tz)s).")
+                % {
+                    "opname": title,
+                    "date": start_time_local.strftime("%Y-%m-%d %H:%M"),
+                    "tz": active_tz_name,
+                },
             )
         else:
             messages.success(
                 request,
                 (
-                    "Event %(opname)s created for %(date)s. %(event_count)s duplicated events created."
+                    "Event %(opname)s created for %(date)s (%(tz)s). %(event_count)s duplicated events created."
                 )
                 % {
                     "opname": title,
-                    "date": start_time.strftime("%Y-%m-%d %H:%M"),
+                    "date": start_time_local.strftime("%Y-%m-%d %H:%M"),
+                    "tz": active_tz_name,
                     "event_count": event_count,
                 },
             )
 
         return HttpResponseRedirect(reverse("opcalendar:calendar"))
 
-    return render(request, "opcalendar/event-add.html", {"form": form})
+    # Pass active timezone to template for hinting
+    # Build an offset label like UTC+02:00
+    try:
+        now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
+        offset = now_utc.astimezone(active_tz).utcoffset()
+        if offset is not None:
+            total_minutes = int(offset.total_seconds() // 60)
+            sign = "+" if total_minutes >= 0 else "-"
+            total_minutes = abs(total_minutes)
+            hours = total_minutes // 60
+            minutes = total_minutes % 60
+            active_tz_offset = f"UTC{sign}{hours:02d}:{minutes:02d}"
+        else:
+            active_tz_offset = "UTC±00:00"
+    except Exception:
+        active_tz_offset = None
+
+    return render(
+        request,
+        "opcalendar/event-add.html",
+        {"form": form, "active_tz": active_tz_name, "active_tz_offset": active_tz_offset},
+    )
 
 
 def get_category(request):
@@ -354,7 +413,34 @@ def event_details(request, event_id):
         # Create a list of character names (sorted by status and name)
         memberlist = [member.character.character_name for member in eventmember]
 
-        context = {"event": event, "eventmember": eventmember, "memberlist": memberlist}
+        # Active TZ banner data
+        try:
+            user_settings = UserSettings.objects.get(user=request.user)
+            tz_name = user_settings.timezone or "UTC"
+        except UserSettings.DoesNotExist:
+            tz_name = "UTC"
+        try:
+            now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
+            offset = now_utc.astimezone(ZoneInfo(tz_name)).utcoffset()
+            if offset is not None:
+                total_minutes = int(offset.total_seconds() // 60)
+                sign = "+" if total_minutes >= 0 else "-"
+                total_minutes = abs(total_minutes)
+                hours = total_minutes // 60
+                minutes = total_minutes % 60
+                tz_offset = f"UTC{sign}{hours:02d}:{minutes:02d}"
+            else:
+                tz_offset = "UTC±00:00"
+        except Exception:
+            tz_offset = "UTC±00:00"
+
+        context = {
+            "event": event,
+            "eventmember": eventmember,
+            "memberlist": memberlist,
+            "active_tz": tz_name,
+            "active_tz_offset": tz_offset,
+        }
 
         return render(request, "opcalendar/event-details.html", context)
 
@@ -370,6 +456,14 @@ def EventEdit(request, event_id):
     )
     event = get_object_or_404(Event, id=event_id)
 
+    # Determine user's active timezone (defaults to UTC)
+    try:
+        user_settings = UserSettings.objects.get(user=request.user)
+        active_tz_name = user_settings.timezone or "UTC"
+    except UserSettings.DoesNotExist:
+        active_tz_name = "UTC"
+    active_tz = ZoneInfo(active_tz_name)
+
     if request.method == "POST":
         form = EventEditForm(request.POST)
         logger.debug(
@@ -377,9 +471,21 @@ def EventEdit(request, event_id):
             % form.is_valid()
         )
         if form.is_valid():
-            form = EventEditForm(request.POST, instance=event)
+            # Update fields manually to convert local naive to UTC-aware
+            event.operation_type = form.cleaned_data["operation_type"]
+            event.title = form.cleaned_data["title"]
+            event.host = form.cleaned_data["host"]
+            event.doctrine = form.cleaned_data["doctrine"]
+            event.formup_system = form.cleaned_data["formup_system"]
+            event.description = form.cleaned_data["description"]
+            start_time_local = form.cleaned_data["start_time"]
+            end_time_local = form.cleaned_data["end_time"]
+            event.start_time = start_time_local.replace(tzinfo=active_tz).astimezone(timezone.utc)
+            event.end_time = end_time_local.replace(tzinfo=active_tz).astimezone(timezone.utc)
+            event.fc = form.cleaned_data["fc"]
+            event.event_visibility = form.cleaned_data["event_visibility"]
 
-            form.save()
+            event.save()
 
             logger.info("User %s updating optimer id %s " % (request.user, event_id))
 
@@ -390,9 +496,34 @@ def EventEdit(request, event_id):
             url = reverse("opcalendar:event-detail", kwargs={"event_id": event.id})
             return HttpResponseRedirect(url)
     else:
-        form = EventEditForm(instance=event)
+        # When showing existing values, convert stored UTC to user's local tz for initial display
+        initial = {
+            "start_time": event.start_time.astimezone(ZoneInfo(active_tz_name)).replace(tzinfo=None),
+            "end_time": event.end_time.astimezone(ZoneInfo(active_tz_name)).replace(tzinfo=None),
+        }
+        form = EventEditForm(instance=event, initial=initial)
 
-    return render(request, "opcalendar/event-edit.html", context={"form": form})
+    # Build an offset label like UTC+02:00
+    try:
+        now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
+        offset = now_utc.astimezone(active_tz).utcoffset()
+        if offset is not None:
+            total_minutes = int(offset.total_seconds() // 60)
+            sign = "+" if total_minutes >= 0 else "-"
+            total_minutes = abs(total_minutes)
+            hours = total_minutes // 60
+            minutes = total_minutes % 60
+            active_tz_offset = f"UTC{sign}{hours:02d}:{minutes:02d}"
+        else:
+            active_tz_offset = "UTC±00:00"
+    except Exception:
+        active_tz_offset = None
+
+    return render(
+        request,
+        "opcalendar/event-edit.html",
+        context={"form": form, "active_tz": active_tz_name, "active_tz_offset": active_tz_offset},
+    )
 
 
 @login_required
@@ -400,7 +531,28 @@ def EventEdit(request, event_id):
 def ingame_event_details(request, event_id):
     event = IngameEvents.objects.get(event_id=event_id)
 
-    context = {"event": event}
+    # Active TZ banner data
+    try:
+        user_settings = UserSettings.objects.get(user=request.user)
+        tz_name = user_settings.timezone or "UTC"
+    except UserSettings.DoesNotExist:
+        tz_name = "UTC"
+    try:
+        now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
+        offset = now_utc.astimezone(ZoneInfo(tz_name)).utcoffset()
+        if offset is not None:
+            total_minutes = int(offset.total_seconds() // 60)
+            sign = "+" if total_minutes >= 0 else "-"
+            total_minutes = abs(total_minutes)
+            hours = total_minutes // 60
+            minutes = total_minutes % 60
+            tz_offset = f"UTC{sign}{hours:02d}:{minutes:02d}"
+        else:
+            tz_offset = "UTC±00:00"
+    except Exception:
+        tz_offset = "UTC±00:00"
+
+    context = {"event": event, "active_tz": tz_name, "active_tz_offset": tz_offset}
 
     if request.user.has_perm("opcalendar.view_ingame"):
         return render(request, "opcalendar/ingame-event-details.html", context)
@@ -582,4 +734,28 @@ def user_settings_view(request):
     else:
         form = UserSettingsForm(instance=user_settings)
 
-    return render(request, "opcalendar/user_settings.html", {"form": form})
+    # Active TZ banner data
+    try:
+        tz_name = user_settings.timezone or "UTC"
+    except Exception:
+        tz_name = "UTC"
+    try:
+        now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
+        offset = now_utc.astimezone(ZoneInfo(tz_name)).utcoffset()
+        if offset is not None:
+            total_minutes = int(offset.total_seconds() // 60)
+            sign = "+" if total_minutes >= 0 else "-"
+            total_minutes = abs(total_minutes)
+            hours = total_minutes // 60
+            minutes = total_minutes % 60
+            tz_offset = f"UTC{sign}{hours:02d}:{minutes:02d}"
+        else:
+            tz_offset = "UTC±00:00"
+    except Exception:
+        tz_offset = "UTC±00:00"
+
+    return render(
+        request,
+        "opcalendar/user_settings.html",
+        {"form": form, "active_tz": tz_name, "active_tz_offset": tz_offset},
+    )
