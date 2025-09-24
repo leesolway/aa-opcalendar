@@ -809,9 +809,13 @@ class UserSettings(models.Model):
         verbose_name=_("Discord Notifications"),
     )
 
-    use_local_times = models.BooleanField(
-        default=True,
-        verbose_name=_("Use Local Times"),
+    # Deprecated: previously controlled whether to show browser local time.
+    # We now persist a user-selected timezone and always render in that timezone.
+    # use_local_times = models.BooleanField(default=True, verbose_name=_("Use Local Times"))
+    timezone = models.CharField(
+        max_length=64,
+        default="UTC",
+        verbose_name=_("Timezone"),
     )
 
     class Meta:

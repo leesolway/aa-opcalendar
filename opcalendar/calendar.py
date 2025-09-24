@@ -4,8 +4,8 @@ from itertools import chain
 
 from allianceauth.services.hooks import get_extension_logger
 from django.db.models import F, Q
-from django.utils import timezone
 from django.urls import reverse
+from django.utils import timezone
 
 from .app_settings import (
     OPCALENDAR_DISPLAY_MOONMINING,
@@ -27,13 +27,23 @@ logger = get_extension_logger(__name__)
 
 class Calendar(HTMLCalendar):
     def __init__(
-        self, year=None, month=None, user=None, prev_month=None, next_month=None
+        self,
+        year=None,
+        month=None,
+        user=None,
+        prev_month=None,
+        next_month=None,
+        user_tz_name="UTC",
     ):
+        from zoneinfo import ZoneInfo
+
         self.year = year
         self.month = month
         self.user = user
         self.prev_month = prev_month
         self.next_month = next_month
+        self.active_tz = ZoneInfo(user_tz_name or "UTC")
+        self.local_today = datetime.now(self.active_tz).date()
         super(Calendar, self).__init__()
 
     def formatday(
@@ -41,14 +51,22 @@ class Calendar(HTMLCalendar):
     ):
         structuretimers_per_day = []
         moonmining_per_day = []
-        events_per_day = events.filter(start_time__day=day)
-        ingame_events_per_day = ingame_events.filter(event_start_date__day=day)
+
+        def is_day(dt):
+            return dt.astimezone(self.active_tz).day == day
+
+        events_per_day = [e for e in events if is_day(e.start_time)]
+        ingame_events_per_day = [e for e in ingame_events if is_day(e.event_start_date)]
 
         if structuretimers_active() and OPCALENDAR_DISPLAY_STRUCTURETIMERS:
-            structuretimers_per_day = structuretimer_events.filter(start_time__day=day)
+            structuretimers_per_day = [
+                e for e in structuretimer_events if is_day(e.start_time)
+            ]
 
         if moonmining_active() and OPCALENDAR_DISPLAY_MOONMINING:
-            moonmining_per_day = moonmining_events.filter(chunk_arrival_at__day=day)
+            moonmining_per_day = [
+                e for e in moonmining_events if is_day(e.chunk_arrival_at)
+            ]
 
         all_events_per_day = sorted(
             chain(
@@ -61,9 +79,11 @@ class Calendar(HTMLCalendar):
                 ((event, f"moon-{event.id}") for event in moonmining_per_day),
             ),
             key=lambda item: (
-                item[0].start_time
-                if hasattr(item[0], "start_time")
-                else item[0].chunk_arrival_at
+                (
+                    item[0].start_time
+                    if hasattr(item[0], "start_time")
+                    else item[0].chunk_arrival_at
+                ).astimezone(self.active_tz)
             ),
         )
 
@@ -108,9 +128,7 @@ class Calendar(HTMLCalendar):
                     if self.user.has_perm("moonmining.extractions_access"):
                         # Extract relevant details for the extraction event
                         refinery = event.refinery.name
-                        system = (
-                            event.refinery.moon.eve_moon.eve_planet.eve_solar_system.name
-                        )
+                        system = event.refinery.moon.eve_moon.eve_planet.eve_solar_system.name
                         structure = refinery.replace(system, "")
 
                         # Generate the display name with or without moon tags
@@ -141,9 +159,11 @@ class Calendar(HTMLCalendar):
                 elif type(event).__name__ in ["Event", "IngameEvents"]:
                     # Determine start time, title, and owner for the event
                     start_time = (
-                        event.start_time.strftime("%H:%M")
+                        event.start_time.astimezone(self.active_tz).strftime("%H:%M")
                         if hasattr(event, "start_time")
-                        else event.event_start_date.strftime("%H:%M")
+                        else event.event_start_date.astimezone(self.active_tz).strftime(
+                            "%H:%M"
+                        )
                     )
                     title = (
                         f"{event.operation_type.ticker} {event.title}"
@@ -168,7 +188,7 @@ class Calendar(HTMLCalendar):
                         f"</a>"
                     )
 
-            if date.today() == date(self.year, self.month, day):
+            if self.local_today == date(self.year, self.month, day):
                 return (
                     f"<td class='today'><div class='date'>{day}</div> {d}</td>",
                     standardized_events_per_day,
@@ -234,10 +254,23 @@ class Calendar(HTMLCalendar):
         """
 
     def formatmonth(self, withyear=True):
-        events = (
+        # Build local month window in the active timezone, then convert to UTC for DB filtering
+        if self.month == 12:
+            next_month_year, next_month = self.year + 1, 1
+        else:
+            next_month_year, next_month = self.year, self.month + 1
+
+        local_start = datetime(self.year, self.month, 1, 0, 0, tzinfo=self.active_tz)
+        local_end = datetime(
+            next_month_year, next_month, 1, 0, 0, tzinfo=self.active_tz
+        )
+        start_utc = local_start.astimezone(timezone.utc)
+        end_utc = local_end.astimezone(timezone.utc)
+
+        events_qs = (
             Event.objects.filter(
-                start_time__year=self.year,
-                start_time__month=self.month,
+                start_time__gte=start_utc,
+                start_time__lt=end_utc,
             )
             .filter(
                 Q(event_visibility__restricted_to_group__in=self.user.groups.all())
@@ -249,9 +282,9 @@ class Calendar(HTMLCalendar):
             )
         )
 
-        ingame_events = (
+        ingame_events_qs = (
             IngameEvents.objects.filter(
-                event_start_date__year=self.year, event_start_date__month=self.month
+                event_start_date__gte=start_utc, event_start_date__lt=end_utc
             )
             .annotate(start_time=F("event_start_date"), end_time=F("event_end_date"))
             .filter(
@@ -267,37 +300,40 @@ class Calendar(HTMLCalendar):
         )
 
         if structuretimers_active() and OPCALENDAR_DISPLAY_STRUCTURETIMERS:
-            structuretimer_events = (
+            structuretimer_events_qs = (
                 Timer.objects.all()
                 .visible_to_user(self.user)
                 .annotate(start_time=F("date"))
-                .filter(date__year=self.year, date__month=self.month)
+                .filter(date__gte=start_utc, date__lt=end_utc)
             )
         else:
-            structuretimer_events = Event.objects.none()
+            structuretimer_events_qs = Event.objects.none()
 
         if moonmining_active() and OPCALENDAR_DISPLAY_MOONMINING:
-            moonmining_events = (
+            moonmining_events_qs = (
                 Extraction.objects.all()
                 .annotate(start_time=F("chunk_arrival_at"))
-                .filter(
-                    chunk_arrival_at__year=self.year, chunk_arrival_at__month=self.month
-                )
+                .filter(chunk_arrival_at__gte=start_utc, chunk_arrival_at__lt=end_utc)
                 .exclude(status="CN")
             )
         else:
-            moonmining_events = Event.objects.none()
+            moonmining_events_qs = Event.objects.none()
+
+        events = list(events_qs)
+        ingame_events = list(ingame_events_qs)
+        structuretimer_events = list(structuretimer_events_qs)
+        moonmining_events = list(moonmining_events_qs)
 
         logger.debug(
             "Returning %s extractions, display setting is %s. List is: %s"
             % (
-                moonmining_events.count(),
+                len(moonmining_events),
                 OPCALENDAR_DISPLAY_MOONMINING,
                 moonmining_events,
             )
         )
 
-        logger.debug("Returning %s ingame events" % ingame_events.count())
+        logger.debug("Returning %s ingame events" % len(ingame_events))
 
         cal = '<table class="calendar">\n'
         cal += f"{self.formatmonthname(self.year, self.month, withyear=withyear)}\n"

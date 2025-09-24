@@ -190,5 +190,5 @@ class EventMemberAdmin(admin.ModelAdmin):
 
 @admin.register(UserSettings)
 class UserSettingsAdmin(admin.ModelAdmin):
-    list_display = ("user", "disable_discord_notifications", "use_local_times")
+    list_display = ("user", "disable_discord_notifications", "timezone")
     search_fields = ("user__username",)

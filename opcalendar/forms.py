@@ -137,11 +137,98 @@ class EventCategoryAdminForm(forms.ModelForm):
         }
 
 
+# Helper to build timezone choices for a dropdown, with offsets in labels
+try:
+    from zoneinfo import ZoneInfo, available_timezones
+    from datetime import datetime, timezone as dt_timezone
+
+    def _fmt_offset(tzname: str) -> str:
+        now_utc = datetime.now(dt_timezone.utc)
+        try:
+            offset = now_utc.astimezone(ZoneInfo(tzname)).utcoffset()
+        except Exception:
+            offset = None
+        if offset is None:
+            return "UTC±00:00"
+        total_minutes = int(offset.total_seconds() // 60)
+        sign = "+" if total_minutes >= 0 else "-"
+        total_minutes = abs(total_minutes)
+        hours = total_minutes // 60
+        minutes = total_minutes % 60
+        return f"UTC{sign}{hours:02d}:{minutes:02d}"
+
+    def get_timezone_choices():
+        tzs = sorted(
+            [tz for tz in available_timezones() if "/" in tz and not tz.startswith("Etc/")]
+        )
+        # Put UTC at the top
+        tzs = ["UTC"] + [t for t in tzs if t != "UTC"]
+        choices = []
+        for tz in tzs:
+            if tz == "UTC":
+                label = "UTC - EVE Time"
+            else:
+                label = f"{tz} ({_fmt_offset(tz)})"
+            choices.append((tz, label))
+        return choices
+except Exception:  # pragma: no cover
+    from datetime import datetime, timezone as dt_timezone
+    try:
+        from zoneinfo import ZoneInfo
+    except Exception:
+        ZoneInfo = None  # type: ignore
+
+    def _fmt_offset_fallback(tzname: str) -> str:
+        if not ZoneInfo:
+            return "UTC±00:00"
+        now_utc = datetime.now(dt_timezone.utc)
+        try:
+            offset = now_utc.astimezone(ZoneInfo(tzname)).utcoffset()
+        except Exception:
+            offset = None
+        if offset is None:
+            return "UTC±00:00"
+        total_minutes = int(offset.total_seconds() // 60)
+        sign = "+" if total_minutes >= 0 else "-"
+        total_minutes = abs(total_minutes)
+        hours = total_minutes // 60
+        minutes = total_minutes % 60
+        return f"UTC{sign}{hours:02d}:{minutes:02d}"
+
+    def get_timezone_choices():
+        fallback = [
+            "UTC",
+            "America/New_York",
+            "America/Chicago",
+            "America/Denver",
+            "America/Los_Angeles",
+            "Europe/London",
+            "Europe/Berlin",
+            "Australia/Sydney",
+        ]
+        choices = []
+        for tz in fallback:
+            if tz == "UTC":
+                label = "UTC - EVE Time"
+            else:
+                label = f"{tz} ({_fmt_offset_fallback(tz)})"
+            choices.append((tz, label))
+        return choices
+
+
 class UserSettingsForm(forms.ModelForm):
     class Meta:
         model = UserSettings
-        fields = ["disable_discord_notifications", "use_local_times"]
+        fields = ["disable_discord_notifications", "timezone"]
         labels = {
             "disable_discord_notifications": "Disable all direct discord notifications",
-            "use_local_times": "Show all events in local time instead of EVE time",
+            "timezone": "Preferred timezone",
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["timezone"].widget = forms.Select(
+            choices=get_timezone_choices(), attrs={"class": "form-select"}
+        )
+        # Harmonize label text with other fields
+        self.fields["timezone"].label = "Timezone"

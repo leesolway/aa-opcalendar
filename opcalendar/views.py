@@ -166,11 +166,30 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         user = self.request.user
         context = super().get_context_data(**kwargs)
         d = get_date(self.request.GET.get("month", None))
-        cal = Calendar(d.year, d.month, user)
 
         user_settings, created = UserSettings.objects.get_or_create(
             user=user,
-            defaults={"disable_discord_notifications": False, "use_local_times": False},
+            defaults={"disable_discord_notifications": False},
+        )
+
+        # Allow tz override via GET (?tz=Area/City), and persist it.
+        tz_param = self.request.GET.get("tz")
+        if tz_param:
+            try:
+                # Basic validation to avoid garbage values in DB
+                if "/" in tz_param and len(tz_param) <= 64:
+                    user_settings.timezone = tz_param
+                    user_settings.save(update_fields=["timezone"])
+            except Exception:
+                pass
+
+        active_tz = getattr(user_settings, "timezone", None) or "UTC"
+
+        cal = Calendar(
+            d.year,
+            d.month,
+            user,
+            user_tz_name=active_tz,
         )
 
         html_cal, all_events_per_month = cal.formatmonth(withyear=True)
@@ -181,6 +200,7 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context["calendar"] = mark_safe(html_cal)
         context["all_events_per_month"] = all_events_per_month
         context["user_settings"] = user_settings
+        context["active_tz"] = active_tz
         context["OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME"] = (
             OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME
         )

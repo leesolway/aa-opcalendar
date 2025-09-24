@@ -57,32 +57,6 @@
         // Set initial values
         timedUpdate();
 
-        {% if user_settings.use_local_times %}
-        /**
-         * Set the local time info for the timer
-         * @param timer Timer information
-         */
-        const setLocalTime = (timer) => {
-            const element = document.getElementById("event-time-" + timer.id);
-            if (element) {
-                element.innerHTML = timer.targetDate.format("HH:mm");
-            }
-        };
-
-        /**
-         * Set all local time fields
-         */
-        const setAllLocalTimes = () => {
-            const l = timers.length;
-
-            for (let i = 0; i < l; ++i) {
-                setLocalTime(timers[i]);
-            }
-        };
-
-        // Set local time values
-        setAllLocalTimes();
-        {% endif %}
     </script>
     <script>
         let selectedEvents = []
