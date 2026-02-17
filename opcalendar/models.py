@@ -320,12 +320,14 @@ class EventImport(models.Model):
 class Event(models.Model):
     DAILY = "DD"
     WEEKLY = "WE"
+    FORTNIGHTLY = "FN"
     MONTHLY = "MM"
     YEARLY = "YY"
 
     REPEAT_INTERVAL = [
         (DAILY, _("Daily")),
         (WEEKLY, _("Weekly")),
+        (FORTNIGHTLY, _("Fortnightly")),
         (MONTHLY, _("Monthly")),
         (YEARLY, _("Yearly")),
     ]

@@ -295,6 +295,9 @@ def create_event(request):
                 if repeat_event == "WE":
                     start_local += relativedelta(weeks=1)
                     end_local += relativedelta(weeks=1)
+                if repeat_event == "FN":
+                    start_local += relativedelta(weeks=2)
+                    end_local += relativedelta(weeks=2)
                 if repeat_event == "MM":
                     start_local += relativedelta(months=1)
                     end_local += relativedelta(months=1)

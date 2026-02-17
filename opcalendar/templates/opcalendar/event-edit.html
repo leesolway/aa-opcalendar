@@ -12,19 +12,35 @@
 
 {% block content %}
 <div class="aa-opcalendar">
-    <div class="card">
-          <div class="card-header">{% trans "Edit Event" %}</div>
-          <div class="card-body">
-                <div class="mb-2">
-                    {% trans "Current Timezone:" %} <strong class="label label-info text-left">{{ active_tz|default:"UTC" }}</strong>
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-6">
+            <div class="card">
+                <div class="card-header">{% trans "Edit Event" %}</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        {% trans "Current Timezone:" %} <strong class="badge bg-info">{{ active_tz|default:"UTC" }}</strong>
+                    </div>
+                    <form role="form" action="" method="POST">
+                        {% csrf_token %}
+                        {% bootstrap_field form.title %}
+                        {% bootstrap_field form.operation_type %}
+                        {% bootstrap_field form.host %}
+                        {% bootstrap_field form.event_visibility %}
+                        <div class="row">
+                            <div class="col-md-6">{% bootstrap_field form.start_time %}</div>
+                            <div class="col-md-6">{% bootstrap_field form.end_time %}</div>
+                        </div>
+                        {% bootstrap_field form.fc %}
+                        {% bootstrap_field form.formup_system %}
+                        {% bootstrap_field form.doctrine %}
+                        {% bootstrap_field form.description %}
+                        <div class="d-grid mt-3">
+                            <button class="btn btn-lg btn-primary" type="submit">{% trans "Edit Event" %}</button>
+                        </div>
+                    </form>
                 </div>
-                <form class="form-signin" role="form" action="" method="POST">
-                    {% csrf_token %}
-                    {% bootstrap_form form %}
-                    <br/>
-                    <button class="btn btn-lg btn-primary btn-block" type="submit">{% trans "Edit Event" %}</button>
-                </form>
-          </div>
+            </div>
+        </div>
     </div>
 </div>
 

@@ -11,6 +11,8 @@
     margin: auto;
     font-size: 13px;
     table-layout: fixed;
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
   }
 
 .aa-opcalendar .nostyling{
@@ -20,7 +22,6 @@
 .aa-opcalendar .btn {
     outline: none;
     color: white;
-    /* background-color: transparent; */
     box-shadow: 0 0 0 0;
     margin-right:3px;
 }
@@ -29,9 +30,9 @@
 .aa-opcalendar .event {
     background-image: none;
     border-radius: 4px;
-    background: var(--bs-light);
+    background: color-mix(in srgb, var(--bs-body-color) 10%, var(--bs-body-bg));
     border: none;
-    color: black;
+    color: var(--bs-body-color);
     font-size: .75em;
     padding: 0 .75em;
     line-height: 2em;
@@ -52,11 +53,13 @@
 }
 
 .aa-opcalendar .event-structuretimer{
-  background: #ffe1c0;
+  background: rgba(255, 225, 192, 0.15);
+  border-left: 3px solid #f0ad4e;
 }
 
 .aa-opcalendar .event-moonmining{
-  background: #bcedff;
+  background: rgba(188, 237, 255, 0.15);
+  border-left: 3px solid #5bc0de;
 }
 
 .aa-opcalendar .event:before {
@@ -77,8 +80,8 @@
     color: #50a5f1;
     font-weight: bold;
 }
-.aa-opcalendar .calendar tr, .calendar td {
-  border: 1px solid var(--bs-card-border-color);
+.aa-opcalendar .calendar tr, .aa-opcalendar .calendar td {
+  border: 1px solid color-mix(in srgb, var(--bs-body-color) 20%, var(--bs-body-bg));
 }
 
 .aa-opcalendar .calendar th {
@@ -86,6 +89,7 @@
   text-align: center;
   font-size: 18px;
   width: 15%;
+  color: var(--bs-body-color);
 }
 
 .aa-opcalendar .calendar td {
@@ -97,13 +101,18 @@
 
 .aa-opcalendar .month {
   font-size: 25px;
-  background: var(--bs-card-cap-bg);
-  color: white;
+  background: color-mix(in srgb, var(--bs-body-color) 8%, var(--bs-body-bg));
+  color: var(--bs-body-color);
+}
+
+.aa-opcalendar .month h5 {
+  color: var(--bs-body-color);
 }
 
 .aa-opcalendar .date {
   font-size: 16px;
   padding: 5px;
+  color: var(--bs-body-color);
 }
 
 .aa-opcalendar ul {
@@ -112,7 +121,7 @@
 }
 
 .aa-opcalendar a {
-  color: #17a2b8;
+  color: var(--bs-link-color, #17a2b8);
 }
 .aa-opcalendar .left {
   float: left;
@@ -126,13 +135,27 @@
   margin: auto;
 }
 
-.aa-opcalendar .form input, .form select, .form textarea {
+.aa-opcalendar .form input, .aa-opcalendar .form select, .aa-opcalendar .form textarea {
   border-radius: 5px;
-  border: 1px solid #17a2b8;
+  border: 1px solid color-mix(in srgb, var(--bs-body-color) 25%, transparent);
   outline: none;
-  background: none;
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
   padding: 5px;
   width: 100%;
+  }
+
+.aa-opcalendar .form-control,
+.aa-opcalendar .form-select {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border-color: color-mix(in srgb, var(--bs-body-color) 25%, transparent);
+  }
+
+.aa-opcalendar .form-control:focus,
+.aa-opcalendar .form-select:focus {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
   }
 
 .aa-opcalendar .legend {
@@ -162,7 +185,7 @@
   margin-left: 5px;
 }
 
-/* Label classes to fallback for Bootstrap 3 */
+/* Badge/label styling (BS5 compatible) */
 .aa-opcalendar .label {
     display: inline;
     padding: .2em .6em .3em;
@@ -177,7 +200,7 @@
 }
 
 .aa-opcalendar .label-default {
-    background-color: #95a5a6;
+    background-color: var(--bs-secondary, #95a5a6);
 }
 
 .aa-opcalendar .label-default[href]:focus,
@@ -186,7 +209,7 @@
 }
 
 .aa-opcalendar .label-primary {
-    background-color: #2C3E50;
+    background-color: var(--bs-primary, #2C3E50);
 }
 
 .aa-opcalendar .label-primary[href]:focus,
@@ -195,7 +218,7 @@
 }
 
 .aa-opcalendar .label-success {
-    background-color: #5cb85c;
+    background-color: var(--bs-success, #5cb85c);
 }
 
 .aa-opcalendar .label-success[href]:focus,
@@ -204,7 +227,7 @@
 }
 
 .aa-opcalendar .label-info {
-    background-color: #5bc0de;
+    background-color: var(--bs-info, #5bc0de);
 }
 
 .aa-opcalendar .label-info[href]:focus,
@@ -213,7 +236,7 @@
 }
 
 .aa-opcalendar .label-warning {
-    background-color: #f0ad4e;
+    background-color: var(--bs-warning, #f0ad4e);
 }
 
 .aa-opcalendar .label-warning[href]:focus,
@@ -222,7 +245,7 @@
 }
 
 .aa-opcalendar .label-danger {
-    background-color: #d9534f;
+    background-color: var(--bs-danger, #d9534f);
 }
 
 .aa-opcalendar .label-danger[href]:focus,
