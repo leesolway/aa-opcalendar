@@ -22,13 +22,31 @@
                     </div>
                     <form role="form" action="" method="POST">
                         {% csrf_token %}
+                        <input type="hidden" name="time_mode" id="id_time_mode" value="local">
                         {% bootstrap_field form.title %}
                         {% bootstrap_field form.operation_type %}
                         {% bootstrap_field form.host %}
                         {% bootstrap_field form.event_visibility %}
+                        <div class="mb-3">
+                            <label class="form-label">{% trans "Time Input Mode" %}</label>
+                            <div class="btn-group w-100" role="group">
+                                <button type="button" class="btn btn-outline-primary active" id="btn-mode-local">
+                                    {% trans "Local Time" %} ({{ active_tz|default:"UTC" }})
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" id="btn-mode-eve">
+                                    {% trans "EVE Time" %} (UTC)
+                                </button>
+                            </div>
+                        </div>
                         <div class="row">
-                            <div class="col-md-6">{% bootstrap_field form.start_time %}</div>
-                            <div class="col-md-6">{% bootstrap_field form.end_time %}</div>
+                            <div class="col-md-6">
+                                {% bootstrap_field form.start_time %}
+                                <small class="text-muted" id="start-time-hint"></small>
+                            </div>
+                            <div class="col-md-6">
+                                {% bootstrap_field form.end_time %}
+                                <small class="text-muted" id="end-time-hint"></small>
+                            </div>
                         </div>
                         {% bootstrap_field form.fc %}
                         {% bootstrap_field form.formup_system %}
@@ -49,7 +67,87 @@
 {% block extra_javascript %}
   {% include 'bundles/jquery-datetimepicker-js.html' %}
   <script>
+    const ACTIVE_TZ_NAME = '{{ active_tz|default:"UTC" }}';
+    const ACTIVE_TZ_OFFSET_MINUTES = {{ active_tz_offset_minutes|default:"0" }};
+    let currentTimeMode = 'local';
+
+    function formatDateTime(date) {
+      let year = date.getFullYear();
+      let month = ('0' + (date.getMonth() + 1)).slice(-2);
+      let day = ('0' + date.getDate()).slice(-2);
+      let hours = ('0' + date.getHours()).slice(-2);
+      let minutes = ('0' + date.getMinutes()).slice(-2);
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
+    }
+
+    function parseInputDateTime(val) {
+      if (!val || val.length < 16) return null;
+      const parts = val.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/);
+      if (!parts) return null;
+      return new Date(+parts[1], +parts[2] - 1, +parts[3], +parts[4], +parts[5]);
+    }
+
+    function convertTime(inputDate, fromLocal) {
+      if (!inputDate) return null;
+      if (fromLocal) {
+        return new Date(inputDate.getTime() - ACTIVE_TZ_OFFSET_MINUTES * 60000);
+      } else {
+        return new Date(inputDate.getTime() + ACTIVE_TZ_OFFSET_MINUTES * 60000);
+      }
+    }
+
+    function updateHints() {
+      const startVal = $('#id_start_time').val();
+      const endVal = $('#id_end_time').val();
+      const startDate = parseInputDateTime(startVal);
+      const endDate = parseInputDateTime(endVal);
+
+      if (currentTimeMode === 'local') {
+        if (startDate) {
+          const utc = convertTime(startDate, true);
+          $('#start-time-hint').text('= ' + formatDateTime(utc) + ' EVE');
+        } else {
+          $('#start-time-hint').text('');
+        }
+        if (endDate) {
+          const utc = convertTime(endDate, true);
+          $('#end-time-hint').text('= ' + formatDateTime(utc) + ' EVE');
+        } else {
+          $('#end-time-hint').text('');
+        }
+      } else {
+        if (startDate) {
+          const local = convertTime(startDate, false);
+          $('#start-time-hint').text('= ' + formatDateTime(local) + ' ' + ACTIVE_TZ_NAME);
+        } else {
+          $('#start-time-hint').text('');
+        }
+        if (endDate) {
+          const local = convertTime(endDate, false);
+          $('#end-time-hint').text('= ' + formatDateTime(local) + ' ' + ACTIVE_TZ_NAME);
+        } else {
+          $('#end-time-hint').text('');
+        }
+      }
+    }
+
     $(document).ready(() => {
+      $('#btn-mode-local').on('click', function() {
+        currentTimeMode = 'local';
+        $('#id_time_mode').val('local');
+        $(this).addClass('active');
+        $('#btn-mode-eve').removeClass('active');
+        updateHints();
+      });
+
+      $('#btn-mode-eve').on('click', function() {
+        currentTimeMode = 'eve';
+        $('#id_time_mode').val('eve');
+        $(this).addClass('active');
+        $('#btn-mode-local').removeClass('active');
+        updateHints();
+      });
+
       $('#id_start_time').datetimepicker({
         setlocale: '{{ LANGUAGE_CODE }}',
         mask: true,
@@ -57,34 +155,27 @@
         minDate: 0,
         onChangeDateTime: function(currentDateTime) {
           if (currentDateTime) {
-            // Add 1 hour (60 minutes * 60 seconds * 1000 milliseconds)
-            let endDateTime = new Date(currentDateTime.getTime() + (60 * 60 * 1000)); 
-
-            // Ensure end time can't be before start time
+            let endDateTime = new Date(currentDateTime.getTime() + (60 * 60 * 1000));
             $('#id_end_time').datetimepicker('setOptions', { minDate: currentDateTime });
             $('#id_end_time').val(formatDateTime(endDateTime));
           }
+          updateHints();
         }
       });
-  
-      // Initialize the datetimepicker for end_time
+
       $('#id_end_time').datetimepicker({
         setlocale: '{{ LANGUAGE_CODE }}',
         mask: true,
         format: 'Y-m-d H:i',
-        minDate: 0
+        minDate: 0,
+        onChangeDateTime: function() {
+          updateHints();
+        }
       });
+
+      $('#id_start_time, #id_end_time').on('input change', updateHints);
+
+      updateHints();
     });
-  
-    // Helper function to format the Date object as 'Y-m-d H:i'
-    function formatDateTime(date) {
-      let year = date.getFullYear();
-      let month = ('0' + (date.getMonth() + 1)).slice(-2); // Months are 0-based, so add 1
-      let day = ('0' + date.getDate()).slice(-2);
-      let hours = ('0' + date.getHours()).slice(-2);
-      let minutes = ('0' + date.getMinutes()).slice(-2);
-      
-      return `${year}-${month}-${day} ${hours}:${minutes}`;
-    }
   </script>
 {% endblock %}

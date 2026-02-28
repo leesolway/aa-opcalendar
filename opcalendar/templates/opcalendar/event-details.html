@@ -12,16 +12,11 @@ Event Details
         {% include "opcalendar/partials/event_details/navigation.html" %}
     </div>
     <div class="card-body">
-        <h5 class="card-title">{{ event.title }}</h5>
-        <h6 class="card-subtitle mb-2 text-muted">
-            Created by: {{ event.eve_character }}<br>
-            {% trans "Current Eve Time:" %} <strong class="label label-info text-left" id="current-time"></strong>
-        </h6>
         {% include "opcalendar/partials/event_details/details.html" %}
     </div>
 </div>
 
-<div class="card" style="margin-top:10px;">
+<div class="card mt-2">
     <div class="card-header">
         {% include "opcalendar/partials/event_details/signups_navigation.html" %}
     </div>
@@ -30,9 +25,9 @@ Event Details
     </div>
 </div>
 
-<div class="card" style="margin-top:10px;">
+<div class="card mt-2">
     <div class="card-header">
-        Host Details
+        {% trans "Host Details" %}
     </div>
     <div class="card-body">
         {% include "opcalendar/partials/event_details/host.html" %}
@@ -44,29 +39,34 @@ Event Details
 {% include "bundles/timers-js.html" %}
 
 <script>
+    const OFFSET_MINUTES = {{ active_tz_offset_minutes|default:"0" }};
+
     const timers = [
         {
-            'id': {{ event.id }},
-            'targetDate': moment("{{ event.start_time | date:"c" }}"),
+            'id': '{{ event.id }}',
+            'utcDate': moment.utc("{{ event.start_time | date:"c" }}"),
+            'expired': false
+        },
+        {
+            'id': '{{ event.id }}_end',
+            'utcDate': moment.utc("{{ event.end_time | date:"c" }}"),
             'expired': false
         }
     ];
 
     /**
-     * Set the local time info for the timer
-     * @param timer Timer information
+     * Convert a UTC moment to the user's configured timezone and display it
      */
     const setLocalTime = (timer) => {
-        document.getElementById("localtime" + timer.id).innerHTML = timer.targetDate.format("ddd @ LT");
+        const el = document.getElementById("localtime" + timer.id);
+        if (el) {
+            const localTime = timer.utcDate.clone().add(OFFSET_MINUTES, 'minutes');
+            el.innerHTML = localTime.format("ddd YYYY-MM-DD HH:mm");
+        }
     };
 
-    /**
-     * Set all local time fields
-     */
     const setAllLocalTimes = () => {
-        const l = timers.length;
-
-        for (let i = 0; i < l; ++i) {
+        for (let i = 0; i < timers.length; ++i) {
             setLocalTime(timers[i]);
         }
     };
@@ -75,9 +75,16 @@ Event Details
         document.getElementById("current-time").innerHTML = getCurrentEveTimeString();
     };
 
+    const timedUpdate = () => {
+        updateClock();
+    };
 
     // Set initial values
     setAllLocalTimes();
+
+    // Start timed updates
+    setInterval(timedUpdate, 1000);
+    timedUpdate();
 
 </script>
 {% endblock extra_javascript %}

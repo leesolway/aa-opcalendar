@@ -1,48 +1,56 @@
 {% load i18n %}
 
-<table>
-<tr>
-    <td style="padding-right: 10px;"><b>{% trans "Community:" %}</b></td>
-    <td><span>{{ event.host.community|urlize }}</span></td>
-</tr>
-<tr>
-    <td style="padding-right: 10px;"><b>{% trans "Ingame channel:" %}</b></td>
-    <td><span>{{ event.host.ingame_channel|urlize }}</span></td>
-</tr>
-<tr>
-    <td style="padding-right: 10px;"><b>{% trans "Ingame mailing list:" %}</b></td>
-    <td><span>{{ event.host.ingame_mailing_list|urlize }}</span></td>
-</tr>
-<tr>
-    <td style="padding-right: 10px;"><b>{% trans "Fleet comms:" %}</b></td>
-    <td><span>{{ event.host.fleet_comms|urlize }}</span></td>
-</tr>
-<tr>
-    <td style="padding-right: 10px;"><b>{% trans "Fleet doctrines:" %}</b></td>
-    <td><span>{{ event.host.fleet_doctrines|urlize }}</span></td>
-</tr>
-<tr>
-    <td style="padding-right: 10px;"><b>{% trans "Website:" %}</b></td>
-    <td><span>{{ event.host.website|urlize }}</span></td>
-</tr>
-<tr>
-    <td style="padding-right: 10px;"><b>{% trans "Discord:" %}</b></td>
-    <td><span>{{ event.host.discord|urlize }}</span></td>
-</tr>
-<tr>
-    <td style="padding-right: 10px;"><b>{% trans "Twitch:" %}</b></td>
-    <td><span>{{ event.host.twitch|urlize }}</span></td>
-</tr>
-<tr>
-    <td style="padding-right: 10px;"><b>{% trans "Twitter:" %}</b></td>
-    <td><span>{{ event.host.twitter|urlize }}</span></td>
-</tr>
-<tr>
-    <td style="padding-right: 10px;"><b>{% trans "Youtube:" %}</b></td>
-    <td><span>{{ event.host.youtube|urlize }}</span></td>
-</tr>
-<tr>
-    <td style="padding-right: 10px;"><b>{% trans "Facebook:" %}</b></td>
-    <td><span>{{ event.host.facebook|urlize }}</span></td>
-</tr>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 150px;">{% trans "Field" %}</th>
+            <th>{% trans "Details" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><b>{% trans "Community:" %}</b></td>
+            <td>{{ event.host.community|urlize }}</td>
+        </tr>
+        <tr>
+            <td><b>{% trans "Ingame channel:" %}</b></td>
+            <td>{{ event.host.ingame_channel|urlize }}</td>
+        </tr>
+        <tr>
+            <td><b>{% trans "Mailing list:" %}</b></td>
+            <td>{{ event.host.ingame_mailing_list|urlize }}</td>
+        </tr>
+        <tr>
+            <td><b>{% trans "Fleet comms:" %}</b></td>
+            <td>{{ event.host.fleet_comms|urlize }}</td>
+        </tr>
+        <tr>
+            <td><b>{% trans "Fleet doctrines:" %}</b></td>
+            <td>{{ event.host.fleet_doctrines|urlize }}</td>
+        </tr>
+        <tr>
+            <td><b>{% trans "Website:" %}</b></td>
+            <td>{{ event.host.website|urlize }}</td>
+        </tr>
+        <tr>
+            <td><b>{% trans "Discord:" %}</b></td>
+            <td>{{ event.host.discord|urlize }}</td>
+        </tr>
+        <tr>
+            <td><b>{% trans "Twitch:" %}</b></td>
+            <td>{{ event.host.twitch|urlize }}</td>
+        </tr>
+        <tr>
+            <td><b>{% trans "Twitter:" %}</b></td>
+            <td>{{ event.host.twitter|urlize }}</td>
+        </tr>
+        <tr>
+            <td><b>{% trans "Youtube:" %}</b></td>
+            <td>{{ event.host.youtube|urlize }}</td>
+        </tr>
+        <tr>
+            <td><b>{% trans "Facebook:" %}</b></td>
+            <td>{{ event.host.facebook|urlize }}</td>
+        </tr>
+    </tbody>
 </table>

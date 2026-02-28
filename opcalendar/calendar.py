@@ -14,7 +14,7 @@ from .app_settings import (
     moonmining_active,
     structuretimers_active,
 )
-from .models import Event, IngameEvents
+from .models import Event, EventMember, IngameEvents
 
 if structuretimers_active():
     from structuretimers.models import Timer
@@ -176,12 +176,23 @@ class Calendar(HTMLCalendar):
                         else event.owner_name
                     )
 
+                    # Check if user has responded to this event
+                    signup_icon = ""
+                    if hasattr(self, 'user_signups') and type(event).__name__ == "Event":
+                        signup_status = self.user_signups.get(event.id)
+                        if signup_status == "A":
+                            signup_icon = '<i class="fas fa-check-circle text-success ms-1" title="Attending"></i>'
+                        elif signup_status == "M":
+                            signup_icon = '<i class="fas fa-question-circle text-warning ms-1" title="Maybe"></i>'
+                        elif signup_status == "D":
+                            signup_icon = '<i class="fas fa-times-circle text-danger ms-1" title="Declined"></i>'
+
                     # Generate the HTML for the Event or IngameEvents
                     d += (
                         f"<style>{event.get_event_styling}</style>"
                         f'<a class="nostyling" href="{event.get_html_url}">'
                         f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class} {event.external_tag}">'
-                        f'<span id="event-time-{unique_id}">{start_time}</span>'
+                        f'<span id="event-time-{unique_id}">{start_time}{signup_icon}</span>'
                         f"<span><b>{title}</b></span>"
                         f"<span><i>{owner}</i></span>"
                         f"</div>"
@@ -323,6 +334,17 @@ class Calendar(HTMLCalendar):
         ingame_events = list(ingame_events_qs)
         structuretimer_events = list(structuretimer_events_qs)
         moonmining_events = list(moonmining_events_qs)
+
+        # Pre-fetch user's signup statuses for all events this month
+        user_char = getattr(getattr(self.user, 'profile', None), 'main_character', None)
+        if user_char:
+            event_ids = [e.id for e in events]
+            signups = EventMember.objects.filter(
+                event_id__in=event_ids, character=user_char
+            ).values_list('event_id', 'status')
+            self.user_signups = dict(signups)
+        else:
+            self.user_signups = {}
 
         logger.debug(
             "Returning %s extractions, display setting is %s. List is: %s"

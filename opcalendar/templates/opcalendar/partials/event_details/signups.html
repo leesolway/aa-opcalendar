@@ -14,7 +14,7 @@
       {% for member in eventmember %}
       <tr role="row">
           <td>{{ forloop.counter }}</td>
-          <td>{{ member.character }}</td>
+          <td><img src="{{ member.character.portrait_url_32 }}" class="rounded-circle" width="32" height="32" alt="{{ member.character }}"> {{ member.character }}</td>
           <td>
             {% if member.status == "A" %}
               {% trans "Attending" %}
