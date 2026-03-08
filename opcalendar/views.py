@@ -468,6 +468,8 @@ def event_details(request, event_id):
             tz_offset = "UTC±00:00"
             tz_offset_minutes = 0
 
+        event_url = request.build_absolute_uri(event.get_absolute_url())
+
         context = {
             "event": event,
             "eventmember": eventmember,
@@ -475,6 +477,7 @@ def event_details(request, event_id):
             "active_tz": tz_name,
             "active_tz_offset": tz_offset,
             "active_tz_offset_minutes": tz_offset_minutes,
+            "event_url": event_url,
         }
 
         return render(request, "opcalendar/event-details.html", context)

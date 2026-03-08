@@ -33,6 +33,92 @@ Event Details
         {% include "opcalendar/partials/event_details/host.html" %}
     </div>
 </div>
+
+<div class="card mt-2">
+    <div class="card-header">
+        {% trans "Discord Timestamps" %}
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-3">{% trans "Click any timestamp code to copy it. Paste into Discord and it will display in each user's local timezone." %}</p>
+        <table class="table table-bordered table-sm" id="discord-timestamps">
+            <thead>
+                <tr>
+                    <th style="width: 140px;">{% trans "Style" %}</th>
+                    <th style="width: 280px;">{% trans "Discord Code" %}</th>
+                    <th>{% trans "Preview" %}</th>
+                    <th style="width: 60px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{% trans "Full Date & Time" %}</td>
+                    <td><code id="ts-F">&lt;t:{{ event.start_time|date:"U" }}:F&gt;</code></td>
+                    <td><span id="preview-F"></span></td>
+                    <td><button class="btn btn-sm btn-outline-secondary copy-ts" data-target="ts-F" title="Copy"><i class="fas fa-copy"></i></button></td>
+                </tr>
+                <tr>
+                    <td>{% trans "Short Date & Time" %}</td>
+                    <td><code id="ts-f">&lt;t:{{ event.start_time|date:"U" }}:f&gt;</code></td>
+                    <td><span id="preview-f"></span></td>
+                    <td><button class="btn btn-sm btn-outline-secondary copy-ts" data-target="ts-f" title="Copy"><i class="fas fa-copy"></i></button></td>
+                </tr>
+                <tr>
+                    <td>{% trans "Long Date" %}</td>
+                    <td><code id="ts-D">&lt;t:{{ event.start_time|date:"U" }}:D&gt;</code></td>
+                    <td><span id="preview-D"></span></td>
+                    <td><button class="btn btn-sm btn-outline-secondary copy-ts" data-target="ts-D" title="Copy"><i class="fas fa-copy"></i></button></td>
+                </tr>
+                <tr>
+                    <td>{% trans "Short Date" %}</td>
+                    <td><code id="ts-d">&lt;t:{{ event.start_time|date:"U" }}:d&gt;</code></td>
+                    <td><span id="preview-d"></span></td>
+                    <td><button class="btn btn-sm btn-outline-secondary copy-ts" data-target="ts-d" title="Copy"><i class="fas fa-copy"></i></button></td>
+                </tr>
+                <tr>
+                    <td>{% trans "Short Time" %}</td>
+                    <td><code id="ts-t">&lt;t:{{ event.start_time|date:"U" }}:t&gt;</code></td>
+                    <td><span id="preview-t"></span></td>
+                    <td><button class="btn btn-sm btn-outline-secondary copy-ts" data-target="ts-t" title="Copy"><i class="fas fa-copy"></i></button></td>
+                </tr>
+                <tr>
+                    <td>{% trans "Long Time" %}</td>
+                    <td><code id="ts-T">&lt;t:{{ event.start_time|date:"U" }}:T&gt;</code></td>
+                    <td><span id="preview-T"></span></td>
+                    <td><button class="btn btn-sm btn-outline-secondary copy-ts" data-target="ts-T" title="Copy"><i class="fas fa-copy"></i></button></td>
+                </tr>
+                <tr>
+                    <td>{% trans "Relative" %}</td>
+                    <td><code id="ts-R">&lt;t:{{ event.start_time|date:"U" }}:R&gt;</code></td>
+                    <td><span id="preview-R"></span></td>
+                    <td><button class="btn btn-sm btn-outline-secondary copy-ts" data-target="ts-R" title="Copy"><i class="fas fa-copy"></i></button></td>
+                </tr>
+                <tr>
+                    <td><b>{% trans "Discord Message" %}</b></td>
+                    <td colspan="2"><pre id="ts-msg" class="mb-0" style="white-space: pre-wrap; font-size: 0.85em;">**{{ event.title }}**
+
+**When:** &lt;t:{{ event.start_time|date:"U" }}:F&gt; (&lt;t:{{ event.start_time|date:"U" }}:R&gt;)
+**FC:** {{ event.fc }}
+**Formup:** {{ event.formup_system }}
+**Doctrine:** {{ event.doctrine }}
+
+{{ event_url }}</pre></td>
+                    <td><button class="btn btn-sm btn-outline-secondary copy-ts" data-target="ts-msg" title="Copy"><i class="fas fa-copy"></i></button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+    <div id="copy-toast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-check me-1"></i> {% trans "Copied to clipboard!" %}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 {% block extra_javascript %}
 {% include "bundles/moment-js.html" with locale=True %}
@@ -86,5 +172,81 @@ Event Details
     setInterval(timedUpdate, 1000);
     timedUpdate();
 
+</script>
+<script>
+    (function() {
+        const epoch = {{ event.start_time|date:"U" }};
+        const dt = new Date(epoch * 1000);
+
+        const pad = (n) => String(n).padStart(2, '0');
+
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December'];
+
+        const day = dayNames[dt.getDay()];
+        const date = pad(dt.getDate());
+        const month = monthNames[dt.getMonth()];
+        const year = dt.getFullYear();
+        const hours = pad(dt.getHours());
+        const minutes = pad(dt.getMinutes());
+        const seconds = pad(dt.getSeconds());
+
+        const previews = {
+            'F': `${day}, ${date} ${month} ${year} at ${hours}:${minutes}`,
+            'f': `${date} ${month} ${year} at ${hours}:${minutes}`,
+            'D': `${date} ${month} ${year}`,
+            'd': `${date}/${pad(dt.getMonth()+1)}/${year}`,
+            't': `${hours}:${minutes}`,
+            'T': `${hours}:${minutes}:${seconds}`,
+            'R': getRelativeTime(dt)
+        };
+
+        function getRelativeTime(target) {
+            const now = new Date();
+            const diffMs = target - now;
+            const absDiff = Math.abs(diffMs);
+            const seconds = Math.floor(absDiff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            let text;
+            if (seconds < 60) text = 'a few seconds';
+            else if (minutes < 60) text = minutes + ' minute' + (minutes !== 1 ? 's' : '');
+            else if (hours < 24) text = hours + ' hour' + (hours !== 1 ? 's' : '');
+            else text = days + ' day' + (days !== 1 ? 's' : '');
+
+            return diffMs < 0 ? text + ' ago' : 'in ' + text;
+        }
+
+        for (const [key, value] of Object.entries(previews)) {
+            const el = document.getElementById('preview-' + key);
+            if (el) el.textContent = value;
+        }
+
+        // Update relative time every second
+        setInterval(() => {
+            const el = document.getElementById('preview-R');
+            if (el) el.textContent = getRelativeTime(dt);
+        }, 1000);
+
+        // Copy to clipboard handlers
+        const toastEl = document.getElementById('copy-toast');
+        const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
+
+        document.querySelectorAll('.copy-ts').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const target = this.getAttribute('data-target');
+                const code = document.getElementById(target);
+                if (code) {
+                    const text = code.textContent;
+                    navigator.clipboard.writeText(text).then(() => {
+                        toast.show();
+                    });
+                }
+            });
+        });
+    })();
 </script>
 {% endblock extra_javascript %}
