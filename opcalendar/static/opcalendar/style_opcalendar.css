@@ -19,12 +19,6 @@
   text-decoration: none !important;
 }
 
-.aa-opcalendar .btn {
-    outline: none;
-    color: white;
-    box-shadow: 0 0 0 0;
-    margin-right:3px;
-}
 
 /* Updated event styles */
 .aa-opcalendar .event {
