@@ -317,6 +317,22 @@ class EventImport(models.Model):
         verbose_name_plural = "NPSI Event Imports"
 
 
+class EventQuerySet(models.QuerySet):
+    def visible_to_user(self, user):
+        from django.db.models import Q
+        return (
+            self.filter(
+                Q(event_visibility__restricted_to_group__in=user.groups.all())
+                | Q(event_visibility__restricted_to_group__isnull=True)
+            )
+            .filter(
+                Q(event_visibility__restricted_to_state=user.profile.state)
+                | Q(event_visibility__restricted_to_state__isnull=True)
+            )
+            .distinct()
+        )
+
+
 class Event(models.Model):
     DAILY = "DD"
     WEEKLY = "WE"
@@ -412,6 +428,8 @@ class Event(models.Model):
         on_delete=models.CASCADE,
         help_text=_("User who created the event"),
     )
+
+    objects = EventQuerySet.as_manager()
 
     def duration(self):
         return self.end_time - self.start_time

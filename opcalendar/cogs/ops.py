@@ -122,7 +122,6 @@ def _get_events(author, user_argument):
         embed.description = "Activate the [discord service]({}/services) to access this command.".format(
             url
         )
-        discord_active = False
 
         return embed
 
@@ -216,8 +215,6 @@ def _get_events(author, user_argument):
                     ),
                     inline=False,
                 )
-
-        discord_active = False
 
         return embed
 

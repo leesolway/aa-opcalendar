@@ -1,5 +1,4 @@
 # cal/views.py
-import calendar
 from datetime import date, datetime, timedelta
 
 from allianceauth.authentication.models import CharacterOwnership
@@ -17,7 +16,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView
 from django_ical.views import ICalFeed
@@ -45,6 +43,7 @@ from .app_settings import (
 )
 from .calendar import Calendar
 from .forms import CancelEventForm, EventEditForm, EventForm, PlaceholderEventForm, UserSettingsForm
+from .helpers import get_tz_offset_string
 from .utils import messages_plus
 
 logger = get_extension_logger(__name__)
@@ -203,21 +202,7 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context["calendar"] = mark_safe(html_cal)
         context["all_events_per_month"] = all_events_per_month
         context["user_settings"] = user_settings
-        # Add active tz banner data
-        try:
-            now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
-            offset = now_utc.astimezone(ZoneInfo(active_tz)).utcoffset()
-            if offset is not None:
-                total_minutes = int(offset.total_seconds() // 60)
-                sign = "+" if total_minutes >= 0 else "-"
-                total_minutes = abs(total_minutes)
-                hours = total_minutes // 60
-                minutes = total_minutes % 60
-                active_tz_offset = f"UTC{sign}{hours:02d}:{minutes:02d}"
-            else:
-                active_tz_offset = "UTC±00:00"
-        except Exception:
-            active_tz_offset = "UTC±00:00"
+        active_tz_offset = get_tz_offset_string(active_tz)
         context["active_tz"] = active_tz
         context["active_tz_offset"] = active_tz_offset
         context["OPCALENDAR_DISPLAY_MOONMINING_ARRIVAL_TIME"] = (
@@ -400,21 +385,7 @@ def create_event(request):
         return HttpResponseRedirect(reverse("opcalendar:calendar"))
 
     # Pass active timezone to template for hinting
-    # Build an offset label like UTC+02:00
-    try:
-        now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
-        offset = now_utc.astimezone(active_tz).utcoffset()
-        if offset is not None:
-            total_minutes = int(offset.total_seconds() // 60)
-            sign = "+" if total_minutes >= 0 else "-"
-            total_minutes = abs(total_minutes)
-            hours = total_minutes // 60
-            minutes = total_minutes % 60
-            active_tz_offset = f"UTC{sign}{hours:02d}:{minutes:02d}"
-        else:
-            active_tz_offset = "UTC±00:00"
-    except Exception:
-        active_tz_offset = None
+    active_tz_offset = get_tz_offset_string(active_tz_name)
 
     # Compute numeric offset in minutes for JS timezone conversion
     try:
@@ -452,17 +423,7 @@ def get_category(request):
 def event_details(request, event_id):
     try:
         # Get the event considering group and state visibility restrictions
-        event = (
-            Event.objects.filter(
-                Q(event_visibility__restricted_to_group__in=request.user.groups.all())
-                | Q(event_visibility__restricted_to_group__isnull=True),
-            )
-            .filter(
-                Q(event_visibility__restricted_to_state=request.user.profile.state)
-                | Q(event_visibility__restricted_to_state__isnull=True),
-            )
-            .get(id=event_id)
-        )
+        event = Event.objects.visible_to_user(request.user).get(id=event_id)
 
         # Filter and order the event members by status and character name
         eventmember = EventMember.objects.filter(event=event).order_by(
@@ -478,22 +439,12 @@ def event_details(request, event_id):
             tz_name = user_settings.timezone or "UTC"
         except UserSettings.DoesNotExist:
             tz_name = "UTC"
+        tz_offset = get_tz_offset_string(tz_name)
         try:
             now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
             offset = now_utc.astimezone(ZoneInfo(tz_name)).utcoffset()
-            if offset is not None:
-                total_minutes = int(offset.total_seconds() // 60)
-                sign = "+" if total_minutes >= 0 else "-"
-                abs_minutes = abs(total_minutes)
-                hours = abs_minutes // 60
-                minutes = abs_minutes % 60
-                tz_offset = f"UTC{sign}{hours:02d}:{minutes:02d}"
-                tz_offset_minutes = total_minutes
-            else:
-                tz_offset = "UTC±00:00"
-                tz_offset_minutes = 0
+            tz_offset_minutes = int(offset.total_seconds() // 60) if offset else 0
         except Exception:
-            tz_offset = "UTC±00:00"
             tz_offset_minutes = 0
 
         event_url = request.build_absolute_uri(event.get_absolute_url())
@@ -592,21 +543,7 @@ def EventEdit(request, event_id):
         }
         form = EventEditForm(instance=event, initial=initial)
 
-    # Build an offset label like UTC+02:00
-    try:
-        now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
-        offset = now_utc.astimezone(active_tz).utcoffset()
-        if offset is not None:
-            total_minutes = int(offset.total_seconds() // 60)
-            sign = "+" if total_minutes >= 0 else "-"
-            total_minutes = abs(total_minutes)
-            hours = total_minutes // 60
-            minutes = total_minutes % 60
-            active_tz_offset = f"UTC{sign}{hours:02d}:{minutes:02d}"
-        else:
-            active_tz_offset = "UTC±00:00"
-    except Exception:
-        active_tz_offset = None
+    active_tz_offset = get_tz_offset_string(active_tz_name)
 
     # Compute numeric offset in minutes for JS timezone conversion
     try:
@@ -639,20 +576,7 @@ def ingame_event_details(request, event_id):
         tz_name = user_settings.timezone or "UTC"
     except UserSettings.DoesNotExist:
         tz_name = "UTC"
-    try:
-        now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
-        offset = now_utc.astimezone(ZoneInfo(tz_name)).utcoffset()
-        if offset is not None:
-            total_minutes = int(offset.total_seconds() // 60)
-            sign = "+" if total_minutes >= 0 else "-"
-            total_minutes = abs(total_minutes)
-            hours = total_minutes // 60
-            minutes = total_minutes % 60
-            tz_offset = f"UTC{sign}{hours:02d}:{minutes:02d}"
-        else:
-            tz_offset = "UTC±00:00"
-    except Exception:
-        tz_offset = "UTC±00:00"
+    tz_offset = get_tz_offset_string(tz_name)
 
     context = {"event": event, "active_tz": tz_name, "active_tz_offset": tz_offset}
 
@@ -900,20 +824,7 @@ def user_settings_view(request):
         tz_name = user_settings.timezone or "UTC"
     except Exception:
         tz_name = "UTC"
-    try:
-        now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
-        offset = now_utc.astimezone(ZoneInfo(tz_name)).utcoffset()
-        if offset is not None:
-            total_minutes = int(offset.total_seconds() // 60)
-            sign = "+" if total_minutes >= 0 else "-"
-            total_minutes = abs(total_minutes)
-            hours = total_minutes // 60
-            minutes = total_minutes % 60
-            tz_offset = f"UTC{sign}{hours:02d}:{minutes:02d}"
-        else:
-            tz_offset = "UTC±00:00"
-    except Exception:
-        tz_offset = "UTC±00:00"
+    tz_offset = get_tz_offset_string(tz_name)
 
     return render(
         request,

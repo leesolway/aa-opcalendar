@@ -84,40 +84,37 @@ def handle_standard_event(instance, created, col):
         handle_event_notification(instance, created, col, "New event:")
 
 
+def _build_standard_event_embed(instance, message, url, color):
+    """Build a Discord embed dict for a standard Event."""
+    main_char = instance.eve_character
+    if main_char:
+        portrait = main_char.portrait_url_64
+        character_name = main_char.character_name
+        ticker = f"[{main_char.corporation_ticker}]"
+    else:
+        portrait = character_name = ticker = ""
+    return {
+        "title": message,
+        "description": instance.description,
+        "url": url,
+        "color": color,
+        "fields": [
+            {"name": "FC", "value": instance.fc, "inline": True},
+            {"name": "Type", "value": instance.operation_type.name, "inline": True},
+            {"name": "Formup", "value": instance.formup_system, "inline": True},
+            {"name": "Eve Time", "value": instance.start_time.strftime("%Y-%m-%d %H:%M:%S")},
+        ],
+        "footer": {"icon_url": portrait, "text": f"{character_name} {ticker}, {instance.host}"},
+    }
+
+
 def handle_event_notification(instance, created, col, message_prefix):
     """Generate and send event notifications."""
     try:
         logger.debug("New signal fleet created for event %s", instance.title)
         url = get_site_url() + f"/opcalendar/event/{instance.pk}/details/"
         message = f"{message_prefix} {instance.title}"
-
-        main_char = instance.eve_character
-        if main_char:
-            portrait = main_char.portrait_url_64
-            character_name = main_char.character_name
-            ticker = f"[{main_char.corporation_ticker}]"
-        else:
-            portrait = character_name = ticker = ""
-
-        embed = {
-            "title": message,
-            "description": instance.description,
-            "url": url,
-            "color": col,
-            "fields": [
-                {"name": "FC", "value": instance.fc, "inline": True},
-                {"name": "Type", "value": instance.operation_type.name, "inline": True},
-                {"name": "Formup", "value": instance.formup_system, "inline": True},
-                {
-                    "name": "Eve Time",
-                    "value": instance.start_time.strftime("%Y-%m-%d %H:%M:%S"),
-                },
-            ],
-            "footer": {
-                "icon_url": portrait,
-                "text": f"{character_name} {ticker}, {instance.host}",
-            },
-        }
+        embed = _build_standard_event_embed(instance, message, url, col)
         send_webhook(embed, instance.event_visibility, instance.start_time)
     except Exception as e:
         logger.exception(e)
@@ -153,34 +150,7 @@ def handle_event_deletion(instance, message_prefix, color):
     try:
         url = get_site_url() + f"/opcalendar/event/{instance.pk}/details/"
         message = f"{message_prefix} {instance.title}"
-
-        main_char = instance.eve_character
-        if main_char:
-            portrait = main_char.portrait_url_64
-            character_name = main_char.character_name
-            ticker = f"[{main_char.corporation_ticker}]"
-        else:
-            portrait = character_name = ticker = ""
-
-        embed = {
-            "title": message,
-            "description": instance.description,
-            "url": url,
-            "color": color,
-            "fields": [
-                {"name": "FC", "value": instance.fc, "inline": True},
-                {"name": "Type", "value": instance.operation_type.name, "inline": True},
-                {"name": "Formup", "value": instance.formup_system, "inline": True},
-                {
-                    "name": "Eve Time",
-                    "value": instance.start_time.strftime("%Y-%m-%d %H:%M:%S"),
-                },
-            ],
-            "footer": {
-                "icon_url": portrait,
-                "text": f"{character_name} {ticker}, {instance.host}",
-            },
-        }
+        embed = _build_standard_event_embed(instance, message, url, color)
         send_webhook(embed, instance.event_visibility, instance.start_time)
     except Exception as e:
         logger.exception(e)

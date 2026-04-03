@@ -4,6 +4,8 @@ from django.forms import ModelForm
 from django.forms.widgets import TextInput
 from django.utils.translation import gettext_lazy as _
 
+from .helpers import get_tz_offset_string
+
 from opcalendar.models import (
     Event,
     EventCategory,
@@ -16,22 +18,24 @@ from opcalendar.models import (
 logger = get_extension_logger(__name__)
 
 
-class EventForm(ModelForm):
+class BaseEventForm(ModelForm):
+    """Shared date-field initialization for all event forms."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        date_format = "%Y-%m-%dT%H:%M"
+        self.fields["start_time"].input_formats = (date_format,)
+        self.fields["end_time"].input_formats = (date_format,)
+        self.fields["start_time"].widget.attrs.update({"autocomplete": "off"})
+        self.fields["end_time"].widget.attrs.update({"autocomplete": "off"})
+
+
+class EventForm(BaseEventForm):
     class Meta:
         model = Event
         exclude = ["user", "eve_character", "created_date", "external", "is_cancelled", "cancellation_reason", "is_placeholder"]
 
     def __init__(self, *args, **kwargs):
-        super(EventForm, self).__init__(*args, **kwargs)
-
-        # Define the date format
-        date_format = "%Y-%m-%dT%H:%M"
-        self.fields["start_time"].input_formats = (date_format,)
-        self.fields["end_time"].input_formats = (date_format,)
-
-        # Set autocomplete attribute to "off" for date fields
-        self.fields["start_time"].widget.attrs.update({"autocomplete": "off"})
-        self.fields["end_time"].widget.attrs.update({"autocomplete": "off"})
+        super().__init__(*args, **kwargs)
 
         # Setup querysets and requirements for other fields
         self.fields["host"].queryset = EventHost.objects.filter(external=False)
@@ -54,7 +58,7 @@ class EventForm(ModelForm):
             logger.debug("Form defaults: No default host set")
 
 
-class EventEditForm(ModelForm):
+class EventEditForm(BaseEventForm):
     class Meta:
         model = Event
         exclude = [
@@ -70,16 +74,7 @@ class EventEditForm(ModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        super(EventEditForm, self).__init__(*args, **kwargs)
-
-        # Define the date format
-        date_format = "%Y-%m-%dT%H:%M"
-        self.fields["start_time"].input_formats = (date_format,)
-        self.fields["end_time"].input_formats = (date_format,)
-
-        # Set autocomplete attribute to "off" for date fields
-        self.fields["start_time"].widget.attrs.update({"autocomplete": "off"})
-        self.fields["end_time"].widget.attrs.update({"autocomplete": "off"})
+        super().__init__(*args, **kwargs)
 
         # Setup querysets and requirements for other fields
         self.fields["host"].queryset = EventHost.objects.filter(external=False)
@@ -89,35 +84,17 @@ class EventEditForm(ModelForm):
         )
 
 
-class PlaceholderEventForm(ModelForm):
+class PlaceholderEventForm(BaseEventForm):
     class Meta:
         model = Event
         fields = ["title", "event_visibility", "start_time", "end_time"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        date_format = "%Y-%m-%dT%H:%M"
-        self.fields["start_time"].input_formats = (date_format,)
-        self.fields["end_time"].input_formats = (date_format,)
-        self.fields["start_time"].widget.attrs.update({"autocomplete": "off"})
-        self.fields["end_time"].widget.attrs.update({"autocomplete": "off"})
         self.fields["event_visibility"].required = True
         self.fields["event_visibility"].queryset = EventVisibility.objects.filter(
             is_visible=True, is_active=True
         )
-
-
-class SignupForm(forms.Form):
-    username = forms.CharField(
-        widget=forms.TextInput(
-            attrs={"class": "form-control", "placeholder": "Username"}
-        )
-    )
-    password = forms.CharField(
-        widget=forms.PasswordInput(
-            attrs={"class": "form-control", "placeholder": "Password"}
-        )
-    )
 
 
 class AddMemberForm(forms.ModelForm):
@@ -133,12 +110,6 @@ class AddMemberForm(forms.ModelForm):
                 }
             ),
         }
-
-
-class AddCategoryForm(forms.ModelForm):
-    class Meta:
-        model = EventCategory
-        fields = "__all__"
 
 
 class EventVisibilityAdminForm(forms.ModelForm):
@@ -161,23 +132,7 @@ class EventCategoryAdminForm(forms.ModelForm):
 
 # Helper to build timezone choices for a dropdown, with offsets in labels
 try:
-    from zoneinfo import ZoneInfo, available_timezones
-    from datetime import datetime, timezone as dt_timezone
-
-    def _fmt_offset(tzname: str) -> str:
-        now_utc = datetime.now(dt_timezone.utc)
-        try:
-            offset = now_utc.astimezone(ZoneInfo(tzname)).utcoffset()
-        except Exception:
-            offset = None
-        if offset is None:
-            return "UTC±00:00"
-        total_minutes = int(offset.total_seconds() // 60)
-        sign = "+" if total_minutes >= 0 else "-"
-        total_minutes = abs(total_minutes)
-        hours = total_minutes // 60
-        minutes = total_minutes % 60
-        return f"UTC{sign}{hours:02d}:{minutes:02d}"
+    from zoneinfo import available_timezones
 
     def get_timezone_choices():
         tzs = sorted(
@@ -190,33 +145,10 @@ try:
             if tz == "UTC":
                 label = "UTC - EVE Time"
             else:
-                label = f"{tz} ({_fmt_offset(tz)})"
+                label = f"{tz} ({get_tz_offset_string(tz)})"
             choices.append((tz, label))
         return choices
 except Exception:  # pragma: no cover
-    from datetime import datetime, timezone as dt_timezone
-    try:
-        from zoneinfo import ZoneInfo
-    except Exception:
-        ZoneInfo = None  # type: ignore
-
-    def _fmt_offset_fallback(tzname: str) -> str:
-        if not ZoneInfo:
-            return "UTC±00:00"
-        now_utc = datetime.now(dt_timezone.utc)
-        try:
-            offset = now_utc.astimezone(ZoneInfo(tzname)).utcoffset()
-        except Exception:
-            offset = None
-        if offset is None:
-            return "UTC±00:00"
-        total_minutes = int(offset.total_seconds() // 60)
-        sign = "+" if total_minutes >= 0 else "-"
-        total_minutes = abs(total_minutes)
-        hours = total_minutes // 60
-        minutes = total_minutes % 60
-        return f"UTC{sign}{hours:02d}:{minutes:02d}"
-
     def get_timezone_choices():
         fallback = [
             "UTC",
@@ -233,7 +165,7 @@ except Exception:  # pragma: no cover
             if tz == "UTC":
                 label = "UTC - EVE Time"
             else:
-                label = f"{tz} ({_fmt_offset_fallback(tz)})"
+                label = f"{tz} ({get_tz_offset_string(tz)})"
             choices.append((tz, label))
         return choices
 

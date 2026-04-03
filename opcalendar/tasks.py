@@ -121,6 +121,28 @@ def import_all_npsi_fleets() -> bool:
     return True
 
 
+def _upsert_event(feed, title, start_date, end_date, extra_fields, event_ids_to_remove):
+    """If an event with this title+start_time exists, keep it; otherwise create it."""
+    original = Event.objects.filter(start_time=start_date, title=title).first()
+    if original:
+        logger.debug("%s: Event: %s already in database, skipping", feed, title)
+        event_ids_to_remove.discard(original.id)
+    else:
+        Event.objects.create(
+            operation_type=feed.operation_type,
+            title=title,
+            host=feed.host,
+            start_time=start_date,
+            end_time=end_date,
+            external=True,
+            user=feed.creator,
+            event_visibility=feed.event_visibility,
+            eve_character=feed.eve_character,
+            **extra_fields,
+        )
+        logger.debug("%s: Saved new event in database: %s", feed, title)
+
+
 def _import_spectre_fleet(feed, event_ids_to_remove):
     logger.debug(
         "%s: import feed active. Pulling events from %s",
@@ -144,7 +166,6 @@ def _import_spectre_fleet(feed, event_ids_to_remove):
                     date_object = datetime.strptime(
                         entry.published, "%a, %d %b %Y %H:%M:%S %z"
                     )
-                    date_object.strftime("%Y-%m-%dT%H:%M")
 
                     # Check if we already have the event stored
                     original = Event.objects.filter(
@@ -219,38 +240,12 @@ def _import_fun_inc(feed, event_ids_to_remove):
             title = entry.name if entry.name else ""
 
             logger.debug("%s: Import even found: %s", feed, title)
-
-            # Check if we already have the event stored
-            original = Event.objects.filter(start_time=start_date, title=title).first()
-
-            # If we get the event from API it should not be removed
-            if original:
-                logger.debug("%s: Event: %s already in database, skipping", feed, title)
-
-                # Remove the found fleet from the to be removed list
-                event_ids_to_remove.discard(original.id)
-
-            else:
-                # Save new fleet to database
-                event = Event(
-                    operation_type=feed.operation_type,
-                    title=title,
-                    host=feed.host,
-                    doctrine="see details",
-                    formup_system=feed.source,
-                    description=strip_tags(entry.description),
-                    start_time=start_date,
-                    end_time=end_date,
-                    fc=feed.source,
-                    external=True,
-                    user=feed.creator,
-                    event_visibility=feed.event_visibility,
-                    eve_character=feed.eve_character,
-                )
-
-                logger.debug("%s: Saved new EVE UNI event in database: %s", feed, title)
-
-                event.save()
+            _upsert_event(feed, title, start_date, end_date, {
+                "doctrine": "see details",
+                "formup_system": feed.source,
+                "fc": feed.source,
+                "description": strip_tags(entry.description),
+            }, event_ids_to_remove)
 
     except (NotImplementedError, RequestException):
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
@@ -285,45 +280,12 @@ def _import_eve_uni(feed, event_ids_to_remove):
                 title = re.sub(r"[\(\[].*?[\)\]]", "", entry.name)
 
                 logger.debug("%s: Import even found: %s", feed, title)
-
-                # Check if we already have the event stored
-                original = Event.objects.filter(
-                    start_time=start_date, title=title
-                ).first()
-
-                # If we get the event from API it should not be removed
-                if original:
-                    logger.debug(
-                        "%s: Event: %s already in database, skipping", feed, title
-                    )
-
-                    # Remove the found fleet from the to be removed list
-                    event_ids_to_remove.discard(original.id)
-
-                else:
-                    # Save new event to database
-                    event = Event(
-                        operation_type=feed.operation_type,
-                        title=title,
-                        host=feed.host,
-                        doctrine="see details",
-                        formup_system=feed.source,
-                        description=strip_tags(entry.description.replace("<br>", "\n")),
-                        start_time=start_date,
-                        end_time=end_date,
-                        fc=feed.source,
-                        external=True,
-                        user=feed.creator,
-                        event_visibility=feed.event_visibility,
-                        eve_character=feed.eve_character,
-                    )
-
-                    logger.debug(
-                        "%s: Saved new EVE UNI event in database: %s",
-                        feed,
-                        title,
-                    )
-                    event.save()
+                _upsert_event(feed, title, start_date, end_date, {
+                    "doctrine": "see details",
+                    "formup_system": feed.source,
+                    "fc": feed.source,
+                    "description": strip_tags(entry.description.replace("<br>", "\n")),
+                }, event_ids_to_remove)
 
     except (NotImplementedError, RequestException):
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
@@ -356,39 +318,10 @@ def _import_ical(feed, event_ids_to_remove, url):
             title = re.sub(r"[\(\[].*?[\)\]]", "", entry.name) if entry.name else ""
 
             logger.debug("%s: Import even found: %s", feed, title)
-
-            # Check if we already have the event stored
-            original = Event.objects.filter(start_time=start_date, title=title).first()
-
-            # If we get the event from API it should not be removed
-            if original:
-                logger.debug("%s: Event: %s already in database, skipping", feed, title)
-
-                # Remove the found fleet from the to be removed list
-                event_ids_to_remove.discard(original.id)
-
-            else:
-                # Save new event to database
-                event = Event(
-                    operation_type=feed.operation_type,
-                    title=title,
-                    host=feed.host,
-                    formup_system=entry.location,
-                    description=strip_tags(entry.description.replace("<br>", "\n")),
-                    start_time=start_date,
-                    end_time=end_date,
-                    external=True,
-                    user=feed.creator,
-                    event_visibility=feed.event_visibility,
-                    eve_character=feed.eve_character,
-                )
-
-                logger.debug(
-                    "%s: Saved new EVE UNI event in database: %s",
-                    feed,
-                    title,
-                )
-                event.save()
+            _upsert_event(feed, title, start_date, end_date, {
+                "formup_system": entry.location,
+                "description": strip_tags(entry.description.replace("<br>", "\n")),
+            }, event_ids_to_remove)
 
     except (NotImplementedError, RequestException):
         logger.error("%s: Error in fetching fleets", feed, exc_info=True)
@@ -431,8 +364,3 @@ def _get_owner(owner_pk: int) -> Owner:
             "Requested owner with pk {} does not exist".format(owner_pk)
         )
     return owner
-
-
-# @shared_task
-# def add(x, y):
-#     return x + y

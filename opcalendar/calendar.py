@@ -266,18 +266,8 @@ class Calendar(HTMLCalendar):
         end_utc = local_end.astimezone(timezone.utc)
 
         events_qs = (
-            Event.objects.filter(
-                start_time__gte=start_utc,
-                start_time__lt=end_utc,
-            )
-            .filter(
-                Q(event_visibility__restricted_to_group__in=self.user.groups.all())
-                | Q(event_visibility__restricted_to_group__isnull=True),
-            )
-            .filter(
-                Q(event_visibility__restricted_to_state=self.user.profile.state)
-                | Q(event_visibility__restricted_to_state__isnull=True),
-            )
+            Event.objects.visible_to_user(self.user)
+            .filter(start_time__gte=start_utc, start_time__lt=end_utc)
         )
 
         ingame_events_qs = (
