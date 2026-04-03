@@ -1,4 +1,12 @@
 {% load i18n %}
+{% if event.is_cancelled %}
+<div class="alert alert-warning">
+    <strong><i class="fas fa-ban"></i> {% trans "This event has been cancelled." %}</strong>
+    {% if event.cancellation_reason %}
+        <br>{{ event.cancellation_reason }}
+    {% endif %}
+</div>
+{% endif %}
 <table class="table table-bordered">
     <thead>
         <tr>

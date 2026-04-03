@@ -2,6 +2,7 @@ from allianceauth.services.hooks import get_extension_logger
 from django import forms
 from django.forms import ModelForm
 from django.forms.widgets import TextInput
+from django.utils.translation import gettext_lazy as _
 
 from opcalendar.models import (
     Event,
@@ -18,7 +19,7 @@ logger = get_extension_logger(__name__)
 class EventForm(ModelForm):
     class Meta:
         model = Event
-        exclude = ["user", "eve_character", "created_date", "external"]
+        exclude = ["user", "eve_character", "created_date", "external", "is_cancelled", "cancellation_reason"]
 
     def __init__(self, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
@@ -63,6 +64,8 @@ class EventEditForm(ModelForm):
             "external",
             "repeat_event",
             "repeat_times",
+            "is_cancelled",
+            "cancellation_reason",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -214,6 +217,14 @@ except Exception:  # pragma: no cover
                 label = f"{tz} ({_fmt_offset_fallback(tz)})"
             choices.append((tz, label))
         return choices
+
+
+class CancelEventForm(forms.Form):
+    cancellation_reason = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 3}),
+        required=False,
+        label=_("Cancellation reason"),
+    )
 
 
 class UserSettingsForm(forms.ModelForm):

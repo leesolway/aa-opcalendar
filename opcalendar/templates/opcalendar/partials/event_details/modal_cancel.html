@@ -1,0 +1,27 @@
+{% load i18n %}
+{% if can_edit and not event.is_cancelled %}
+<div class="modal fade" id="cancelEventModal" tabindex="-1" aria-labelledby="cancelEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'opcalendar:cancel_event' event.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelEventModalLabel"><i class="fas fa-ban"></i> {% trans "Cancel Event" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>{% blocktrans with title=event.title %}Are you sure you want to cancel <strong>{{ title }}</strong>?{% endblocktrans %}</p>
+                    <div class="mb-3">
+                        <label for="cancellation_reason" class="form-label">{% trans "Cancellation reason" %} <span class="text-muted">({% trans "optional" %})</span></label>
+                        <textarea class="form-control" id="cancellation_reason" name="cancellation_reason" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Go Back" %}</button>
+                    <button type="submit" class="btn btn-warning"><i class="fas fa-ban"></i> {% trans "Confirm Cancellation" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}

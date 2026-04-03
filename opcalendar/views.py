@@ -43,7 +43,7 @@ from .app_settings import (
     structuretimers_active,
 )
 from .calendar import Calendar
-from .forms import EventEditForm, EventForm, UserSettingsForm
+from .forms import CancelEventForm, EventEditForm, EventForm, UserSettingsForm
 from .utils import messages_plus
 
 logger = get_extension_logger(__name__)
@@ -478,6 +478,7 @@ def event_details(request, event_id):
             "active_tz_offset": tz_offset,
             "active_tz_offset_minutes": tz_offset_minutes,
             "event_url": event_url,
+            "can_edit": event.user_can_edit(request.user),
         }
 
         return render(request, "opcalendar/event-details.html", context)
@@ -617,6 +618,44 @@ def ingame_event_details(request, event_id):
         return render(request, "opcalendar/ingame-event-details.html", context)
     else:
         return redirect("opcalendar:calendar")
+
+
+@login_required
+@permission_required("opcalendar.create_event")
+def uncancel_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    if not event.user_can_edit(request.user):
+        messages.error(request, _("You do not have permission to edit this event."))
+        return redirect("opcalendar:event-detail", event_id=event.id)
+    if request.method == "POST":
+        event.is_cancelled = False
+        event.cancellation_reason = ""
+        event.save()
+        messages.success(
+            request,
+            _("Event %(opname)s has been re-enabled.") % {"opname": event.title},
+        )
+    return redirect("opcalendar:event-detail", event_id=event.id)
+
+
+@login_required
+@permission_required("opcalendar.create_event")
+def cancel_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    if not event.user_can_edit(request.user):
+        messages.error(request, _("You do not have permission to edit this event."))
+        return redirect("opcalendar:event-detail", event_id=event.id)
+    if request.method == "POST":
+        form = CancelEventForm(request.POST)
+        if form.is_valid():
+            event.is_cancelled = True
+            event.cancellation_reason = form.cleaned_data["cancellation_reason"]
+            event.save()
+            messages.warning(
+                request,
+                _("Event %(opname)s has been cancelled.") % {"opname": event.title},
+            )
+    return redirect("opcalendar:event-detail", event_id=event.id)
 
 
 @login_required

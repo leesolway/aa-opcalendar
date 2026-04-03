@@ -1,0 +1,28 @@
+{% extends 'allianceauth/base-bs5.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2>{% trans "Cancel Event" %}: {{ event.title }}</h2>
+            <p class="text-muted">{% trans "This will mark the event as cancelled and notify attendees." %}</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="{{ form.cancellation_reason.id_for_label }}" class="form-label">
+                        {{ form.cancellation_reason.label }}
+                    </label>
+                    {{ form.cancellation_reason }}
+                </div>
+                <button type="submit" class="btn btn-warning me-2">
+                    <i class="fas fa-ban"></i> {% trans "Confirm Cancellation" %}
+                </button>
+                <a href="{% url 'opcalendar:event-detail' event.id %}" class="btn btn-secondary">
+                    {% trans "Go Back" %}
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

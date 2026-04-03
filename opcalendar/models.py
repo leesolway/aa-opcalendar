@@ -394,6 +394,8 @@ class Event(models.Model):
         null=True,
         help_text=_("Is the event an external event over API"),
     )
+    is_cancelled = models.BooleanField(default=False)
+    cancellation_reason = models.TextField(blank=True, default="")
     created_date = models.DateTimeField(
         default=timezone.now,
         help_text=_("When the event was created"),
@@ -447,6 +449,10 @@ class Event(models.Model):
             return "external"
         else:
             return False
+
+    @property
+    def cancelled_tag(self):
+        return "cancelled-event" if self.is_cancelled else ""
 
     @property
     def get_html_url(self):

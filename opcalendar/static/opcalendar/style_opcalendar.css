@@ -51,6 +51,12 @@
   border-left: 3px solid #f0ad4e;
 }
 
+.aa-opcalendar .event.cancelled-event {
+    opacity: 0.5;
+    text-decoration: line-through;
+    border-left: 3px solid #dc3545;
+}
+
 .aa-opcalendar .event-moonmining{
   background: rgba(188, 237, 255, 0.15);
   border-left: 3px solid #5bc0de;

@@ -188,12 +188,15 @@ class Calendar(HTMLCalendar):
                             signup_icon = '<i class="fas fa-times-circle text-danger ms-1" title="Declined"></i>'
 
                     # Generate the HTML for the Event or IngameEvents
+                    cancelled_badge = ""
+                    if getattr(event, "is_cancelled", False):
+                        cancelled_badge = ' <span class="badge bg-danger" style="font-size:0.7em;vertical-align:middle;">CANCELLED</span>'
                     d += (
                         f"<style>{event.get_event_styling}</style>"
                         f'<a class="nostyling" href="{event.get_html_url}">'
-                        f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class} {event.external_tag}">'
+                        f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class} {event.external_tag} {event.cancelled_tag}">'
                         f'<span id="event-time-{unique_id}">{start_time}{signup_icon}</span>'
-                        f"<span><b>{title}</b></span>"
+                        f"<span><b>{title}</b>{cancelled_badge}</span>"
                         f"<span><i>{owner}</i></span>"
                         f"</div>"
                         f"</a>"

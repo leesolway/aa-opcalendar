@@ -1,0 +1,23 @@
+{% load i18n %}
+{% if can_edit and not event.external %}
+<div class="modal fade" id="deleteEventModal" tabindex="-1" aria-labelledby="deleteEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'opcalendar:remove_event' event.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteEventModalLabel"><i class="fas fa-trash"></i> {% trans "Delete Event" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>{% blocktrans with title=event.title %}Are you sure you want to permanently delete <strong>{{ title }}</strong>? This cannot be undone.{% endblocktrans %}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Go Back" %}</button>
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> {% trans "Delete Event" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
