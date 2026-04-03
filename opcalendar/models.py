@@ -396,6 +396,7 @@ class Event(models.Model):
     )
     is_cancelled = models.BooleanField(default=False)
     cancellation_reason = models.TextField(blank=True, default="")
+    is_placeholder = models.BooleanField(default=False)
     created_date = models.DateTimeField(
         default=timezone.now,
         help_text=_("When the event was created"),
@@ -453,6 +454,10 @@ class Event(models.Model):
     @property
     def cancelled_tag(self):
         return "cancelled-event" if self.is_cancelled else ""
+
+    @property
+    def placeholder_tag(self):
+        return "placeholder-event" if self.is_placeholder else ""
 
     @property
     def get_html_url(self):
@@ -765,6 +770,7 @@ class EventMember(models.Model):
         ATTENDING = "A", _("Attending")
         MAYBE = "M", _("Maybe")
         DECLINED = "D", _("Declined")
+        INTERESTED = "I", _("Interested")
 
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     character = models.ForeignKey(

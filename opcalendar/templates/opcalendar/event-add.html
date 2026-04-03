@@ -23,10 +23,28 @@
                     <form role="form" action="" method="POST">
                         {% csrf_token %}
                         <input type="hidden" name="time_mode" id="id_time_mode" value="local">
+                        <input type="hidden" name="is_placeholder" id="id_is_placeholder" value="false">
+
+                        <div class="mb-3">
+                            <label class="form-label">{% trans "Event Type" %}</label>
+                            <div class="btn-group w-100" role="group">
+                                <button type="button" class="btn btn-primary active" id="btn-type-event">
+                                    <i class="fas fa-calendar-check"></i> {% trans "Event" %}
+                                </button>
+                                <button type="button" class="btn btn-primary" id="btn-type-placeholder">
+                                    <i class="fas fa-question-circle"></i> {% trans "Placeholder" %}
+                                </button>
+                            </div>
+                        </div>
+
                         {% bootstrap_field form.title %}
-                        {% bootstrap_field form.operation_type %}
-                        {% bootstrap_field form.host %}
                         {% bootstrap_field form.event_visibility %}
+
+                        <div id="event-only-fields">
+                            {% bootstrap_field form.operation_type %}
+                            {% bootstrap_field form.host %}
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">{% trans "Time Input Mode" %}</label>
                             <div class="btn-group w-100" role="group">
@@ -48,16 +66,20 @@
                                 <small class="text-muted" id="end-time-hint"></small>
                             </div>
                         </div>
-                        {% bootstrap_field form.fc %}
-                        {% bootstrap_field form.formup_system %}
-                        {% bootstrap_field form.doctrine %}
-                        {% bootstrap_field form.description %}
-                        <div class="row">
-                            <div class="col-md-6">{% bootstrap_field form.repeat_event %}</div>
-                            <div class="col-md-6">{% bootstrap_field form.repeat_times %}</div>
+
+                        <div id="event-detail-fields">
+                            {% bootstrap_field form.fc %}
+                            {% bootstrap_field form.formup_system %}
+                            {% bootstrap_field form.doctrine %}
+                            {% bootstrap_field form.description %}
+                            <div class="row">
+                                <div class="col-md-6">{% bootstrap_field form.repeat_event %}</div>
+                                <div class="col-md-6">{% bootstrap_field form.repeat_times %}</div>
+                            </div>
                         </div>
+
                         <div class="d-grid mt-3">
-                            <button class="btn btn-lg btn-primary" type="submit">{% trans "Create New Event" %}</button>
+                            <button class="btn btn-lg btn-primary" type="submit" id="submit-btn">{% trans "Create New Event" %}</button>
                         </div>
                     </form>
                 </div>
@@ -187,6 +209,28 @@
 
       // Initial hint update
       updateHints();
+
+      // Event type toggle
+      function setEventType(isPlaceholder) {
+        $('#id_is_placeholder').val(isPlaceholder ? 'true' : 'false');
+        const $hiddenInputs = $('#event-only-fields, #event-detail-fields').find('input, select, textarea');
+        if (isPlaceholder) {
+          $('#btn-type-placeholder').addClass('active');
+          $('#btn-type-event').removeClass('active');
+          $('#event-only-fields, #event-detail-fields').hide();
+          $hiddenInputs.prop('disabled', true);
+          $('#submit-btn').text('{% trans "Create Placeholder" %}');
+        } else {
+          $('#btn-type-event').addClass('active');
+          $('#btn-type-placeholder').removeClass('active');
+          $('#event-only-fields, #event-detail-fields').show();
+          $hiddenInputs.prop('disabled', false);
+          $('#submit-btn').text('{% trans "Create New Event" %}');
+        }
+      }
+
+      $('#btn-type-event').on('click', function() { setEventType(false); });
+      $('#btn-type-placeholder').on('click', function() { setEventType(true); });
     });
   </script>
 {% endblock %}

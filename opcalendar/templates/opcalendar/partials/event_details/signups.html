@@ -1,6 +1,7 @@
 {% load i18n %}
 
-{% if perms.opcalendar.see_signups %}
+{% if not event.is_placeholder %}
+  {% if perms.opcalendar.see_signups %}
   <table class="table table-bordered">
     <thead>
       <tr>
@@ -31,4 +32,28 @@
       {% endfor %}
     </tbody>
   </table>
+  {% endif %}
+{% endif %}
+
+{% if event.is_placeholder %}
+    {% if perms.opcalendar.see_signups %}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width: 10px">#</th>
+                <th>{% trans "Character" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for member in interested_members %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><img src="{{ member.character.portrait_url_32 }}" class="rounded-circle" width="32" height="32" alt="{{ member.character }}"> {{ member.character }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="2">{% trans "No interest registered yet." %}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 {% endif %}

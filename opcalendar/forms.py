@@ -19,7 +19,7 @@ logger = get_extension_logger(__name__)
 class EventForm(ModelForm):
     class Meta:
         model = Event
-        exclude = ["user", "eve_character", "created_date", "external", "is_cancelled", "cancellation_reason"]
+        exclude = ["user", "eve_character", "created_date", "external", "is_cancelled", "cancellation_reason", "is_placeholder"]
 
     def __init__(self, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
@@ -66,6 +66,7 @@ class EventEditForm(ModelForm):
             "repeat_times",
             "is_cancelled",
             "cancellation_reason",
+            "is_placeholder",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -82,6 +83,24 @@ class EventEditForm(ModelForm):
 
         # Setup querysets and requirements for other fields
         self.fields["host"].queryset = EventHost.objects.filter(external=False)
+        self.fields["event_visibility"].required = True
+        self.fields["event_visibility"].queryset = EventVisibility.objects.filter(
+            is_visible=True, is_active=True
+        )
+
+
+class PlaceholderEventForm(ModelForm):
+    class Meta:
+        model = Event
+        fields = ["title", "event_visibility", "start_time", "end_time"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        date_format = "%Y-%m-%dT%H:%M"
+        self.fields["start_time"].input_formats = (date_format,)
+        self.fields["end_time"].input_formats = (date_format,)
+        self.fields["start_time"].widget.attrs.update({"autocomplete": "off"})
+        self.fields["end_time"].widget.attrs.update({"autocomplete": "off"})
         self.fields["event_visibility"].required = True
         self.fields["event_visibility"].queryset = EventVisibility.objects.filter(
             is_visible=True, is_active=True

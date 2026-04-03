@@ -1,4 +1,10 @@
 {% load i18n %}
+{% if event.is_placeholder %}
+<div class="alert alert-info">
+    <strong><i class="fas fa-question-circle"></i> {% trans "This is a placeholder event." %}</strong>
+    {% trans "Details are not yet confirmed. Register your interest below." %}
+</div>
+{% endif %}
 {% if event.is_cancelled %}
 <div class="alert alert-warning">
     <strong><i class="fas fa-ban"></i> {% trans "This event has been cancelled." %}</strong>

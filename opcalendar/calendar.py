@@ -4,6 +4,7 @@ from itertools import chain
 
 from allianceauth.services.hooks import get_extension_logger
 from django.db.models import F, Q
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
@@ -106,68 +107,56 @@ class Calendar(HTMLCalendar):
                 standardized_events_per_day.append(standardized_event)
 
                 if type(event).__name__ == "Timer":
-                    # Determine the objective type for the timer
                     objective_map = {
                         "HO": "Hostile",
                         "FR": "Friendly",
                         "NE": "Neutral",
                         "UN": "Undefined",
                     }
-                    objective_verbosed = objective_map.get(event.objective, "Undefined")
-
-                    # Generate the HTML for the Timer event
-                    d += (
-                        f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.date else "future-event"} event-structuretimer">'
-                        f'<span id="event-time-{unique_id}">{event.date.strftime("%H:%M")}</span>'
-                        f"<span>{event.eve_solar_system.name} - {event.structure_type.name}</span>"
-                        f"<span><i> {objective_verbosed} structure timer</i></span>"
-                        f"</div>"
+                    d += render_to_string(
+                        "opcalendar/partials/calendar/event_structuretimer.html",
+                        {
+                            "event": event,
+                            "unique_id": unique_id,
+                            "date_status": "past-event" if datetime.now(timezone.utc) > event.date else "future-event",
+                            "start_time": event.date.astimezone(self.active_tz).strftime("%H:%M"),
+                            "objective_verbosed": objective_map.get(event.objective, "Undefined"),
+                        },
                     )
 
                 elif type(event).__name__ == "Extraction":
                     if self.user.has_perm("moonmining.extractions_access"):
-                        # Extract relevant details for the extraction event
                         refinery = event.refinery.name
                         system = event.refinery.moon.eve_moon.eve_planet.eve_solar_system.name
                         structure = refinery.replace(system, "")
-
-                        # Generate the display name with or without moon tags
                         display_name = (
-                            (
-                                event.refinery.moon.rarity_tag_html
-                                + '<span class="event-moon-name">'
-                                + structure[3:]
-                                + "</span>"
-                            )
+                            event.refinery.moon.rarity_tag_html
+                            + '<span class="event-moon-name">'
+                            + structure[3:]
+                            + "</span>"
                             if OPCALENDAR_DISPLAY_MOONMINING_TAGS
                             else "<span>" + structure[3:] + "</span>"
                         )
-
-                        # Generate the HTML for the Extraction event
-                        d += (
-                            f'<a class="nostyling" href="/moonmining/extraction/{event.id}?new_page=yes">'
-                            f'<div class="event {"past-event" if datetime.now(timezone.utc) > event.chunk_arrival_at else "future-event"} event-moonmining">'
-                            f'<span id="event-time-{unique_id}">{event.chunk_arrival_at.strftime("%H:%M")}</span>'
-                            f"<span>{event.refinery.moon.eve_moon.name}</span>"
-                            f'<div class="event-moon-details">'
-                            f"{display_name}"
-                            f"</div>"
-                            f"</div>"
-                            f"</a>"
+                        d += render_to_string(
+                            "opcalendar/partials/calendar/event_moonmining.html",
+                            {
+                                "event": event,
+                                "unique_id": unique_id,
+                                "date_status": "past-event" if datetime.now(timezone.utc) > event.chunk_arrival_at else "future-event",
+                                "start_time": event.chunk_arrival_at.astimezone(self.active_tz).strftime("%H:%M"),
+                                "display_name": display_name,
+                            },
                         )
 
                 elif type(event).__name__ in ["Event", "IngameEvents"]:
-                    # Determine start time, title, and owner for the event
                     start_time = (
                         event.start_time.astimezone(self.active_tz).strftime("%H:%M")
                         if hasattr(event, "start_time")
-                        else event.event_start_date.astimezone(self.active_tz).strftime(
-                            "%H:%M"
-                        )
+                        else event.event_start_date.astimezone(self.active_tz).strftime("%H:%M")
                     )
                     title = (
                         f"{event.operation_type.ticker} {event.title}"
-                        if hasattr(event, "operation_type")
+                        if getattr(event, "operation_type", None)
                         else event.title
                     )
                     owner = (
@@ -175,31 +164,21 @@ class Calendar(HTMLCalendar):
                         if hasattr(event, "host")
                         else event.owner_name
                     )
-
-                    # Check if user has responded to this event
-                    signup_icon = ""
-                    if hasattr(self, 'user_signups') and type(event).__name__ == "Event":
-                        signup_status = self.user_signups.get(event.id)
-                        if signup_status == "A":
-                            signup_icon = '<i class="fas fa-check-circle text-success ms-1" title="Attending"></i>'
-                        elif signup_status == "M":
-                            signup_icon = '<i class="fas fa-question-circle text-warning ms-1" title="Maybe"></i>'
-                        elif signup_status == "D":
-                            signup_icon = '<i class="fas fa-times-circle text-danger ms-1" title="Declined"></i>'
-
-                    # Generate the HTML for the Event or IngameEvents
-                    cancelled_badge = ""
-                    if getattr(event, "is_cancelled", False):
-                        cancelled_badge = ' <span class="badge bg-danger" style="font-size:0.7em;vertical-align:middle;">CANCELLED</span>'
-                    d += (
-                        f"<style>{event.get_event_styling}</style>"
-                        f'<a class="nostyling" href="{event.get_html_url}">'
-                        f'<div class="event {event.get_date_status} {event.get_visibility_class} {event.get_category_class} {event.external_tag} {event.cancelled_tag}">'
-                        f'<span id="event-time-{unique_id}">{start_time}{signup_icon}</span>'
-                        f"<span><b>{title}</b>{cancelled_badge}</span>"
-                        f"<span><i>{owner}</i></span>"
-                        f"</div>"
-                        f"</a>"
+                    signup_status = (
+                        self.user_signups.get(event.id)
+                        if hasattr(self, "user_signups") and type(event).__name__ == "Event"
+                        else None
+                    )
+                    d += render_to_string(
+                        "opcalendar/partials/calendar/event_regular.html",
+                        {
+                            "event": event,
+                            "unique_id": unique_id,
+                            "start_time": start_time,
+                            "title": title,
+                            "owner": owner,
+                            "signup_status": signup_status,
+                        },
                     )
 
             if self.local_today == date(self.year, self.month, day):

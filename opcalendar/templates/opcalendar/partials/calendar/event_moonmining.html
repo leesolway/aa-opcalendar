@@ -1,0 +1,9 @@
+<a class="nostyling" href="/moonmining/extraction/{{ event.id }}?new_page=yes">
+    <div class="event {{ date_status }} event-moonmining">
+        <span id="event-time-{{ unique_id }}">{{ start_time }}</span>
+        <span>{{ event.refinery.moon.eve_moon.name }}</span>
+        <div class="event-moon-details">
+            {{ display_name|safe }}
+        </div>
+    </div>
+</a>

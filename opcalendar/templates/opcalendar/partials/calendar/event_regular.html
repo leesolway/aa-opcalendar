@@ -1,0 +1,18 @@
+{% load i18n %}
+{% if event.is_placeholder %}
+<a class="nostyling" href="{{ event.get_html_url }}">
+    <div class="event {{ event.get_date_status }} {{ event.get_visibility_class }} {{ event.placeholder_tag }}">
+        <span id="event-time-{{ unique_id }}">{{ start_time }}</span>
+        <span><b>{{ event.title }}</b> <span class="badge bg-info" style="font-size:0.7em;vertical-align:middle;">PLACEHOLDER</span></span>
+    </div>
+</a>
+{% else %}
+<style>{{ event.get_event_styling|safe }}</style>
+<a class="nostyling" href="{{ event.get_html_url }}">
+    <div class="event {{ event.get_date_status }} {{ event.get_visibility_class }} {{ event.get_category_class }} {% if event.external_tag %}{{ event.external_tag }}{% endif %} {{ event.cancelled_tag }}">
+        <span id="event-time-{{ unique_id }}">{{ start_time }}{% if signup_status == "A" %}<i class="fas fa-check-circle text-success ms-1" title="{% trans 'Attending' %}"></i>{% elif signup_status == "M" %}<i class="fas fa-question-circle text-warning ms-1" title="{% trans 'Maybe' %}"></i>{% elif signup_status == "D" %}<i class="fas fa-times-circle text-danger ms-1" title="{% trans 'Declined' %}"></i>{% endif %}</span>
+        <span><b>{{ title }}</b>{% if event.is_cancelled %} <span class="badge bg-danger" style="font-size:0.7em;vertical-align:middle;">CANCELLED</span>{% endif %}</span>
+        <span><i>{{ owner }}</i></span>
+    </div>
+</a>
+{% endif %}

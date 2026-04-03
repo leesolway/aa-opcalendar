@@ -28,6 +28,7 @@ from django.utils import timezone
 from opcalendar.models import (
     Event,
     EventCategory,
+    EventHost,
     EventMember,
     EventVisibility,
     IngameEvents,
@@ -43,7 +44,7 @@ from .app_settings import (
     structuretimers_active,
 )
 from .calendar import Calendar
-from .forms import CancelEventForm, EventEditForm, EventForm, UserSettingsForm
+from .forms import CancelEventForm, EventEditForm, EventForm, PlaceholderEventForm, UserSettingsForm
 from .utils import messages_plus
 
 logger = get_extension_logger(__name__)
@@ -229,7 +230,9 @@ class CalendarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 @login_required
 @permission_required("opcalendar.create_event")
 def create_event(request):
-    form = EventForm(request.POST or None)
+    is_placeholder = request.POST.get("is_placeholder") == "true"
+    form = PlaceholderEventForm(request.POST or None) if is_placeholder else EventForm(request.POST or None)
+
     # Determine user's active timezone (defaults to UTC)
     try:
         user_settings = UserSettings.objects.get(user=request.user)
@@ -239,36 +242,65 @@ def create_event(request):
     active_tz = ZoneInfo(active_tz_name)
 
     if request.POST and form.is_valid():
-        event_count = 0
-
-        # Get character
         character = request.user.profile.main_character
-        operation_type = form.cleaned_data["operation_type"]
         title = form.cleaned_data["title"]
+        event_visibility = form.cleaned_data["event_visibility"]
+        start_time_local = form.cleaned_data["start_time"]
+        end_time_local = form.cleaned_data["end_time"]
+        time_mode = request.POST.get("time_mode", "local")
+
+        if time_mode == "eve":
+            start_time_utc = start_time_local.replace(tzinfo=timezone.utc)
+            end_time_utc = end_time_local.replace(tzinfo=timezone.utc)
+        else:
+            start_time_utc = start_time_local.replace(tzinfo=active_tz).astimezone(timezone.utc)
+            end_time_utc = end_time_local.replace(tzinfo=active_tz).astimezone(timezone.utc)
+
+        if is_placeholder:
+            default_host = (
+                EventHost.objects.filter(is_default=True, external=False).first()
+                or EventHost.objects.filter(external=False).first()
+            )
+            event = Event(
+                user=request.user,
+                title=title,
+                host=default_host,
+                event_visibility=event_visibility,
+                start_time=start_time_utc,
+                end_time=end_time_utc,
+                eve_character=character,
+                fc="",
+                doctrine="",
+                formup_system="",
+                description="",
+                is_placeholder=True,
+            )
+            try:
+                event.save()
+            except Error as e:
+                logger.error("Error creating placeholder event %s: %s" % (event, e))
+            messages.success(
+                request,
+                _("Placeholder %(opname)s created for %(date)s (%(tz)s).")
+                % {
+                    "opname": title,
+                    "date": start_time_local.strftime("%Y-%m-%d %H:%M"),
+                    "tz": active_tz_name,
+                },
+            )
+            return HttpResponseRedirect(reverse("opcalendar:calendar"))
+
+        # Full event creation
+        event_count = 0
+        operation_type = form.cleaned_data["operation_type"]
         host = form.cleaned_data["host"]
         doctrine = form.cleaned_data["doctrine"]
         formup_system = form.cleaned_data["formup_system"]
         description = form.cleaned_data["description"]
-        start_time_local = form.cleaned_data["start_time"]  # naive, interpret as user's tz
-        end_time_local = form.cleaned_data["end_time"]      # naive, interpret as user's tz
         repeat_event = form.cleaned_data["repeat_event"]
         repeat_times = form.cleaned_data["repeat_times"]
         fc = form.cleaned_data["fc"]
-        event_visibility = form.cleaned_data["event_visibility"]
 
-        # Check time_mode toggle: "eve" means times are already in UTC
-        time_mode = request.POST.get("time_mode", "local")
-
-        if time_mode == "eve":
-            # Times entered as UTC — attach UTC tzinfo directly
-            start_time_utc = start_time_local.replace(tzinfo=timezone.utc)
-            end_time_utc = end_time_local.replace(tzinfo=timezone.utc)
-        else:
-            # Convert local naive to aware UTC
-            start_time_utc = start_time_local.replace(tzinfo=active_tz).astimezone(timezone.utc)
-            end_time_utc = end_time_local.replace(tzinfo=active_tz).astimezone(timezone.utc)
-
-        # Add original event to objects list
         event = Event(
             user=request.user,
             operation_type=operation_type,
@@ -291,7 +323,6 @@ def create_event(request):
         except Error as e:
             logger.error("Error creating event %s: %s" % (event, e))
 
-        # If we have a repeating event add event to object list multiple times
         if repeat_event:
             logger.debug("Event repeat %s for %s times" % (repeat_event, repeat_times))
             start_local = start_time_local
@@ -313,7 +344,6 @@ def create_event(request):
                     start_local += relativedelta(years=1)
                     end_local += relativedelta(years=1)
 
-                # Convert each occurrence to UTC when saving
                 if time_mode == "eve":
                     repeat_start_utc = start_local.replace(tzinfo=timezone.utc)
                     repeat_end_utc = end_local.replace(tzinfo=timezone.utc)
@@ -337,9 +367,7 @@ def create_event(request):
                     fc=fc,
                     event_visibility=event_visibility,
                 )
-
                 event_count += 1
-
                 try:
                     event.save()
                 except Error as e:
@@ -470,6 +498,17 @@ def event_details(request, event_id):
 
         event_url = request.build_absolute_uri(event.get_absolute_url())
 
+        character = request.user.profile.main_character
+        user_interest = EventMember.objects.filter(
+            event=event, character=character, status=EventMember.Status.INTERESTED
+        ).first() if character else None
+        interest_count = EventMember.objects.filter(
+            event=event, status=EventMember.Status.INTERESTED
+        ).count()
+        interested_members = EventMember.objects.filter(
+            event=event, status=EventMember.Status.INTERESTED
+        ).order_by("character__character_name")
+
         context = {
             "event": event,
             "eventmember": eventmember,
@@ -479,6 +518,9 @@ def event_details(request, event_id):
             "active_tz_offset_minutes": tz_offset_minutes,
             "event_url": event_url,
             "can_edit": event.user_can_edit(request.user),
+            "user_interest": user_interest,
+            "interest_count": interest_count,
+            "interested_members": interested_members,
         }
 
         return render(request, "opcalendar/event-details.html", context)
@@ -654,6 +696,27 @@ def cancel_event(request, event_id):
             messages.warning(
                 request,
                 _("Event %(opname)s has been cancelled.") % {"opname": event.title},
+            )
+    return redirect("opcalendar:event-detail", event_id=event.id)
+
+
+
+@login_required
+@permission_required("opcalendar.basic_access")
+def toggle_interest(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    character = request.user.profile.main_character
+    if request.method == "POST":
+        existing = EventMember.objects.filter(
+            event=event, character=character, status=EventMember.Status.INTERESTED
+        ).first()
+        if existing:
+            existing.delete()
+        else:
+            EventMember.objects.update_or_create(
+                event=event,
+                character=character,
+                defaults={"status": EventMember.Status.INTERESTED},
             )
     return redirect("opcalendar:event-detail", event_id=event.id)
 

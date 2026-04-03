@@ -1,5 +1,6 @@
 {% load i18n %}
 
+{% if not event.is_placeholder %}
 <div class="d-grid gap-2 d-md-flex justify-content-md-start align-items-center w-100">
     <form method="post" id="responseForm" class="d-inline d-md-flex w-100 justify-content-md-start align-items-center">
         {% csrf_token %}
@@ -10,12 +11,12 @@
             <button type="submit" onclick="submitForm('A', '{% url 'opcalendar:event_member_signup_attending' event.id %}');" class="btn btn-success me-md-2">
                 <i class="fa-solid fa-check"></i> {% trans "Attending" %}
             </button>
-            
+
             <!-- Maybe Button -->
             <button type="submit" onclick="submitForm('M', '{% url 'opcalendar:event_member_signup_maybe' event.id %}');" class="btn btn-warning me-md-2">
                 <i class="fa-solid fa-question"></i> {% trans "Maybe" %}
             </button>
-            
+
             <!-- Declined Button -->
             <button type="submit" onclick="submitForm('D', '{% url 'opcalendar:event_member_signup_declined' event.id %}');" class="btn btn-danger me-md-2">
                 <i class="fa-solid fa-hand"></i> {% trans "Declined" %}
@@ -42,3 +43,19 @@ function submitForm(status, action) {
     document.getElementById('statusField').value = status;
 }
 </script>
+{% endif %}
+
+{% if event.is_placeholder %}
+    <form method="post" action="{% url 'opcalendar:toggle_interest' event.id %}">
+        {% csrf_token %}
+        {% if user_interest %}
+            <button class="btn btn-warning" type="submit">
+                <i class="fas fa-star"></i> {% trans "Remove Interest" %} ({{ interest_count }})
+            </button>
+        {% else %}
+            <button class="btn btn-outline-warning" type="submit">
+                <i class="far fa-star"></i> {% trans "I'm Interested" %} ({{ interest_count }})
+            </button>
+        {% endif %}
+    </form>
+{% endif %}

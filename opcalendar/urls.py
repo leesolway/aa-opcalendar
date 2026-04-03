@@ -23,6 +23,7 @@ urlpatterns = [
     path("event/<int:event_id>/remove", views.EventDeleteView, name="remove_event"),
     path("event/<int:event_id>/cancel", views.cancel_event, name="cancel_event"),
     path("event/<int:event_id>/uncancel", views.uncancel_event, name="uncancel_event"),
+    path("event/<int:event_id>/interest", views.toggle_interest, name="toggle_interest"),
     path(
         "remove_eventmember/<int:event_id>",
         views.EventMemberRemove,
