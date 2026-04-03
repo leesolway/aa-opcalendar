@@ -73,6 +73,7 @@
 .aa-opcalendar td.today {
     color: #50a5f1;
     font-weight: bold;
+    background-color: color-mix(in srgb, var(--bs-body-color) 5%, var(--bs-body-bg));
 }
 .aa-opcalendar .calendar tr, .aa-opcalendar .calendar td {
   border: 1px solid color-mix(in srgb, var(--bs-body-color) 20%, var(--bs-body-bg));
@@ -114,9 +115,6 @@
   padding: 0px 5px 0px 20px;
 }
 
-.aa-opcalendar a {
-  color: var(--bs-link-color, #17a2b8);
-}
 .aa-opcalendar .left {
   float: left;
 }

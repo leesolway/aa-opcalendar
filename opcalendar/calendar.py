@@ -247,15 +247,20 @@ class Calendar(HTMLCalendar):
         else:
             s = f"{month_name[themonth]}"
 
+        today_url = reverse('opcalendar:calendar')
+
         # Return the HTML with Bootstrap 5 aligned buttons and month name
         return f"""
         <tr>
             <th colspan="7" class="{self.cssclass_month_head}">
                 <div class="d-flex justify-content-start align-items-center">
-                    <a class="btn btn-info me-2" href="{prev_url}">
+                    <a class="btn btn-secondary me-2" href="{prev_url}">
                         <i class="fas fa-backward"></i> Previous
                     </a>
-                    <a class="btn btn-info me-2" href="{next_url}">
+                    <a class="btn btn-secondary me-2" href="{today_url}">
+                        Today
+                    </a>
+                    <a class="btn btn-secondary me-2" href="{next_url}">
                         Next <i class="fas fa-forward"></i>
                     </a>
                     <span class="ms-3"><h5 class="mb-0">{s}</h5></span>
