@@ -10,7 +10,7 @@ from itertools import chain
 # AA Contexts
 from aadiscordbot.app_settings import get_site_url
 from allianceauth.services.modules.discord.models import DiscordUser
-from app_utils.urls import static_file_absolute_url
+from django.templatetags.static import static
 from discord.colour import Color
 from discord.commands import Option
 from discord.embeds import Embed
@@ -22,6 +22,12 @@ from opcalendar.app_settings import OPCALENDAR_DISCORD_OPS_DISPLAY_EXTERNAL
 from opcalendar.models import Event, EventHost, IngameEvents
 
 logger = logging.getLogger(__name__)
+
+
+def static_file_absolute_url(file_path: str) -> str:
+    """Return absolute URL to a static file."""
+    from urllib.parse import urljoin
+    return urljoin(get_site_url(), static(file_path))
 
 # i dont want to do this, but the below object get wont work without it, investigate.
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
