@@ -37,7 +37,8 @@ setup(
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     ],
     install_requires=[
-        "allianceauth<5.0.0,>=4",
+        "django>=3.2,<6.0",
+        "allianceauth>=3.0.0",
         "feedparser",
         "ics>=0.7.2",
         "pytz",
